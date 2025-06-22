@@ -13,6 +13,7 @@ import generateJwt from "../utils/generateJwt";
 import { TServiceResult } from "../types/serviceResult";
 import doesResourceExists from "../utils/doesResourceExists";
 import hashItem from "../utils/hashItem";
+import compareHashedItem from "../utils/compareHashedItem";
 
 const createToken = (user: IUser) => {
   const { _id, username, email, role } = user;
@@ -57,37 +58,22 @@ const createUserService = async (userData: Partial<IUser>) => {
   return { user, token };
 };
 
-const loginService = async (loginData: {
-  email: string;
-  password: string;
-}): Promise<TServiceResult<IUser> & { token?: string }> => {
+const loginService = async (loginData: { email: string; password: string }) => {
   const { email, password } = loginData;
-  const user = await User.findOne({ email }, { __v: 0 });
-  if (!user) {
-    const error = new AppError(
-      "This user does not Exist",
-      400,
-      httpStatusText.ERROR
-    );
-    return { error, type: "error" };
-  }
 
-  const comparedPasswords = bcrypt.compareSync(password, user.password);
-  if (!comparedPasswords) {
-    const error = new AppError(
-      "Invalid credeintitals",
-      400,
-      httpStatusText.ERROR
-    );
-    return { error, type: "error" };
-  }
-  const token = generateJwt({
-    id: user._id,
-    username: user.username,
-    email,
-    role: user.role,
-  });
-  return { token, type: "success" };
+  const user = await User.findOne({ email }).select("+password -__v");
+
+  doesResourceExists(user, "Invalid credentials");
+
+  compareHashedItem(password, user.password, "Invalid credentials");
+
+  const token = createToken(user);
+
+  user.toObject();
+
+  user.password = undefined as any;
+
+  return { user, token };
 };
 
 const updateUserService = async (

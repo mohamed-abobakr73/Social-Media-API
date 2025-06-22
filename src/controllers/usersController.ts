@@ -57,15 +57,12 @@ const login = asyncWrapper(
     res: Response,
     next: NextFunction
   ): Promise<Response | void> => {
-    const loginResult = await usersServices.loginService(req.body);
-    if (loginResult.type === "error") {
-      return next(loginResult.error);
-    } else {
-      return res.status(200).json({
-        status: httpStatusText.SUCCESS,
-        data: { token: loginResult.token },
-      });
-    }
+    const { user, token } = await usersServices.loginService(req.body);
+
+    return res.status(200).json({
+      status: httpStatusText.SUCCESS,
+      data: { user, token },
+    });
   }
 );
 
