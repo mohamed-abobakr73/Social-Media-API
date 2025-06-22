@@ -1,21 +1,7 @@
 import mongoose from "mongoose";
-import { IReport } from "../types/";
-export interface IGroup extends Document {
-  groupName: string;
-  createdBy: mongoose.Types.ObjectId;
-  groupMembers: mongoose.Types.ObjectId[];
-  posts: mongoose.Types.ObjectId[];
-  admins: mongoose.Types.ObjectId[];
-  groupCover: string;
-  isPrivate: boolean;
-  joinRequests: mongoose.Types.ObjectId[];
-  reports: IReport[];
-  banned: boolean;
-  isDeleted: boolean;
-  createdAt?: Date;
-}
+import { TGroup } from "../types/";
 
-const groupsSchema = new mongoose.Schema<IGroup>(
+const groupsSchema = new mongoose.Schema<TGroup>(
   {
     groupName: { type: String, required: true },
     createdBy: {
@@ -66,7 +52,7 @@ groupsSchema.pre("save", function (next) {
 });
 
 groupsSchema.pre("findOneAndUpdate", function (next) {
-  const update = this.getUpdate() as Partial<IGroup>;
+  const update = this.getUpdate() as Partial<TGroup>;
   if (!update) {
     return;
   }
@@ -80,4 +66,4 @@ groupsSchema.pre("save", function (next) {
   if (this.reports.length >= 10) this.banned = true;
   next();
 });
-export const Group = mongoose.model<IGroup>("Group", groupsSchema);
+export const Group = mongoose.model<TGroup>("Group", groupsSchema);

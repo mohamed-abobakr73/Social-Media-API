@@ -1,13 +1,13 @@
 import mongoose from "mongoose";
-import { Chat, IChat, IMessage } from "../models/chatsModel";
-import { User } from "../models/usersModel";
+import { Chat, User } from "../models/";
 import AppError from "../utils/AppError";
 import httpStatusText from "../utils/httpStatusText";
 import { TServiceResult } from "../types/serviceResult";
+import { TChat, TMessage } from "../types";
 
 const getAllChatsService = async (
   userId: string
-): Promise<TServiceResult<IChat[]>> => {
+): Promise<TServiceResult<TChat[]>> => {
   const chats = await Chat.find(
     { participants: { $all: [userId] } },
     { __v: 0 }
@@ -23,7 +23,7 @@ const getAllChatsService = async (
 const createOrGetChatService = async (
   firstUserId: mongoose.Types.ObjectId,
   secondUserId: mongoose.Types.ObjectId
-): Promise<TServiceResult<IChat>> => {
+): Promise<TServiceResult<TChat>> => {
   // Ensure participants exist and aren't blocked
   const users = await User.find({ _id: { $in: [firstUserId, secondUserId] } });
 
@@ -78,7 +78,7 @@ const sendMessageService = async (
   chatId: string,
   senderId: string,
   content: string
-): Promise<TServiceResult<IMessage>> => {
+): Promise<TServiceResult<TMessage>> => {
   const chat = await Chat.findById(chatId);
   if (!chat) {
     const error = new AppError("Invalid chat id", 400, httpStatusText.ERROR);
@@ -117,7 +117,7 @@ const updateOrDeleteMessageService = async (
     messageId: string;
     newContent?: string;
   }
-): Promise<TServiceResult<IChat>> => {
+): Promise<TServiceResult<TChat>> => {
   const { type, senderId, messageId, newContent } = messageData;
   const chat = await Chat.findById(chatId);
   if (!chat) {

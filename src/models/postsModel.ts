@@ -1,30 +1,7 @@
-import mongoose, { Document } from "mongoose";
-import { IReport } from "../types/";
+import mongoose from "mongoose";
+import { TPost } from "../types/";
 
-export interface IComment {
-  _id?: mongoose.Types.ObjectId;
-  content: string;
-  createdBy: mongoose.Types.ObjectId;
-  createdAt?: Date;
-}
-
-export interface IPost extends Document {
-  _id: mongoose.Types.ObjectId;
-  postTitle?: string;
-  postContent: string;
-  images: string[];
-  createdBy: mongoose.Types.ObjectId;
-  createdAt?: Date;
-  likes: mongoose.Types.ObjectId[];
-  comments: IComment[];
-  isShared: boolean;
-  reports: IReport[];
-  shares: mongoose.Types.ObjectId[];
-  isDeleted: boolean;
-  banned: boolean;
-}
-
-const postsSchema = new mongoose.Schema<IPost>(
+const postsSchema = new mongoose.Schema<TPost>(
   {
     postTitle: { type: String },
     postContent: { type: String, required: true },
@@ -69,4 +46,4 @@ postsSchema.pre("save", function (next) {
   next();
 });
 
-export const Post = mongoose.model<IPost>("Post", postsSchema);
+export const Post = mongoose.model<TPost>("Post", postsSchema);
