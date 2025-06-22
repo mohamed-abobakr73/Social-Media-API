@@ -5,10 +5,12 @@ import {
   sendMessage,
   updateOrDeleteMessage,
 } from "../controllers/chatsController";
-import createChatValidation from "../middlewares/createChatValidation";
-import userIdValidation from "../middlewares/userIdValidation";
-import sendMessageValidation from "../middlewares/sendMessageValidation";
-import updateOrDeleteMessageValidation from "../middlewares/updateOrDeleteMessageValidation";
+import {
+  createChatValidation,
+  sendMessageValidation,
+  updateOrDeleteMessageValidation,
+  validateRequestBody,
+} from "../middlewares/";
 
 const chatsRouter = Router();
 
@@ -16,14 +18,22 @@ const chatsRouter = Router();
 chatsRouter.route("/").get(getAllChats);
 
 // Create or get chat if it already exists
-chatsRouter.route("/").post(createChatValidation(), createOrGetChat);
+chatsRouter
+  .route("/")
+  .post(createChatValidation(), validateRequestBody, createOrGetChat);
 
 // Send message
-chatsRouter.route("/:chatId").post(sendMessageValidation(), sendMessage);
+chatsRouter
+  .route("/:chatId")
+  .post(sendMessageValidation(), validateRequestBody, sendMessage);
 
 // Update or delete message
 chatsRouter
   .route("/:chatId")
-  .patch(updateOrDeleteMessageValidation(), updateOrDeleteMessage);
+  .patch(
+    updateOrDeleteMessageValidation(),
+    validateRequestBody,
+    updateOrDeleteMessage
+  );
 
 export default chatsRouter;

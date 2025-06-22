@@ -26,7 +26,7 @@ import joinGroupValidation from "./joinGroupValidation";
 import createGroupValidation from "./createGroupValidation";
 import sendMessageValidation from "./sendMessageValidation";
 import validateRequestBody from "./validateRequestBody";
-
+import createChatValidation from "./createChatValidation";
 export {
   addCommentValidation,
   addOrRemoveFollowedUsersValidation,
@@ -56,4 +56,5 @@ export {
   createGroupValidation,
   sendMessageValidation,
   validateRequestBody,
+  createChatValidation,
 };

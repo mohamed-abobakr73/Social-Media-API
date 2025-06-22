@@ -10,24 +10,21 @@ import {
   updateFriendRequestStatusService,
   addToBlockList,
   removeFromBlockList,
-  joinGroup,
-  leaveGroup,
   addFollowedUsers,
   removeFollowedUsers,
-  addFollowedPages,
-  // addFollowers,
-  // reportUser,
-  // removeReport,
 } from "../controllers/usersController";
-import upload from "../config/cloudinaryConfig";
-import createAndUpdateUserValidation from "../middlewares/createAndUpdateUserValidation";
-import loginValidation from "../middlewares/loginValidation";
-import updateFriendRequestStatusValidation from "../middlewares/updateFriendRequestStatusValidation";
-import sendFriendRequestValidation from "../middlewares/sendFriendRequestValidation";
-import addOrRemoveFollowedUsersValidation from "../middlewares/addOrRemoveFollowedUsersValidation";
-import removeReportValidation from "../middlewares/removeReportValidation";
-import verifyToken from "../middlewares/verifyToken";
-import addReportValidation from "../middlewares/addReportValidation";
+import { upload } from "../config/";
+import {
+  createAndUpdateUserValidation,
+  loginValidation,
+  updateFriendRequestStatusValidation,
+  sendFriendRequestValidation,
+  addOrRemoveFollowedUsersValidation,
+  removeReportValidation,
+  verifyToken,
+  addReportValidation,
+  validateRequestBody,
+} from "../middlewares/";
 import { addReport, removeReport } from "../controllers/reportsController";
 
 const usersRouter = Router();
@@ -44,11 +41,12 @@ usersRouter
   .post(
     upload.single("profilePicture"),
     createAndUpdateUserValidation(false),
+    validateRequestBody,
     createUser
   );
 
 // Login
-usersRouter.route("/login").post(loginValidation(), login);
+usersRouter.route("/login").post(loginValidation(), validateRequestBody, login);
 
 // Update user by ID
 usersRouter
@@ -57,11 +55,14 @@ usersRouter
     verifyToken,
     upload.single("profilePicture"),
     createAndUpdateUserValidation(true),
+    validateRequestBody,
     updateUser
   );
 
 // Remove a report
-usersRouter.route("/reports").delete(removeReportValidation(), removeReport);
+usersRouter
+  .route("/reports")
+  .delete(removeReportValidation(), validateRequestBody, removeReport);
 
 // Delete user by ID
 usersRouter.route("/:userId").delete(verifyToken, deleteUser);
@@ -69,7 +70,12 @@ usersRouter.route("/:userId").delete(verifyToken, deleteUser);
 // Add friend request by user ID
 usersRouter
   .route("/:senderId/friend-requests")
-  .post(verifyToken, sendFriendRequestValidation(), addFriendRequest);
+  .post(
+    verifyToken,
+    sendFriendRequestValidation(),
+    validateRequestBody,
+    addFriendRequest
+  );
 
 // Update friend request by user ID
 usersRouter
@@ -77,6 +83,7 @@ usersRouter
   .patch(
     verifyToken,
     updateFriendRequestStatusValidation(),
+    validateRequestBody,
     updateFriendRequestStatusService
   );
 
@@ -97,7 +104,12 @@ usersRouter
 // Add followed users by user ID
 usersRouter
   .route("/:userId/followed-users")
-  .post(verifyToken, addOrRemoveFollowedUsersValidation(), addFollowedUsers);
+  .post(
+    verifyToken,
+    addOrRemoveFollowedUsersValidation(),
+    validateRequestBody,
+    addFollowedUsers
+  );
 
 // Remove followed users by user ID
 usersRouter
@@ -105,6 +117,7 @@ usersRouter
   .delete(
     verifyToken,
     addOrRemoveFollowedUsersValidation(),
+    validateRequestBody,
     removeFollowedUsers
   );
 
@@ -115,6 +128,8 @@ usersRouter
 // usersRouter.post("/:userId/followers", addFollowers);
 
 // Report a user
-usersRouter.route("/reports").post(addReportValidation(), addReport);
+usersRouter
+  .route("/reports")
+  .post(addReportValidation(), validateRequestBody, addReport);
 
 export default usersRouter;
