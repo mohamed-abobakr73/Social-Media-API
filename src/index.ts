@@ -1,4 +1,4 @@
-import express, { Request, Response, NextFunction } from "express";
+import express from "express";
 import http from "http";
 import { Server } from "socket.io";
 import dotenv from "dotenv";
@@ -6,8 +6,7 @@ import morgan from "morgan";
 import helmet from "helmet";
 import cors from "cors";
 import connectToDb from "./config/connectToDb";
-import httpStatusText from "./utils/httpStatusText";
-import TGlobalError from "./types/globalErrorType";
+
 import usersRouter from "./routes/usersRoute";
 import groupsRouter from "./routes/groupsRoute";
 import postsRouter from "./routes/postsRoute";
@@ -15,6 +14,7 @@ import pagesRouter from "./routes/pagesRoute";
 import chatsRouter from "./routes/chatsRoute";
 import searchRouter from "./routes/searchRoute";
 import globalErrorHandler from "./middlewares/globalErrorHandler";
+import notFoundRoutes from "./middlewares/notFoundRoutes";
 
 const app = express();
 const server = http.createServer(app);
@@ -84,13 +84,8 @@ app.use("/api/v1/search", searchRouter);
 app.use(globalErrorHandler);
 
 // Not found routes
-app.all("*", (req: Request, res: Response) => {
-  res.status(404).json({
-    status: httpStatusText.ERROR,
-    message: "Route not found.",
-  });
-});
+app.all("*", notFoundRoutes);
 
 server.listen(port || 5000, () => {
-  console.log(`app running on port ${port}`);
+  console.log(`Server running on port ${port}`);
 });
