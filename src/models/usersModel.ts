@@ -35,6 +35,7 @@ export interface IUserGroup {
 
 // Define the base User type extending the Mongoose Document
 export interface IUser extends Document {
+  _id: mongoose.Types.ObjectId;
   username: string;
   age: number;
   email: string;
@@ -57,11 +58,7 @@ export interface IUser extends Document {
   madeReports: IMadeReports[];
   reports: IReport[];
   banned: boolean;
-  role: {
-    type: String;
-    enum: ["user", "superAdmin"];
-    default: "user";
-  }; // Restrict the role field to the enum values
+  role: "user" | "superAdmin"; // Restrict the role field to the enum values
   token: string;
 }
 
@@ -70,7 +67,7 @@ const usersSchema = new mongoose.Schema<IUser>(
     username: { type: String, required: true },
     age: { type: Number, required: true },
     email: { type: String, required: true, unique: true },
-    password: { type: String, required: true },
+    password: { type: String, required: true, select: false },
     gender: { type: String, required: true },
     profilePicture: {
       type: String,

@@ -8,12 +8,22 @@ const globalErrorHandler = (
   res: Response,
   next: NextFunction
 ) => {
-  res.status(error.statusCode || 500).json({
+  const errorJsonObject: {
+    status: string;
+    message: string;
+    code: number;
+    data: any;
+    validationErrors?: any;
+  } = {
     status: error.statusText || httpStatusText.ERROR,
     message: error.message,
     code: error.statusCode || 500,
     data: null,
-  });
+  };
+  if (error.validationErrors) {
+    errorJsonObject.validationErrors = error.validationErrors;
+  }
+  res.status(error.statusCode || 500).json(errorJsonObject);
 };
 
 export default globalErrorHandler;

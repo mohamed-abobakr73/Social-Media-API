@@ -37,7 +37,12 @@ const createAndUpdateUserValidation = (isUpdate: boolean) => {
     requiredCheck("gender")
       .notEmpty()
       .withMessage("Gender is required")
-      .customSanitizer((value) => value.toLowerCase()) // Convert to lowercase
+      .customSanitizer((value) => {
+        if (typeof value === "string") {
+          return value.toLowerCase();
+        }
+        return value;
+      })
       .isIn(["male", "female"])
       .withMessage("Gender must be male or female"),
   ];

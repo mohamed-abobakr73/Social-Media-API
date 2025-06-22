@@ -20,14 +20,12 @@ const getUserById = asyncWrapper(
     next: NextFunction
   ): Promise<Response | void> => {
     const { userId } = req.params;
+
     const user = await usersServices.getUserByIdService(userId);
-    if (user.type === "error") {
-      return next(user.error);
-    } else {
-      return res
-        .status(200)
-        .json({ status: httpStatusText.SUCCESS, data: { user } });
-    }
+
+    return res
+      .status(200)
+      .json({ status: httpStatusText.SUCCESS, data: { user } });
   }
 );
 
@@ -44,15 +42,12 @@ const createUser = asyncWrapper(
       profilePicture: uploadedImage,
     };
 
-    const userResult = await usersServices.createUserService(userData);
-    if (userResult.type === "error") {
-      return next(userResult.error);
-    } else {
-      return res.status(201).json({
-        status: httpStatusText.SUCCESS,
-        data: { user: userResult.data, token: userResult.token },
-      });
-    }
+    const { user, token } = await usersServices.createUserService(userData);
+
+    return res.status(201).json({
+      status: httpStatusText.SUCCESS,
+      data: { user, token: token },
+    });
   }
 );
 

@@ -7,6 +7,8 @@ import TGroup from "./TGroup";
 import TPage from "./TPage";
 import TComment from "./TComment";
 import TPost from "./TPost";
+import TGenerateJwt from "./TGenerateJwt";
+
 export {
   TAppError,
   TCurrentUser,
@@ -17,4 +19,5 @@ export {
   TPage,
   TComment,
   TPost,
+  TGenerateJwt,
 };

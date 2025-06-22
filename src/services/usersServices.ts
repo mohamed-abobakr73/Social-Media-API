@@ -11,38 +11,50 @@ import AppError from "../utils/AppError";
 import httpStatusText from "../utils/httpStatusText";
 import generateJwt from "../utils/generateJwt";
 import { TServiceResult } from "../types/serviceResult";
+import doesResourceExists from "../utils/doesResourceExists";
+import hashItem from "../utils/hashItem";
+
+const createToken = (user: IUser) => {
+  const { _id, username, email, role } = user;
+  const tokenPayload = {
+    id: _id,
+    username: username,
+    email: email,
+    role: role,
+  };
+
+  const token = generateJwt(tokenPayload);
+
+  return token;
+};
 
 const getAllUsersService = async () => {
   const users = await User.find({}, { __v: 0 });
   return users;
 };
 
-const getUserByIdService = async (
-  userId: string
-): Promise<TServiceResult<IUser>> => {
-  const user = await User.findById(userId, { password: 0, __v: 0 });
-  if (!user) {
-    const error = new AppError("Invalid user id", 400, httpStatusText.ERROR);
-    return { error, type: "error" };
-  }
-  return { data: user, type: "success" };
+const getUserByIdService = async (userId: string) => {
+  const user = await User.findById(userId, { __v: 0 });
+
+  doesResourceExists(user, "User not found");
+
+  return user;
 };
 
-const createUserService = async (
-  userData: Partial<IUser>
-): Promise<TServiceResult<IUser> & { token: string }> => {
-  const { username, email, role, password } = userData;
-  const hashedPassword = bcrypt.hashSync(password!, 10);
-  userData.password = hashedPassword;
+const createUserService = async (userData: Partial<IUser>) => {
+  const { password } = userData;
+
+  userData.password = hashItem(password);
+
   const user = new User(userData);
+
   await user.save();
-  const token = await generateJwt({
-    id: user._id,
-    username,
-    email,
-    role,
-  });
-  return { data: user, token, type: "success" };
+
+  doesResourceExists(user, "Error creating user");
+
+  const token = createToken(user);
+
+  return { user, token };
 };
 
 const loginService = async (loginData: {
@@ -69,7 +81,7 @@ const loginService = async (loginData: {
     );
     return { error, type: "error" };
   }
-  const token = await generateJwt({
+  const token = generateJwt({
     id: user._id,
     username: user.username,
     email,
