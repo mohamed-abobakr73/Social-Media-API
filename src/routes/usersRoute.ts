@@ -20,10 +20,10 @@ import {
   // removeReport,
 } from "../controllers/usersController";
 import upload from "../config/cloudinaryConfig";
-import createAndUpdateUserValidiation from "../middlewares/createUserValidiation";
+import createAndUpdateUserValidation from "../middlewares/createAndUpdateUserValidation";
 import loginValidation from "../middlewares/loginValidation";
 import updateFriendRequestStatusValidation from "../middlewares/updateFriendRequestStatusValidation";
-import sendFriendRequestValidaton from "../middlewares/sendFriendRequestValidaton";
+import sendFriendRequestValidation from "../middlewares/sendFriendRequestValidation";
 import addOrRemoveFollowedUsersValidation from "../middlewares/addOrRemoveFollowedUsersValidation";
 import removeReportValidation from "../middlewares/removeReportValidation";
 import verifyToken from "../middlewares/verifyToken";
@@ -43,7 +43,7 @@ usersRouter
   .route("/")
   .post(
     upload.single("profilePicture"),
-    createAndUpdateUserValidiation(false),
+    createAndUpdateUserValidation(false),
     createUser
   );
 
@@ -56,7 +56,7 @@ usersRouter
   .patch(
     verifyToken,
     upload.single("profilePicture"),
-    createAndUpdateUserValidiation(true),
+    createAndUpdateUserValidation(true),
     updateUser
   );
 
@@ -69,7 +69,7 @@ usersRouter.route("/:userId").delete(verifyToken, deleteUser);
 // Add friend request by user ID
 usersRouter
   .route("/:senderId/friend-requests")
-  .post(verifyToken, sendFriendRequestValidaton(), addFriendRequest);
+  .post(verifyToken, sendFriendRequestValidation(), addFriendRequest);
 
 // Update friend request by user ID
 usersRouter

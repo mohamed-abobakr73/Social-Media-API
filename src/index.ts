@@ -6,15 +6,13 @@ import morgan from "morgan";
 import helmet from "helmet";
 import cors from "cors";
 import connectToDb from "./config/connectToDb";
-
 import usersRouter from "./routes/usersRoute";
 import groupsRouter from "./routes/groupsRoute";
 import postsRouter from "./routes/postsRoute";
 import pagesRouter from "./routes/pagesRoute";
 import chatsRouter from "./routes/chatsRoute";
 import searchRouter from "./routes/searchRoute";
-import globalErrorHandler from "./middlewares/globalErrorHandler";
-import notFoundRoutes from "./middlewares/notFoundRoutes";
+import { globalErrorHandler, notFoundRoutes } from "./middlewares/";
 
 const app = express();
 const server = http.createServer(app);
