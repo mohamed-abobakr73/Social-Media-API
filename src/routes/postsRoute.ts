@@ -10,22 +10,27 @@ import {
   sharePost,
   updatePost,
 } from "../controllers/postsController";
-import createPostValidation from "../middlewares/createPostValidation";
-import verifyToken from "../middlewares/verifyToken";
-import isAllowed from "../middlewares/isAllowed";
-import updatePostValidation from "../middlewares/updatePostValidation";
-import getAllPostsValidation from "../middlewares/getAllPostsValidation";
-import userIdValidation from "../middlewares/userIdValidation";
-import addCommentValidation from "../middlewares/addCommentValidation";
-import upload from "../config/cloudinaryConfig";
-import addReportValidation from "../middlewares/addReportValidation";
+import {
+  createPostValidation,
+  verifyToken,
+  isAllowed,
+  updatePostValidation,
+  getAllPostsValidation,
+  userIdValidation,
+  addCommentValidation,
+  addReportValidation,
+  removeReportValidation,
+  validateRequestBody,
+} from "../middlewares/";
+import { upload } from "../config/";
 import { addReport, removeReport } from "../controllers/reportsController";
-import removeReportValidation from "../middlewares/removeReportValidation";
 
 const postsRouter = Router();
 
 // Get All posts from [users, groups, pages];
-postsRouter.route("/").get(getAllPostsValidation(), getAllPosts);
+postsRouter
+  .route("/")
+  .get(getAllPostsValidation(), validateRequestBody, getAllPosts);
 
 // Get post by ID
 postsRouter.route("/:postId").get(getPostById);
@@ -38,42 +43,48 @@ postsRouter
     isAllowed("user", "superAdmin"),
     upload.array("files", 100),
     createPostValidation(),
+    validateRequestBody,
     createPost
   );
 
 // Update post
 postsRouter
   .route("/:postId")
-  .patch(verifyToken, updatePostValidation(), updatePost);
+  .patch(verifyToken, updatePostValidation(), validateRequestBody, updatePost);
 
 // Remove a report
-postsRouter.route("/reports").delete(removeReportValidation(), removeReport);
+postsRouter
+  .route("/reports")
+  .delete(removeReportValidation(), validateRequestBody, removeReport);
 
 // Delete post
 postsRouter
   .route("/:postId")
-  .delete(verifyToken, userIdValidation(), deletePost);
+  .delete(verifyToken, userIdValidation(), validateRequestBody, deletePost);
 
 // Handle like post
 postsRouter
   .route("/:postId/likes")
-  .post(verifyToken, userIdValidation(), handleLikePost);
+  .post(verifyToken, userIdValidation(), validateRequestBody, handleLikePost);
 
 // Add comment to post
 postsRouter
   .route("/:postId/comments")
-  .post(verifyToken, addCommentValidation(), addComment);
+  .post(verifyToken, addCommentValidation(), validateRequestBody, addComment);
 
 // Delete comment
 postsRouter
   .route("/:postId/comments/:commentId")
-  .delete(verifyToken, userIdValidation(), deleteComment);
+  .delete(verifyToken, userIdValidation(), validateRequestBody, deleteComment);
 
 // Share post
 postsRouter
   .route("/:postId/share")
-  .post(verifyToken, userIdValidation(), sharePost);
+  .post(verifyToken, userIdValidation(), validateRequestBody, sharePost);
 
 // Report a post
-postsRouter.route("/reports").post(addReportValidation(), addReport);
+postsRouter
+  .route("/reports")
+  .post(addReportValidation(), validateRequestBody, addReport);
+
 export default postsRouter;

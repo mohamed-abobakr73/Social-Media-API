@@ -2,8 +2,6 @@ import { Request, Response, NextFunction } from "express";
 import asyncWrapper from "../middlewares/asyncWrapper";
 import pagesServices from "../services/pagesServices";
 import httpStatusText from "../utils/httpStatusText";
-import AppError from "../utils/appError";
-import { validationResult } from "express-validator";
 
 const getAllPages = asyncWrapper(
   async (
@@ -59,12 +57,6 @@ const createPage = asyncWrapper(
     res: Response,
     next: NextFunction
   ): Promise<Response | void> => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      const error = AppError.create(errors.array(), 400, httpStatusText.ERROR);
-      return next(error);
-    }
-
     const pageCover = req.file?.path;
     const createPageResult = await pagesServices.createPageService({
       ...req.body,
@@ -90,11 +82,6 @@ const updatePage = asyncWrapper(
   ): Promise<Response | void> => {
     const { pageId } = req.params;
     const { userId } = req.body;
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      const error = AppError.create(errors.array(), 400, httpStatusText.ERROR);
-      return next(error);
-    }
 
     const pageCover = req.file?.path;
 
@@ -124,12 +111,6 @@ const deletePage = asyncWrapper(
     const { pageId } = req.params;
     const { userId } = req.body;
 
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      const error = AppError.create(errors.array(), 400, httpStatusText.ERROR);
-      return next(error);
-    }
-
     const deletePageResult = await pagesServices.deletePageService(
       pageId,
       userId
@@ -155,12 +136,6 @@ const addFollowers = asyncWrapper(
     const { pageId } = req.params;
     const { userId } = req.body;
 
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      const error = AppError.create(errors.array(), 400, httpStatusText.ERROR);
-      return next(error);
-    }
-
     const addFollowersResult = await pagesServices.addFollowersService(
       pageId,
       userId
@@ -185,12 +160,6 @@ const removeFollowers = asyncWrapper(
   ): Promise<Response | void> => {
     const { pageId } = req.params;
     const { userId } = req.body;
-
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      const error = AppError.create(errors.array(), 400, httpStatusText.ERROR);
-      return next(error);
-    }
 
     const removeFollowersResult = await pagesServices.removeFollowersService(
       pageId,

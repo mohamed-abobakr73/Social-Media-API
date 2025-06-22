@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import { Post, IPost } from "../models/postsModel";
 import { User } from "../models/usersModel";
 import { Group } from "../models/groupsModel";
-import AppError from "../utils/appError";
+import AppError from "../utils/AppError";
 import httpStatusText from "../utils/httpStatusText";
 import { TServiceResult } from "../types/serviceResult";
 import { Page } from "../models/pagesModel";
@@ -24,7 +24,7 @@ const getAllPostsService = async (
     case "group":
       const group = await Group.findById(postSourceId);
       if (!group) {
-        const error = AppError.create(
+        const error = new AppError(
           "Invalid group id",
           400,
           httpStatusText.ERROR
@@ -38,7 +38,7 @@ const getAllPostsService = async (
     case "page": // TODO
       const page = await Page.findById(postSourceId);
       if (!page) {
-        const error = AppError.create(
+        const error = new AppError(
           "Invalid page id",
           400,
           httpStatusText.ERROR
@@ -52,7 +52,7 @@ const getAllPostsService = async (
   }
 
   if (!posts) {
-    const error = AppError.create("Invalid user id", 400, httpStatusText.ERROR);
+    const error = new AppError("Invalid user id", 400, httpStatusText.ERROR);
     return { error, type: "error" };
   }
   return { data: posts, type: "success" };
@@ -63,7 +63,7 @@ const getPostByIdService = async (
 ): Promise<TServiceResult<IPost>> => {
   const post = await Post.findById(postId, { __v: 0 });
   if (!post) {
-    const error = AppError.create("Invalid post id", 400, httpStatusText.ERROR);
+    const error = new AppError("Invalid post id", 400, httpStatusText.ERROR);
     return { error, type: "error" };
   }
   return { data: post, type: "success" };
@@ -89,7 +89,7 @@ const createPostService = async (postData: {
   } = postData;
   const user = await User.findById(createdBy);
   if (!user) {
-    const error = AppError.create("Invalid user id", 400, httpStatusText.ERROR);
+    const error = new AppError("Invalid user id", 400, httpStatusText.ERROR);
     return { error, type: "error" };
   }
 
@@ -101,7 +101,7 @@ const createPostService = async (postData: {
   });
 
   if (!post) {
-    const error = AppError.create(
+    const error = new AppError(
       "An error occured during creating the post, please try again later",
       400,
       httpStatusText.ERROR
@@ -116,7 +116,7 @@ const createPostService = async (postData: {
     case "group":
       const group = await Group.findById(groupId);
       if (!group) {
-        const error = AppError.create(
+        const error = new AppError(
           "Invalid group id",
           400,
           httpStatusText.ERROR
@@ -130,7 +130,7 @@ const createPostService = async (postData: {
     case "page":
       const page = await Page.findById(pageId);
       if (!page) {
-        const error = AppError.create(
+        const error = new AppError(
           "Invalid page id",
           400,
           httpStatusText.ERROR
@@ -157,18 +157,18 @@ const updatePostService = async (
   const user = await User.findById(userId);
   const post = await Post.findById(postId);
   if (!user) {
-    const error = AppError.create("Invalid user id", 400, httpStatusText.ERROR);
+    const error = new AppError("Invalid user id", 400, httpStatusText.ERROR);
     return { error, type: "error" };
   }
   if (!post) {
-    const error = AppError.create("Invalid post id", 400, httpStatusText.ERROR);
+    const error = new AppError("Invalid post id", 400, httpStatusText.ERROR);
     return { error, type: "error" };
   }
 
   // Checking if the requesting update user is the creator of the post
   const isUserPostCreator = post.createdBy.toString() === userId;
   if (!isUserPostCreator) {
-    const error = AppError.create(
+    const error = new AppError(
       "You can't update this post, only the creator can edit this post",
       400,
       httpStatusText.ERROR
@@ -182,7 +182,7 @@ const updatePostService = async (
     { new: true }
   );
   if (!updatedPost) {
-    const error = AppError.create(
+    const error = new AppError(
       "An error occured during the post update, please try again later",
       400,
       httpStatusText.ERROR
@@ -200,17 +200,17 @@ const deletePostService = async (
   const user = await User.findById(userId);
   const post = await Post.findById(postId);
   if (!post) {
-    const error = AppError.create("Invalid post id", 400, httpStatusText.ERROR);
+    const error = new AppError("Invalid post id", 400, httpStatusText.ERROR);
     return { error, type: "error" };
   }
   if (!user) {
-    const error = AppError.create("Invalid user id", 400, httpStatusText.ERROR);
+    const error = new AppError("Invalid user id", 400, httpStatusText.ERROR);
     return { error, type: "error" };
   }
 
   const isUserPostCreator = post.createdBy.toString() === userId;
   if (!isUserPostCreator) {
-    const error = AppError.create(
+    const error = new AppError(
       "Only post creator can delete this post",
       400,
       httpStatusText.ERROR
@@ -219,7 +219,7 @@ const deletePostService = async (
   }
 
   if (post.isDeleted) {
-    const error = AppError.create(
+    const error = new AppError(
       "This post is already deleted",
       400,
       httpStatusText.ERROR
@@ -240,12 +240,12 @@ const handleLikePostService = async (
   const user = await User.findById(userId);
 
   if (!post) {
-    const error = AppError.create("Invalid post id", 400, httpStatusText.ERROR);
+    const error = new AppError("Invalid post id", 400, httpStatusText.ERROR);
     return { error, type: "error" };
   }
 
   if (!user) {
-    const error = AppError.create("Invalid user id", 400, httpStatusText.ERROR);
+    const error = new AppError("Invalid user id", 400, httpStatusText.ERROR);
     return { error, type: "error" };
   }
 
@@ -287,12 +287,12 @@ const addCommentService = async (
   const user = await User.findById(createdBy);
 
   if (!post) {
-    const error = AppError.create("Invalid post id", 400, httpStatusText.ERROR);
+    const error = new AppError("Invalid post id", 400, httpStatusText.ERROR);
     return { error, type: "error" };
   }
 
   if (!user) {
-    const error = AppError.create("Invalid user id", 400, httpStatusText.ERROR);
+    const error = new AppError("Invalid user id", 400, httpStatusText.ERROR);
     return { error, type: "error" };
   }
 
@@ -319,12 +319,12 @@ const deleteCommentService = async (
   const user = await User.findById(userId);
 
   if (!post) {
-    const error = AppError.create("Invalid post id", 400, httpStatusText.ERROR);
+    const error = new AppError("Invalid post id", 400, httpStatusText.ERROR);
     return { error, type: "error" };
   }
 
   if (!user) {
-    const error = AppError.create("Invalid user id", 400, httpStatusText.ERROR);
+    const error = new AppError("Invalid user id", 400, httpStatusText.ERROR);
     return { error, type: "error" };
   }
 
@@ -332,7 +332,7 @@ const deleteCommentService = async (
     (comment) => comment._id!.toString() === commentId
   );
   if (!commentExists) {
-    const error = AppError.create(
+    const error = new AppError(
       "Comment does not exist",
       400,
       httpStatusText.ERROR
@@ -344,7 +344,7 @@ const deleteCommentService = async (
     (comment) => comment.createdBy.toString() === userId
   );
   if (!isUserCommentCreator) {
-    const error = AppError.create(
+    const error = new AppError(
       "Only the comment creator can delete this comment",
       400,
       httpStatusText.ERROR
@@ -368,12 +368,12 @@ const sharePostService = async (
   const user = await User.findById(userId);
 
   if (!post) {
-    const error = AppError.create("Invalid post id", 400, httpStatusText.ERROR);
+    const error = new AppError("Invalid post id", 400, httpStatusText.ERROR);
     return { error, type: "error" };
   }
 
   if (!user) {
-    const error = AppError.create("Invalid user id", 400, httpStatusText.ERROR);
+    const error = new AppError("Invalid user id", 400, httpStatusText.ERROR);
     return { error, type: "error" };
   }
 

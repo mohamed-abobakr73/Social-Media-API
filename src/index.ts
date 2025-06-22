@@ -1,30 +1,28 @@
-import express, { Request, Response, NextFunction } from "express";
+import express from "express";
 import http from "http";
 import { Server } from "socket.io";
 import dotenv from "dotenv";
 import morgan from "morgan";
 import helmet from "helmet";
 import cors from "cors";
-import connectToDb from "./config/connectToDb";
-import httpStatusText from "./utils/httpStatusText";
-import TGlobalError from "./types/globalErrorType";
-import usersRouter from "./routes/usersRoute";
-import groupsRouter from "./routes/groupsRoute";
-import postsRouter from "./routes/postsRoute";
-import pagesRouter from "./routes/pagesRoute";
-import chatsRouter from "./routes/chatsRoute";
-import searchRouter from "./routes/searchRoute";
+import { connectToDb } from "./config/";
+import {
+  usersRouter,
+  groupsRouter,
+  postsRouter,
+  pagesRouter,
+  chatsRouter,
+  searchRouter,
+} from "./routes/";
+
+import { globalErrorHandler, notFoundRoutes } from "./middlewares/";
 
 const app = express();
 const server = http.createServer(app);
 export const io = new Server(server);
 
-app.get("/", (req, res) => {
-  res.sendFile(__dirname + "/index.html");
-});
-app.get("/test", (req, res) => {
-  res.sendFile(__dirname + "/test.html");
-});
+// Connecting to mongodb
+connectToDb();
 
 io.on("connection", (socket) => {
   console.log("A user connected:", socket.id);
@@ -69,14 +67,11 @@ dotenv.config();
 const port = process.env.PORT;
 
 // Middlewares
-app.use(morgan("common"));
+app.use(morgan("dev"));
 app.use(helmet());
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-// Connecting to mongodb
-connectToDb();
 
 // Routes
 app.use("/api/v1/users", usersRouter);
@@ -87,31 +82,11 @@ app.use("/api/v1/chats", chatsRouter);
 app.use("/api/v1/search", searchRouter);
 
 // Global error handler
-app.use(
-  (
-    error: TGlobalError,
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): void => {
-    res.status(error.statusCode || 500).json({
-      status: error.statusText || httpStatusText.ERROR,
-      message: error.message,
-      code: error.statusCode || 500,
-      data: null,
-    });
-  }
-);
+app.use(globalErrorHandler);
 
 // Not found routes
-// @ts-ignore
-app.all("*", (req: Request, res: Response) =>
-  res.status(404).json({
-    status: httpStatusText.ERROR,
-    message: "Route not found.",
-  })
-);
+app.all("*", notFoundRoutes);
 
 server.listen(port || 5000, () => {
-  console.log(`app running on port ${port}`);
+  console.log(`Server running on port ${port}`);
 });

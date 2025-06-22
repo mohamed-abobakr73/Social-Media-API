@@ -1,5 +1,5 @@
 import { IPage, Page } from "../models/pagesModel";
-import AppError from "../utils/appError";
+import AppError from "../utils/AppError";
 import httpStatusText from "../utils/httpStatusText";
 import { TServiceResult } from "../types/serviceResult";
 import { User } from "../models/usersModel";
@@ -19,7 +19,7 @@ const getPageByIdService = async (
 ): Promise<TServiceResult<IPage>> => {
   const page = await Page.findById(pageId);
   if (!page) {
-    const error = AppError.create("Invalid page ID", 400, httpStatusText.ERROR);
+    const error = new AppError("Invalid page ID", 400, httpStatusText.ERROR);
     return { error, type: "error" };
   }
   return { data: page, type: "success" };
@@ -33,7 +33,7 @@ const createPageService = async (pageData: {
   const { pageName, createdBy, pageCover } = pageData;
   const user = await User.findById(createdBy);
   if (!user) {
-    const error = AppError.create("Invalid user id", 400, httpStatusText.ERROR);
+    const error = new AppError("Invalid user id", 400, httpStatusText.ERROR);
     return { error, type: "error" };
   }
 
@@ -44,7 +44,7 @@ const createPageService = async (pageData: {
   });
 
   if (!page) {
-    const error = AppError.create(
+    const error = new AppError(
       "An error occuerd during creating the page, please try again later",
       400,
       httpStatusText.ERROR
@@ -64,13 +64,13 @@ const updatePageService = async (
   const { pageCover } = updateData;
   const page = await Page.findById(pageId);
   if (!page) {
-    const error = AppError.create("Invalid page id", 400, httpStatusText.ERROR);
+    const error = new AppError("Invalid page id", 400, httpStatusText.ERROR);
     return { error, type: "error" };
   }
 
   const userIsPageOwner = page.createdBy.toString() === userId;
   if (!userIsPageOwner) {
-    const error = AppError.create(
+    const error = new AppError(
       "Only page owner can delete this page",
       400,
       httpStatusText.ERROR
@@ -85,7 +85,7 @@ const updatePageService = async (
   );
 
   if (!updatedPage) {
-    const error = AppError.create(
+    const error = new AppError(
       "An error occured during updating the page, please try again later",
       400,
       httpStatusText.ERROR
@@ -104,17 +104,17 @@ const deletePageService = async (
   const page = await Page.findById(pageId);
 
   if (!page) {
-    const error = AppError.create("Invalid page id", 400, httpStatusText.ERROR);
+    const error = new AppError("Invalid page id", 400, httpStatusText.ERROR);
     return { error, type: "error" };
   }
   if (!user) {
-    const error = AppError.create("Invalid user id", 400, httpStatusText.ERROR);
+    const error = new AppError("Invalid user id", 400, httpStatusText.ERROR);
     return { error, type: "error" };
   }
 
   const userIsPageOwner = page.createdBy.toString() === userId;
   if (!userIsPageOwner) {
-    const error = AppError.create(
+    const error = new AppError(
       "Only page owner can delete this page",
       400,
       httpStatusText.ERROR
@@ -134,11 +134,11 @@ const addFollowersService = async (
   const page = await Page.findById(pageId);
   const user = await User.findById(userId);
   if (!page) {
-    const error = AppError.create("Invalid page id", 400, httpStatusText.ERROR);
+    const error = new AppError("Invalid page id", 400, httpStatusText.ERROR);
     return { error, type: "error" };
   }
   if (!user) {
-    const error = AppError.create("Invalid user id", 400, httpStatusText.ERROR);
+    const error = new AppError("Invalid user id", 400, httpStatusText.ERROR);
     return { error, type: "error" };
   }
 
@@ -146,7 +146,7 @@ const addFollowersService = async (
     (follower) => follower.toString() === userId
   );
   if (userAlreadyFollowingPage) {
-    const error = AppError.create(
+    const error = new AppError(
       "You are already following this page",
       400,
       httpStatusText.ERROR
@@ -176,11 +176,11 @@ const removeFollowersService = async (
   const page = await Page.findById(pageId);
   const user = await User.findById(userId);
   if (!page) {
-    const error = AppError.create("Invalid page id", 400, httpStatusText.ERROR);
+    const error = new AppError("Invalid page id", 400, httpStatusText.ERROR);
     return { error, type: "error" };
   }
   if (!user) {
-    const error = AppError.create("Invalid user id", 400, httpStatusText.ERROR);
+    const error = new AppError("Invalid user id", 400, httpStatusText.ERROR);
     return { error, type: "error" };
   }
 
@@ -188,7 +188,7 @@ const removeFollowersService = async (
     (follower) => follower.toString() === userId
   );
   if (!userFollowingPage) {
-    const error = AppError.create(
+    const error = new AppError(
       "You are not a follower of this page",
       400,
       httpStatusText.ERROR

@@ -1,4 +1,4 @@
-import mongoose, { UpdateWriteOpResult } from "mongoose";
+import mongoose from "mongoose";
 import {
   User,
   IUser,
@@ -6,9 +6,8 @@ import {
   IUserGroup,
   INotification,
 } from "../models/usersModel";
-import { IReport } from "../types/report";
 import bcrypt from "bcrypt";
-import AppError from "../utils/appError";
+import AppError from "../utils/AppError";
 import httpStatusText from "../utils/httpStatusText";
 import generateJwt from "../utils/generateJwt";
 import { TServiceResult } from "../types/serviceResult";
@@ -23,7 +22,7 @@ const getUserByIdService = async (
 ): Promise<TServiceResult<IUser>> => {
   const user = await User.findById(userId, { password: 0, __v: 0 });
   if (!user) {
-    const error = AppError.create("Invalid user id", 400, httpStatusText.ERROR);
+    const error = new AppError("Invalid user id", 400, httpStatusText.ERROR);
     return { error, type: "error" };
   }
   return { data: user, type: "success" };
@@ -53,7 +52,7 @@ const loginService = async (loginData: {
   const { email, password } = loginData;
   const user = await User.findOne({ email }, { __v: 0 });
   if (!user) {
-    const error = AppError.create(
+    const error = new AppError(
       "This user does not Exist",
       400,
       httpStatusText.ERROR
@@ -63,7 +62,7 @@ const loginService = async (loginData: {
 
   const comparedPasswords = bcrypt.compareSync(password, user.password);
   if (!comparedPasswords) {
-    const error = AppError.create(
+    const error = new AppError(
       "Invalid credeintitals",
       400,
       httpStatusText.ERROR
@@ -94,7 +93,7 @@ const updateUserService = async (
   const user = await User.findById(userId);
 
   if (!user) {
-    const error = AppError.create("Invalid user id", 400, httpStatusText.ERROR);
+    const error = new AppError("Invalid user id", 400, httpStatusText.ERROR);
     return { error, type: "error" };
   }
 
@@ -117,7 +116,7 @@ const updateUserService = async (
   );
 
   if (!updatedUser) {
-    const error = AppError.create(
+    const error = new AppError(
       "An error occured during updating the user, please try again later",
       400,
       httpStatusText.ERROR
@@ -133,7 +132,7 @@ const deleteUserService = async (
 ): Promise<TServiceResult<IUser>> => {
   const deletedUser = await User.deleteOne({ userId });
   if (!deletedUser.deletedCount) {
-    const error = AppError.create("Invalid user id", 400, httpStatusText.ERROR);
+    const error = new AppError("Invalid user id", 400, httpStatusText.ERROR);
     return { error, type: "error" };
   }
   return { type: "success" };
@@ -147,12 +146,12 @@ const addFriendRequestService = async (
   const recipient = await User.findById(recipientId);
 
   if (!sender) {
-    const error = AppError.create("Invalid user id", 400, httpStatusText.ERROR);
+    const error = new AppError("Invalid user id", 400, httpStatusText.ERROR);
     return { error, type: "error" };
   }
 
   if (!recipient) {
-    const error = AppError.create(
+    const error = new AppError(
       "Invalid friend request recpient id",
       400,
       httpStatusText.ERROR
@@ -165,7 +164,7 @@ const addFriendRequestService = async (
     (request) => request.sender.toString() === recipientId
   );
   if (recipientAlreadySentRequest) {
-    const error = AppError.create(
+    const error = new AppError(
       "The use you are trying to send a friend request to already sent you a friend request, check your friend requests box",
       400,
       httpStatusText.ERROR
@@ -182,7 +181,7 @@ const addFriendRequestService = async (
   );
 
   if (isUserBlocked) {
-    const error = AppError.create(
+    const error = new AppError(
       "You can't send a friend request to this user",
       400,
       httpStatusText.FAIL
@@ -190,7 +189,7 @@ const addFriendRequestService = async (
     return { error, type: "error" };
   }
   if (senderBlockedTheRecpient) {
-    const error = AppError.create(
+    const error = new AppError(
       "You have to unblock this user first to send him a friend request",
       400,
       httpStatusText.FAIL
@@ -199,7 +198,7 @@ const addFriendRequestService = async (
   }
 
   if (sender.friendList.length + sender.friendRequests.length >= 500) {
-    const error = AppError.create(
+    const error = new AppError(
       "You can't send a friend request to this user as your friend list is full",
       400,
       httpStatusText.ERROR
@@ -208,7 +207,7 @@ const addFriendRequestService = async (
   }
 
   if (recipient.friendList.length + recipient.friendRequests.length >= 500) {
-    const error = AppError.create(
+    const error = new AppError(
       "The user you are trying to send a friend request to has a full friend list",
       400,
       httpStatusText.ERROR
@@ -223,14 +222,14 @@ const addFriendRequestService = async (
     const requestAlreadyAccepted =
       recipient.friendRequests[requestAlreadyExist].status === "accepted";
     if (requestAlreadyAccepted) {
-      const error = AppError.create(
+      const error = new AppError(
         "You are already a friend to this user",
         400,
         httpStatusText.ERROR
       );
       return { error, type: "error" };
     }
-    const error = AppError.create(
+    const error = new AppError(
       "You already sent a friend request to this user",
       400,
       httpStatusText.ERROR
@@ -253,7 +252,7 @@ const updateFriendRequestStatusService = async (
   const sender = await User.findById(friendRequest.sender);
 
   if (!recpient) {
-    const error = AppError.create(
+    const error = new AppError(
       "Invalid friend request recpient id",
       400,
       httpStatusText.ERROR
@@ -262,7 +261,7 @@ const updateFriendRequestStatusService = async (
   }
 
   if (!sender) {
-    const error = AppError.create(
+    const error = new AppError(
       "Invalid friend request sender id",
       400,
       httpStatusText.ERROR
@@ -281,14 +280,14 @@ const updateFriendRequestStatusService = async (
   const currentFriendRequestStatus =
     sender.sentFriendRequests[currentSentFriendRequestIndex].status;
   if (currentFriendRequestStatus === "accepted") {
-    const error = AppError.create(
+    const error = new AppError(
       "This request is already accepted",
       400,
       httpStatusText.ERROR
     );
     return { error, type: "error" };
   } else if (currentFriendRequestStatus === "declined") {
-    const error = AppError.create(
+    const error = new AppError(
       "This request is already declined",
       400,
       httpStatusText.ERROR
@@ -322,12 +321,12 @@ const addToBlockListService = async (
   const blockedUser = await User.findById(blockedUserId);
 
   if (!user) {
-    const error = AppError.create("Invalid user id", 400, httpStatusText.ERROR);
+    const error = new AppError("Invalid user id", 400, httpStatusText.ERROR);
     return { error, type: "error" };
   }
 
   if (!blockedUser) {
-    const error = AppError.create(
+    const error = new AppError(
       "Invalid user id to be blocked",
       400,
       httpStatusText.ERROR
@@ -383,7 +382,7 @@ const removeFromBlockListService = async (
 ): Promise<TServiceResult<IUser>> => {
   const user = await User.findById(userId);
   if (!user) {
-    const error = AppError.create("Invalid user id", 400, httpStatusText.ERROR);
+    const error = new AppError("Invalid user id", 400, httpStatusText.ERROR);
     return { error, type: "error" };
   }
 
@@ -394,7 +393,7 @@ const removeFromBlockListService = async (
   if (isUserActullayblocked !== -1) {
     user.blockList.splice(isUserActullayblocked, 1);
   } else {
-    const error = AppError.create(
+    const error = new AppError(
       "This user is not in your block list",
       400,
       httpStatusText.ERROR
@@ -418,7 +417,7 @@ const joinGroupService = async (
 ): Promise<TServiceResult<IUser>> => {
   const user = await User.findById(userId);
   if (!user) {
-    const error = AppError.create("Invalid user id", 400, httpStatusText.ERROR);
+    const error = new AppError("Invalid user id", 400, httpStatusText.ERROR);
     return { error, type: "error" };
   }
   user.groups.push({
@@ -435,7 +434,7 @@ const leaveGroupService = async (
 ): Promise<TServiceResult<IUser>> => {
   const user = await User.findById(userId);
   if (!user) {
-    const error = AppError.create("Invalid user id", 400, httpStatusText.ERROR);
+    const error = new AppError("Invalid user id", 400, httpStatusText.ERROR);
     return { error, type: "error" };
   }
   user.groups.filter((group) => group.groupId !== groupId);
@@ -451,11 +450,11 @@ const addFollowedUserService = async (
   const followedUser = await User.findById(followedUserId);
 
   if (!user) {
-    const error = AppError.create("Invalid user id", 400, httpStatusText.ERROR);
+    const error = new AppError("Invalid user id", 400, httpStatusText.ERROR);
     return { error, type: "error" };
   }
   if (!followedUser) {
-    const error = AppError.create(
+    const error = new AppError(
       "Invalid followed user id",
       400,
       httpStatusText.ERROR
@@ -465,7 +464,7 @@ const addFollowedUserService = async (
 
   const followAlreadyExists = user.followedUsers.includes(followedUserId);
   if (followAlreadyExists) {
-    const error = AppError.create(
+    const error = new AppError(
       "You are already following this user",
       400,
       httpStatusText.ERROR
@@ -487,11 +486,11 @@ const removeFollowedUserService = async (
   const followedUser = await User.findById(followedUserId);
 
   if (!user) {
-    const error = AppError.create("Invalid user id", 400, httpStatusText.ERROR);
+    const error = new AppError("Invalid user id", 400, httpStatusText.ERROR);
     return { error, type: "error" };
   }
   if (!followedUser) {
-    const error = AppError.create(
+    const error = new AppError(
       "Invalid followed user id",
       400,
       httpStatusText.ERROR
@@ -503,7 +502,7 @@ const removeFollowedUserService = async (
     (followed) => followed.toString() === followedUserId.toString()
   );
   if (!userIsFollowingTheFollowedUser) {
-    const error = AppError.create(
+    const error = new AppError(
       "You can't unfollow this user as you didn't follow him before",
       400,
       httpStatusText.ERROR
@@ -529,12 +528,12 @@ const addFollowedPagesService = async (
 ): Promise<TServiceResult<IUser>> => {
   const user = await User.findById(userId);
   if (!user) {
-    const error = AppError.create("Invalid user id", 400, httpStatusText.ERROR);
+    const error = new AppError("Invalid user id", 400, httpStatusText.ERROR);
     return { error, type: "error" };
   }
   const followAlreadyExists = user.followedPages.includes(followedPageId);
   if (followAlreadyExists) {
-    const error = AppError.create(
+    const error = new AppError(
       "You are already following this page",
       400,
       httpStatusText.ERROR
@@ -552,7 +551,7 @@ const removeFollowedPagesService = async (
 ): Promise<TServiceResult<IUser>> => {
   const user = await User.findById(userId);
   if (!user) {
-    const error = AppError.create("Invalid user id", 400, httpStatusText.ERROR);
+    const error = new AppError("Invalid user id", 400, httpStatusText.ERROR);
     return { error, type: "error" };
   }
   user.followedUsers.filter((page) => page._id !== followedPageId);
@@ -566,7 +565,7 @@ const removeFollowedPagesService = async (
 // ): Promise<TServiceResult<IUser>> => {
 //   const user = await User.findById(userId);
 //   if (!user) {
-//     const error = AppError.create("Invalid user id", 400, httpStatusText.ERROR);
+//     const error = new AppError("Invalid user id", 400, httpStatusText.ERROR);
 //     return { error, type: "error" };
 //   }
 //   user.followers.push(followerId);
@@ -580,7 +579,7 @@ const removeFollowedPagesService = async (
 // ): Promise<TServiceResult<IUser>> => {
 //   const user = await User.findById(userId);
 //   if (!user) {
-//     const error = AppError.create("Invalid user id", 400, httpStatusText.ERROR);
+//     const error = new AppError("Invalid user id", 400, httpStatusText.ERROR);
 //     return { error, type: "error" };
 //   }
 //   user.followers.filter((user) => user._id !== followerId);
@@ -595,7 +594,7 @@ const removeFollowedPagesService = async (
 //   const reportedBy = await User.findById(reportData.reportedBy);
 //   const reportedUser = await User.findById(reportedUserId);
 //   if (!reportedUser) {
-//     const error = AppError.create(
+//     const error = new AppError(
 //       "Invalid reported user id",
 //       400,
 //       httpStatusText.ERROR
@@ -603,7 +602,7 @@ const removeFollowedPagesService = async (
 //     return { error, type: "error" };
 //   }
 //   if (!reportedBy) {
-//     const error = AppError.create(
+//     const error = new AppError(
 //       "Invalid reporter user id",
 //       400,
 //       httpStatusText.ERROR
@@ -617,7 +616,7 @@ const removeFollowedPagesService = async (
 //       report.reportedBy.toString() === reportData.reportedBy.toString()
 //   );
 //   if (reportAlreadyExists) {
-//     const error = AppError.create(
+//     const error = new AppError(
 //       "You have already reported this user",
 //       400,
 //       httpStatusText.ERROR
@@ -644,7 +643,7 @@ const removeFollowedPagesService = async (
 //   const reportedBy = await User.findById(reportedById);
 //   const reportedUser = await User.findById(reportedUserId);
 //   if (!reportedUser) {
-//     const error = AppError.create(
+//     const error = new AppError(
 //       "Invalid reported user id",
 //       400,
 //       httpStatusText.ERROR
@@ -652,7 +651,7 @@ const removeFollowedPagesService = async (
 //     return { error, type: "error" };
 //   }
 //   if (!reportedBy) {
-//     const error = AppError.create(
+//     const error = new AppError(
 //       "Invalid reporter id",
 //       400,
 //       httpStatusText.ERROR
@@ -665,7 +664,7 @@ const removeFollowedPagesService = async (
 //     (report) => report.reportedBy.toString() === reportedById
 //   );
 //   if (!reportExists) {
-//     const error = AppError.create(
+//     const error = new AppError(
 //       "There is no report to be removed",
 //       400,
 //       httpStatusText.ERROR
@@ -691,7 +690,7 @@ const addNotificationsService = async (
 ): Promise<TServiceResult<IUser>> => {
   const user = await User.findById(userId);
   if (!user) {
-    const error = AppError.create("Invalid user id", 400, httpStatusText.ERROR);
+    const error = new AppError("Invalid user id", 400, httpStatusText.ERROR);
     return { error, type: "error" };
   }
   user.notifications.push(notificationData);
@@ -705,14 +704,14 @@ const markNotficationAsReadService = async (
 ) => {
   const user = await User.findById(userId);
   if (!user) {
-    const error = AppError.create("Invalid user id", 400, httpStatusText.ERROR);
+    const error = new AppError("Invalid user id", 400, httpStatusText.ERROR);
     return { error, type: "error" };
   }
   const notificationToUpdate = user.notifications.find(
     (notification) => (notification._id as unknown) === notificationId
   );
   if (!notificationToUpdate) {
-    const error = AppError.create(
+    const error = new AppError(
       "Invalid notification id",
       400,
       httpStatusText.ERROR
@@ -730,7 +729,7 @@ const removeNotificationsService = async (
 ): Promise<TServiceResult<IUser>> => {
   const user = await User.findById(userId);
   if (!user) {
-    const error = AppError.create("Invalid user id", 400, httpStatusText.ERROR);
+    const error = new AppError("Invalid user id", 400, httpStatusText.ERROR);
     return { error, type: "error" };
   }
   user.notifications.filter(

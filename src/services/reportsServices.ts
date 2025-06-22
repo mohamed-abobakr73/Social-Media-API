@@ -2,10 +2,10 @@ import { Post, IPost } from "../models/postsModel";
 import { User, IUser } from "../models/usersModel";
 import { Group, IGroup } from "../models/groupsModel";
 import { Page, IPage } from "../models/pagesModel";
-import AppError from "../utils/appError";
+import AppError from "../utils/AppError";
 import httpStatusText from "../utils/httpStatusText";
 import { TServiceResult } from "../types/serviceResult";
-import { IReport } from "../types/report";
+import { IReport } from "../types/";
 
 const checkIfReportIsAlreadyMade = (reportsArr: IReport[], userId: string) => {
   return reportsArr.find((report) => report.reportedBy.toString() === userId);
@@ -25,7 +25,7 @@ const addReportService = async (
   const { reason, reportedBy } = reportData;
   const user = await User.findById(reportedBy);
   if (!user) {
-    const error = AppError.create("Invalid user id", 400, httpStatusText.ERROR);
+    const error = new AppError("Invalid user id", 400, httpStatusText.ERROR);
     return { error, type: "error" };
   }
 
@@ -33,7 +33,7 @@ const addReportService = async (
     case "user":
       const reportedUser = await User.findById(reportedItemId);
       if (!reportedUser) {
-        const error = AppError.create(
+        const error = new AppError(
           "Invalid reported user id",
           400,
           httpStatusText.ERROR
@@ -42,7 +42,7 @@ const addReportService = async (
       }
 
       if (checkIfReportIsAlreadyMade(reportedUser.reports, reportedBy)) {
-        const error = AppError.create(
+        const error = new AppError(
           "You have already reported this user",
           400,
           httpStatusText.ERROR
@@ -58,7 +58,7 @@ const addReportService = async (
     case "group":
       const reportedGroup = await Group.findById(reportedItemId);
       if (!reportedGroup) {
-        const error = AppError.create(
+        const error = new AppError(
           "Invalid reported group id",
           400,
           httpStatusText.ERROR
@@ -67,7 +67,7 @@ const addReportService = async (
       }
 
       if (checkIfReportIsAlreadyMade(reportedGroup.reports, reportedBy)) {
-        const error = AppError.create(
+        const error = new AppError(
           "You have already reported this group",
           400,
           httpStatusText.ERROR
@@ -83,7 +83,7 @@ const addReportService = async (
     case "page":
       const reportedPage = await Page.findById(reportedItemId);
       if (!reportedPage) {
-        const error = AppError.create(
+        const error = new AppError(
           "Invalid reported page id",
           400,
           httpStatusText.ERROR
@@ -92,7 +92,7 @@ const addReportService = async (
       }
 
       if (checkIfReportIsAlreadyMade(reportedPage.reports, reportedBy)) {
-        const error = AppError.create(
+        const error = new AppError(
           "You have already reported this page",
           400,
           httpStatusText.ERROR
@@ -108,7 +108,7 @@ const addReportService = async (
     case "post":
       const reportedPost = await Post.findById(reportedItemId);
       if (!reportedPost) {
-        const error = AppError.create(
+        const error = new AppError(
           "Invalid reported user id",
           400,
           httpStatusText.ERROR
@@ -117,7 +117,7 @@ const addReportService = async (
       }
 
       if (checkIfReportIsAlreadyMade(reportedPost.reports, reportedBy)) {
-        const error = AppError.create(
+        const error = new AppError(
           "You have already reported this post",
           400,
           httpStatusText.ERROR
@@ -147,7 +147,7 @@ const removeReportService = async (reportInfo: {
   const { type, reportedItemId, userId } = reportInfo;
   const user = await User.findById(userId);
   if (!user) {
-    const error = AppError.create("Invalid user id", 400, httpStatusText.ERROR);
+    const error = new AppError("Invalid user id", 400, httpStatusText.ERROR);
     return { error, type: "error" };
   }
 
@@ -155,7 +155,7 @@ const removeReportService = async (reportInfo: {
     case "user":
       const reportedUser = await User.findById(reportedItemId);
       if (!reportedUser) {
-        const error = AppError.create(
+        const error = new AppError(
           "Invalid reported user id",
           400,
           httpStatusText.ERROR
@@ -164,7 +164,7 @@ const removeReportService = async (reportInfo: {
       }
 
       if (!isUserTheReportOwner(reportedUser.reports, userId)) {
-        const error = AppError.create(
+        const error = new AppError(
           "You can't remove this report, only the report owner can delete it",
           400,
           httpStatusText.ERROR
@@ -185,7 +185,7 @@ const removeReportService = async (reportInfo: {
     case "group":
       const reportedGroup = await Group.findById(reportedItemId);
       if (!reportedGroup) {
-        const error = AppError.create(
+        const error = new AppError(
           "Invalid reported group id",
           400,
           httpStatusText.ERROR
@@ -194,7 +194,7 @@ const removeReportService = async (reportInfo: {
       }
 
       if (!isUserTheReportOwner(reportedGroup.reports, userId)) {
-        const error = AppError.create(
+        const error = new AppError(
           "You can't remove this report, only the report owner can delete it",
           400,
           httpStatusText.ERROR
@@ -215,7 +215,7 @@ const removeReportService = async (reportInfo: {
     case "page":
       const reportedPage = await Page.findById(reportedItemId);
       if (!reportedPage) {
-        const error = AppError.create(
+        const error = new AppError(
           "Invalid reported page id",
           400,
           httpStatusText.ERROR
@@ -224,7 +224,7 @@ const removeReportService = async (reportInfo: {
       }
 
       if (!isUserTheReportOwner(reportedPage.reports, userId)) {
-        const error = AppError.create(
+        const error = new AppError(
           "You can't remove this report, only the report owner can delete it",
           400,
           httpStatusText.ERROR
@@ -245,7 +245,7 @@ const removeReportService = async (reportInfo: {
     case "post":
       const reportedPost = await Post.findById(reportedItemId);
       if (!reportedPost) {
-        const error = AppError.create(
+        const error = new AppError(
           "Invalid reported post id",
           400,
           httpStatusText.ERROR
@@ -254,7 +254,7 @@ const removeReportService = async (reportInfo: {
       }
 
       if (!isUserTheReportOwner(reportedPost.reports, userId)) {
-        const error = AppError.create(
+        const error = new AppError(
           "You can't remove this report, only the report owner can delete it",
           400,
           httpStatusText.ERROR

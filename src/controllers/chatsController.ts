@@ -3,7 +3,7 @@ import asyncWrapper from "../middlewares/asyncWrapper";
 import chatsServices from "../services/chatsServices";
 import httpStatusText from "../utils/httpStatusText";
 import { validationResult } from "express-validator";
-import AppError from "../utils/appError";
+import AppError from "../utils/AppError";
 
 const getAllChats = asyncWrapper(
   async (
@@ -12,11 +12,6 @@ const getAllChats = asyncWrapper(
     next: NextFunction
   ): Promise<Response | void> => {
     // const { userId } = req.query;
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      const error = AppError.create(errors.array(), 400, httpStatusText.ERROR);
-      return next(error);
-    }
 
     const getChatsResult = await chatsServices.getAllChatsService(
       req.query.userId as string
@@ -40,11 +35,6 @@ const createOrGetChat = asyncWrapper(
     next: NextFunction
   ): Promise<Response | void> => {
     const { firstUserId, secondUserId } = req.body;
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      const error = AppError.create(errors.array(), 400, httpStatusText.ERROR);
-      return next(error);
-    }
 
     const createChatResult = await chatsServices.createOrGetChatService(
       firstUserId,
@@ -70,11 +60,7 @@ const sendMessage = asyncWrapper(
   ): Promise<Response | void> => {
     const { chatId } = req.params;
     const { senderId, content } = req.body;
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      const error = AppError.create(errors.array(), 400, httpStatusText.ERROR);
-      return next(error);
-    }
+
     const sendMessageResult = await chatsServices.sendMessageService(
       chatId,
       senderId,
@@ -100,11 +86,6 @@ const updateOrDeleteMessage = asyncWrapper(
   ): Promise<Response | void> => {
     const { chatId } = req.params;
     const { type } = req.body;
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      const error = AppError.create(errors.array(), 400, httpStatusText.ERROR);
-      return next(error);
-    }
 
     const updateOrDeleteMessageResult =
       await chatsServices.updateOrDeleteMessageService(chatId, req.body);

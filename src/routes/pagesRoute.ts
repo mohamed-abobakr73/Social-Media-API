@@ -8,14 +8,18 @@ import {
   addFollowers,
   removeFollowers,
 } from "../controllers/pagesController";
-import createPageValidation from "../middlewares/createPageValidation";
-import upload from "../config/cloudinaryConfig";
-import userIdValidation from "../middlewares/userIdValidation";
-import updatePageValidation from "../middlewares/updatePageValidation";
-import verifyToken from "../middlewares/verifyToken";
-import addReportValidation from "../middlewares/addReportValidation";
+import {
+  createPageValidation,
+  userIdValidation,
+  updatePageValidation,
+  verifyToken,
+  validateRequestBody,
+  addReportValidation,
+  removeReportValidation,
+} from "../middlewares/";
+import { upload } from "../config/";
+
 import { addReport, removeReport } from "../controllers/reportsController";
-import removeReportValidation from "../middlewares/removeReportValidation";
 
 const pagesRouter = Router();
 
@@ -32,6 +36,7 @@ pagesRouter
     verifyToken,
     upload.single("cover"),
     createPageValidation(),
+    validateRequestBody,
     createPage
   );
 
@@ -42,27 +47,38 @@ pagesRouter
     verifyToken,
     upload.single("cover"),
     updatePageValidation(),
+    validateRequestBody,
     updatePage
   );
 
 // Remove a report
-pagesRouter.route("/reports").delete(removeReportValidation(), removeReport);
+pagesRouter
+  .route("/reports")
+  .delete(removeReportValidation(), validateRequestBody, removeReport);
 
 // Delete page
 pagesRouter
   .route("/:pageId")
-  .delete(verifyToken, userIdValidation(), deletePage);
+  .delete(verifyToken, userIdValidation(), validateRequestBody, deletePage);
 
 // Add followers
 pagesRouter
   .route("/:pageId/followers")
-  .post(verifyToken, userIdValidation(), addFollowers);
+  .post(verifyToken, userIdValidation(), validateRequestBody, addFollowers);
 
 // Remove Followers
 pagesRouter
   .route("/:pageId/followers")
-  .delete(verifyToken, userIdValidation(), removeFollowers);
+  .delete(
+    verifyToken,
+    userIdValidation(),
+    validateRequestBody,
+    removeFollowers
+  );
 
 // Report a page
-pagesRouter.route("/reports").post(addReportValidation(), addReport);
+pagesRouter
+  .route("/reports")
+  .post(addReportValidation(), validateRequestBody, addReport);
+
 export default pagesRouter;

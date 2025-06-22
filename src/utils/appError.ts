@@ -1,31 +1,26 @@
+import httpStatusText from "./httpStatusText";
+import TAppError from "../types/TAppError";
 import { ValidationError } from "express-validator";
 
-export type TAppError = {
-  message: string | ValidationError[];
-  statusCode: number;
-  statusText: string;
-  create(message: string, statusCode: number, statusText: string): TAppError;
-};
-
 class AppError extends Error implements TAppError {
-  public statusCode!: number;
-  public statusText!: string;
+  public message: string;
+  public statusCode: number;
+  public statusText: string;
+  public validationErrors?: ValidationError[];
 
-  constructor() {
-    super();
-  }
-
-  create(
-    message: string | ValidationError[],
+  constructor(
+    message: string,
     statusCode: number,
-    statusText: string
-  ): this {
-    //@ts-ignore
-    this.message = message;
-    this.statusCode = statusCode;
-    this.statusText = statusText;
+    statusText: string,
+    validationErrors?: ValidationError[]
+  ) {
+    super();
+    this.message = message || "Something went wrong";
+    this.statusCode = statusCode || 500;
+    this.statusText = statusText || httpStatusText.ERROR;
+    this.validationErrors = validationErrors;
     return this;
   }
 }
 
-export default new AppError();
+export default AppError;

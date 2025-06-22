@@ -1,9 +1,11 @@
 import { Router } from "express";
 import { search } from "../controllers/searchController";
-import searchValidation from "../middlewares/searchValidation";
+import { searchValidation, validateRequestBody } from "../middlewares/";
 
 const searchRouter = Router();
 
-searchRouter.route("/:searchTerm").post(searchValidation(), search);
+searchRouter
+  .route("/:searchTerm")
+  .post(searchValidation(), validateRequestBody, search);
 
 export default searchRouter;

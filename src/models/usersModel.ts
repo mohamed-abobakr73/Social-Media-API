@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { IReport } from "../types/report";
+import { IReport } from "../types/";
 
 export interface IFriendRequest {
   sender: mongoose.Types.ObjectId;

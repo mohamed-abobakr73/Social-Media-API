@@ -1,7 +1,7 @@
-type TGlobalError = {
+type TAppError = {
   message: string;
   statusCode: number;
   statusText: string;
 };
 
-export default TGlobalError;
+export default TAppError;

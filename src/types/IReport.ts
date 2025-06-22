@@ -1,7 +1,9 @@
 import mongoose from "mongoose";
 
-export interface IReport {
+interface IReport {
   reason: string;
   reportedBy: mongoose.Types.ObjectId;
   createdAt?: Date;
 }
+
+export default IReport;

@@ -1,6 +1,6 @@
 import { body } from "express-validator";
 
-const createAndUpdateUserValidiation = (isUpdate: boolean) => {
+const createAndUpdateUserValidation = (isUpdate: boolean) => {
   const requiredCheck = (field: string) =>
     isUpdate ? body(field).optional() : body(field);
   return [
@@ -43,4 +43,4 @@ const createAndUpdateUserValidiation = (isUpdate: boolean) => {
   ];
 };
 
-export default createAndUpdateUserValidiation;
+export default createAndUpdateUserValidation;

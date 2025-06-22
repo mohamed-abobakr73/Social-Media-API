@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
-import AppError from "../utils/appError";
+import AppError from "../utils/AppError";
 import httpStatusText from "../utils/httpStatusText";
-import { TCurrentUser } from "../types/currentUser";
+import { TCurrentUser } from "../types/";
 
 const isAllowed = (...roles: string[]) => {
   // TODO add the user type that comes from the database
@@ -12,7 +12,7 @@ const isAllowed = (...roles: string[]) => {
   ) => {
     const userRole = req.currentUser?.role;
     if (!roles.includes(userRole!)) {
-      const error = AppError.create(
+      const error = new AppError(
         "You are not allowed to do this action",
         401,
         httpStatusText.FAIL

@@ -9,17 +9,20 @@ import {
   leaveGroup,
   updateGroup,
 } from "../controllers/groupsController";
-import createGroupValidation from "../middlewares/createGroupValidation";
-import verifyToken from "../middlewares/verifyToken";
-import isAllowed from "../middlewares/isAllowed";
-import joinGroupValidation from "../middlewares/joinGroupValidation";
-import handleJoinRequestValidation from "../middlewares/handleJoinRequestValidation";
-import userIdValidation from "../middlewares/userIdValidation";
-import upload from "../config/cloudinaryConfig";
-import updateGroupValidation from "../middlewares/updateGroupValidation";
-import addReportValidation from "../middlewares/addReportValidation";
+import {
+  createGroupValidation,
+  verifyToken,
+  isAllowed,
+  joinGroupValidation,
+  handleJoinRequestValidation,
+  userIdValidation,
+  updateGroupValidation,
+  addReportValidation,
+  removeReportValidation,
+  validateRequestBody,
+} from "../middlewares/";
+import { upload } from "../config/";
 import { addReport, removeReport } from "../controllers/reportsController";
-import removeReportValidation from "../middlewares/removeReportValidation";
 
 const groupsRouter = Router();
 
@@ -37,6 +40,7 @@ groupsRouter
     isAllowed("user", "superAdmin"),
     upload.single("cover"),
     createGroupValidation(),
+    validateRequestBody,
     createGroup
   );
 
@@ -46,11 +50,14 @@ groupsRouter
     verifyToken,
     upload.single("cover"),
     updateGroupValidation(),
+    validateRequestBody,
     updateGroup
   );
 
 // Remove a report
-groupsRouter.route("/reports").delete(removeReportValidation(), removeReport);
+groupsRouter
+  .route("/reports")
+  .delete(removeReportValidation(), validateRequestBody, removeReport);
 
 // Delete group
 groupsRouter.route("/:groupId").delete(verifyToken, deleteGroup);
@@ -58,19 +65,26 @@ groupsRouter.route("/:groupId").delete(verifyToken, deleteGroup);
 // Join group
 groupsRouter
   .route("/:groupId/join")
-  .post(verifyToken, joinGroupValidation(), joinGroup);
+  .post(verifyToken, joinGroupValidation(), validateRequestBody, joinGroup);
 
 // Handle join request
 groupsRouter
   .route("/:groupId/join-requests")
-  .post(verifyToken, handleJoinRequestValidation(), handleJoinRequests);
+  .post(
+    verifyToken,
+    handleJoinRequestValidation(),
+    validateRequestBody,
+    handleJoinRequests
+  );
 
 // Leave group
 groupsRouter
   .route("/:groupId/leave")
-  .post(verifyToken, userIdValidation(), leaveGroup);
+  .post(verifyToken, userIdValidation(), validateRequestBody, leaveGroup);
 
 // Report a group
-groupsRouter.route("/reports").post(addReportValidation(), addReport);
+groupsRouter
+  .route("/reports")
+  .post(addReportValidation(), validateRequestBody, addReport);
 
 export default groupsRouter;

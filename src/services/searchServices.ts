@@ -1,7 +1,7 @@
 import { User, IUser } from "../models/usersModel";
 import { Group, IGroup } from "../models/groupsModel";
 import { Page, IPage } from "../models/pagesModel";
-import AppError from "../utils/appError";
+import AppError from "../utils/AppError";
 import httpStatusText from "../utils/httpStatusText";
 import { TServiceResult } from "../types/serviceResult";
 
