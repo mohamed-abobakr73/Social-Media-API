@@ -2,7 +2,6 @@ import { Request, Response, NextFunction } from "express";
 import asyncWrapper from "../middlewares/asyncWrapper";
 import searchServices from "../services/searchServices";
 import httpStatusText from "../utils/httpStatusText";
-import { validationResult } from "express-validator";
 import AppError from "../utils/AppError";
 
 const search = asyncWrapper(
@@ -18,11 +17,7 @@ const search = asyncWrapper(
 
     const { searchTerm } = req.params;
     const { type } = req.body;
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      const error = new AppError(errors.array(), 400, httpStatusText.ERROR);
-      return next(error);
-    }
+
     const searchResult = await searchServices.searchService(type, searchTerm, {
       limit,
       skip,

@@ -2,8 +2,6 @@ import { Request, Response, NextFunction } from "express";
 import asyncWrapper from "../middlewares/asyncWrapper";
 import groupsServices from "../services/groupsServices";
 import httpStatusText from "../utils/httpStatusText";
-import { validationResult } from "express-validator";
-import AppError from "../utils/AppError";
 
 const getAllGroups = asyncWrapper(
   async (
@@ -55,12 +53,6 @@ const createGroup = asyncWrapper(
     res: Response,
     next: NextFunction
   ): Promise<Response | void> => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      const error = new AppError(errors.array(), 400, httpStatusText.ERROR);
-      return next(error);
-    }
-
     const groupCover = req.file?.path;
 
     const createGroupResult = await groupsServices.createGroupService({
@@ -93,12 +85,6 @@ const updateGroup = asyncWrapper(
     };
 
     const groupCover = req.file?.path;
-
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      const error = new AppError(errors.array(), 400, httpStatusText.ERROR);
-      return next(error);
-    }
 
     const updateGroupResult = await groupsServices.updateGroupService(
       groupId,
@@ -184,11 +170,7 @@ const handleJoinRequests = asyncWrapper(
   ): Promise<Response | void> => {
     const { groupId } = req.params;
     const { status } = req.body;
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      const error = new AppError(errors.array(), 400, httpStatusText.ERROR);
-      return next(error);
-    }
+
     const handleJoinRequestsResult =
       await groupsServices.handleJoinRequestsService({ groupId, ...req.body });
     if (handleJoinRequestsResult.type === "error") {
@@ -210,11 +192,7 @@ const leaveGroup = asyncWrapper(
   ): Promise<Response | void> => {
     const { groupId } = req.params;
     const { userId } = req.body;
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      const error = new AppError(errors.array(), 400, httpStatusText.ERROR);
-      return next(error);
-    }
+
     const leaveGroupResult = await groupsServices.leaveGroupService(
       userId,
       groupId

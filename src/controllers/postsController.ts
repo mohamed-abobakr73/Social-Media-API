@@ -2,7 +2,6 @@ import { Request, Response, NextFunction } from "express";
 import asyncWrapper from "../middlewares/asyncWrapper";
 import postsServices from "../services/postsServices";
 import httpStatusText from "../utils/httpStatusText";
-import { validationResult } from "express-validator";
 import AppError from "../utils/AppError";
 
 const getAllPosts = asyncWrapper(
@@ -58,12 +57,6 @@ const createPost = asyncWrapper(
     res: Response,
     next: NextFunction
   ): Promise<Response | void> => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      const error = new AppError(errors.array(), 400, httpStatusText.ERROR);
-      return next(error);
-    }
-
     const postImages = (req.files as Express.Multer.File[])?.map(
       (file) => file.path
     );
@@ -101,12 +94,6 @@ const updatePost = asyncWrapper(
     const { postId } = req.params;
     const { userId, postTitle, postContent } = req.body;
 
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      const error = new AppError(errors.array(), 400, httpStatusText.ERROR);
-      return next(error);
-    }
-
     const updatePostReslut = await postsServices.updatePostService(
       userId,
       postId,
@@ -132,12 +119,6 @@ const deletePost = asyncWrapper(
   ): Promise<Response | void> => {
     const { postId } = req.params;
     const { userId } = req.body;
-
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      const error = new AppError(errors.array(), 400, httpStatusText.ERROR);
-      return next(error);
-    }
 
     const deletePostResult = await postsServices.deletePostService(
       postId,
@@ -168,12 +149,6 @@ const handleLikePost = asyncWrapper(
       userId
     );
 
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      const error = new AppError(errors.array(), 400, httpStatusText.ERROR);
-      return next(error);
-    }
-
     if (handleLikePostResult.type === "error") {
       return next(handleLikePostResult.error);
     } else {
@@ -200,12 +175,6 @@ const addComment = asyncWrapper(
   ): Promise<Response | void> => {
     const { postId } = req.params;
 
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      const error = new AppError(errors.array(), 400, httpStatusText.ERROR);
-      return next(error);
-    }
-
     const addCommentResult = await postsServices.addCommentService(
       postId,
       req.body
@@ -229,12 +198,6 @@ const deleteComment = asyncWrapper(
   ): Promise<Response | void> => {
     const { postId, commentId } = req.params;
     const { userId } = req.body;
-
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      const error = new AppError(errors.array(), 400, httpStatusText.ERROR);
-      return next(error);
-    }
 
     const deleteCommentResult = await postsServices.deleteCommentService(
       postId,
@@ -260,12 +223,6 @@ const sharePost = asyncWrapper(
   ): Promise<Response | void> => {
     const { postId } = req.params;
     const { userId } = req.body;
-
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      const error = new AppError(errors.array(), 400, httpStatusText.ERROR);
-      return next(error);
-    }
 
     const sharePostResult = await postsServices.sharePostService(
       postId,
