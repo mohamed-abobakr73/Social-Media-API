@@ -1,9 +1,9 @@
 import { NextFunction, Request, Response } from "express";
-import TGlobalError from "../types/globalErrorType";
+import TAppError from "../types/TAppError";
 import httpStatusText from "../utils/httpStatusText";
 
 const globalErrorHandler = (
-  error: TGlobalError,
+  error: TAppError,
   req: Request,
   res: Response,
   next: NextFunction

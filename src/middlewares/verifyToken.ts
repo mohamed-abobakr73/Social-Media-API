@@ -1,6 +1,6 @@
 import jwt, { JwtPayload } from "jsonwebtoken";
 import { NextFunction, Request, Response } from "express";
-import AppError from "../utils/appError";
+import AppError from "../utils/AppError";
 import httpStatusText from "../utils/httpStatusText";
 import dotenv from "dotenv";
 import { TCurrentUser } from "../types/currentUser";
@@ -15,7 +15,7 @@ const verifyToken = (
   const authHeaders =
     req.headers["authorization"] || req.headers["Authorization"];
   if (!authHeaders || typeof authHeaders !== "string") {
-    const error = AppError.create(
+    const error = new AppError(
       "No token provided or invalid header format",
       401,
       httpStatusText.ERROR
@@ -25,7 +25,7 @@ const verifyToken = (
   const token = authHeaders.split(" ")[1];
 
   if (!token) {
-    const error = AppError.create(
+    const error = new AppError(
       "No token found in the header",
       401,
       httpStatusText.ERROR
@@ -40,7 +40,7 @@ const verifyToken = (
     req.currentUser = currentUser;
     next();
   } catch (error) {
-    const err = AppError.create("Invalid JWT token", 401, httpStatusText.ERROR);
+    const err = new AppError("Invalid JWT token", 401, httpStatusText.ERROR);
     return next(err);
   }
 };

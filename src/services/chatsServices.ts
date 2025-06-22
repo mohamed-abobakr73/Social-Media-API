@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import { Chat, IChat, IMessage } from "../models/chatsModel";
 import { User } from "../models/usersModel";
-import AppError from "../utils/appError";
+import AppError from "../utils/AppError";
 import httpStatusText from "../utils/httpStatusText";
 import { TServiceResult } from "../types/serviceResult";
 
@@ -13,7 +13,7 @@ const getAllChatsService = async (
     { __v: 0 }
   );
   if (!chats) {
-    const error = AppError.create("Invalid user id", 400, httpStatusText.ERROR);
+    const error = new AppError("Invalid user id", 400, httpStatusText.ERROR);
     return { error, type: "error" };
   }
 
@@ -28,7 +28,7 @@ const createOrGetChatService = async (
   const users = await User.find({ _id: { $in: [firstUserId, secondUserId] } });
 
   if (users.length !== 2) {
-    const error = AppError.create(
+    const error = new AppError(
       "Invalid paricipants ids",
       400,
       httpStatusText.ERROR
@@ -43,7 +43,7 @@ const createOrGetChatService = async (
   );
 
   if (isBlocked) {
-    const error = AppError.create(
+    const error = new AppError(
       "Cannot chat with a blocked user",
       400,
       httpStatusText.ERROR
@@ -81,7 +81,7 @@ const sendMessageService = async (
 ): Promise<TServiceResult<IMessage>> => {
   const chat = await Chat.findById(chatId);
   if (!chat) {
-    const error = AppError.create("Invalid chat id", 400, httpStatusText.ERROR);
+    const error = new AppError("Invalid chat id", 400, httpStatusText.ERROR);
     return { error, type: "error" };
   }
 
@@ -90,7 +90,7 @@ const sendMessageService = async (
     (participant) => participant.toString() === senderId
   );
   if (!senderIsParticipant) {
-    const error = AppError.create(
+    const error = new AppError(
       "Sender is not a participant in this chat",
       400,
       httpStatusText.ERROR
@@ -121,7 +121,7 @@ const updateOrDeleteMessageService = async (
   const { type, senderId, messageId, newContent } = messageData;
   const chat = await Chat.findById(chatId);
   if (!chat) {
-    const error = AppError.create("Invalid chat id", 400, httpStatusText.ERROR);
+    const error = new AppError("Invalid chat id", 400, httpStatusText.ERROR);
     return { error, type: "error" };
   }
 
@@ -130,7 +130,7 @@ const updateOrDeleteMessageService = async (
     (participant) => participant.toString() === senderId
   );
   if (!senderIsParticipant) {
-    const error = AppError.create(
+    const error = new AppError(
       "Sender is not a participant in this chat",
       400,
       httpStatusText.ERROR
@@ -144,16 +144,12 @@ const updateOrDeleteMessageService = async (
 
   const message = chat.messages[messageIndex];
   if (!message) {
-    const error = AppError.create(
-      "Invalid message id",
-      400,
-      httpStatusText.ERROR
-    );
+    const error = new AppError("Invalid message id", 400, httpStatusText.ERROR);
     return { error, type: "error" };
   }
 
   if (message.sender.toString() !== senderId) {
-    const error = AppError.create(
+    const error = new AppError(
       "User is not message sender",
       400,
       httpStatusText.ERROR

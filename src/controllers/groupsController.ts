@@ -3,7 +3,7 @@ import asyncWrapper from "../middlewares/asyncWrapper";
 import groupsServices from "../services/groupsServices";
 import httpStatusText from "../utils/httpStatusText";
 import { validationResult } from "express-validator";
-import AppError from "../utils/appError";
+import AppError from "../utils/AppError";
 
 const getAllGroups = asyncWrapper(
   async (
@@ -57,7 +57,7 @@ const createGroup = asyncWrapper(
   ): Promise<Response | void> => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      const error = AppError.create(errors.array(), 400, httpStatusText.ERROR);
+      const error = new AppError(errors.array(), 400, httpStatusText.ERROR);
       return next(error);
     }
 
@@ -96,7 +96,7 @@ const updateGroup = asyncWrapper(
 
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      const error = AppError.create(errors.array(), 400, httpStatusText.ERROR);
+      const error = new AppError(errors.array(), 400, httpStatusText.ERROR);
       return next(error);
     }
 
@@ -186,7 +186,7 @@ const handleJoinRequests = asyncWrapper(
     const { status } = req.body;
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      const error = AppError.create(errors.array(), 400, httpStatusText.ERROR);
+      const error = new AppError(errors.array(), 400, httpStatusText.ERROR);
       return next(error);
     }
     const handleJoinRequestsResult =
@@ -212,7 +212,7 @@ const leaveGroup = asyncWrapper(
     const { userId } = req.body;
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      const error = AppError.create(errors.array(), 400, httpStatusText.ERROR);
+      const error = new AppError(errors.array(), 400, httpStatusText.ERROR);
       return next(error);
     }
     const leaveGroupResult = await groupsServices.leaveGroupService(

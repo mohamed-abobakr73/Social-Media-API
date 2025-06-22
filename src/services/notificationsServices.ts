@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import { User } from "../models/usersModel";
-import AppError from "../utils/appError";
+import AppError from "../utils/AppError";
 import httpStatusText from "../utils/httpStatusText";
 import notficationsMessages from "../utils/notficationsMessages";
 
@@ -20,7 +20,7 @@ const addNotificationService = async (
 ) => {
   const user = await User.findById(sourceId);
   if (!user) {
-    const error = AppError.create(
+    const error = new AppError(
       "An error occured during liking the post, pleasse try again later",
       400,
       httpStatusText.ERROR

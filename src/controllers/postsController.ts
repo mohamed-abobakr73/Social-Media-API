@@ -3,7 +3,7 @@ import asyncWrapper from "../middlewares/asyncWrapper";
 import postsServices from "../services/postsServices";
 import httpStatusText from "../utils/httpStatusText";
 import { validationResult } from "express-validator";
-import AppError from "../utils/appError";
+import AppError from "../utils/AppError";
 
 const getAllPosts = asyncWrapper(
   async (
@@ -60,7 +60,7 @@ const createPost = asyncWrapper(
   ): Promise<Response | void> => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      const error = AppError.create(errors.array(), 400, httpStatusText.ERROR);
+      const error = new AppError(errors.array(), 400, httpStatusText.ERROR);
       return next(error);
     }
 
@@ -91,7 +91,7 @@ const updatePost = asyncWrapper(
     next: NextFunction
   ): Promise<Response | void> => {
     if (Object.keys(req.params).length === 0) {
-      const error = AppError.create(
+      const error = new AppError(
         "No data sent to update",
         400,
         httpStatusText.FAIL
@@ -103,7 +103,7 @@ const updatePost = asyncWrapper(
 
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      const error = AppError.create(errors.array(), 400, httpStatusText.ERROR);
+      const error = new AppError(errors.array(), 400, httpStatusText.ERROR);
       return next(error);
     }
 
@@ -135,7 +135,7 @@ const deletePost = asyncWrapper(
 
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      const error = AppError.create(errors.array(), 400, httpStatusText.ERROR);
+      const error = new AppError(errors.array(), 400, httpStatusText.ERROR);
       return next(error);
     }
 
@@ -170,7 +170,7 @@ const handleLikePost = asyncWrapper(
 
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      const error = AppError.create(errors.array(), 400, httpStatusText.ERROR);
+      const error = new AppError(errors.array(), 400, httpStatusText.ERROR);
       return next(error);
     }
 
@@ -202,7 +202,7 @@ const addComment = asyncWrapper(
 
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      const error = AppError.create(errors.array(), 400, httpStatusText.ERROR);
+      const error = new AppError(errors.array(), 400, httpStatusText.ERROR);
       return next(error);
     }
 
@@ -232,7 +232,7 @@ const deleteComment = asyncWrapper(
 
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      const error = AppError.create(errors.array(), 400, httpStatusText.ERROR);
+      const error = new AppError(errors.array(), 400, httpStatusText.ERROR);
       return next(error);
     }
 
@@ -263,7 +263,7 @@ const sharePost = asyncWrapper(
 
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      const error = AppError.create(errors.array(), 400, httpStatusText.ERROR);
+      const error = new AppError(errors.array(), 400, httpStatusText.ERROR);
       return next(error);
     }
 

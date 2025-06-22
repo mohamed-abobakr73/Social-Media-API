@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import { Group, IGroup } from "../models/groupsModel";
-import AppError from "../utils/appError";
+import AppError from "../utils/AppError";
 import httpStatusText from "../utils/httpStatusText";
 import { TServiceResult } from "../types/serviceResult";
 import { User } from "../models/usersModel";
@@ -21,11 +21,7 @@ const getGroupByIdService = async (
 ): Promise<TServiceResult<IGroup>> => {
   const group = await Group.findById(groupId);
   if (!group) {
-    const error = AppError.create(
-      "Invalid group id",
-      400,
-      httpStatusText.ERROR
-    );
+    const error = new AppError("Invalid group id", 400, httpStatusText.ERROR);
     return { error, type: "error" };
   }
   return { data: group, type: "success" };
@@ -46,7 +42,7 @@ const createGroupService = async (groupData: {
   });
 
   if (!group) {
-    const error = AppError.create(
+    const error = new AppError(
       "An error occured during creating the group, please try again later",
       400,
       httpStatusText.FAIL
@@ -74,21 +70,17 @@ const updateGroupService = async (
   const group = await Group.findById(groupId);
 
   if (!group) {
-    const error = AppError.create(
-      "Invalid group id",
-      400,
-      httpStatusText.ERROR
-    );
+    const error = new AppError("Invalid group id", 400, httpStatusText.ERROR);
     return { error, type: "error" };
   }
   if (!user) {
-    const error = AppError.create("Invalid user id", 400, httpStatusText.ERROR);
+    const error = new AppError("Invalid user id", 400, httpStatusText.ERROR);
     return { error, type: "error" };
   }
 
   const userIsGroupOwner = group.createdBy.toString() === userId;
   if (!userIsGroupOwner) {
-    const error = AppError.create(
+    const error = new AppError(
       "Only group owner can delete this group",
       400,
       httpStatusText.ERROR
@@ -97,7 +89,7 @@ const updateGroupService = async (
   }
 
   if (group.isDeleted) {
-    const error = AppError.create(
+    const error = new AppError(
       "This group is deleted, you can't update it",
       400,
       httpStatusText.ERROR
@@ -118,7 +110,7 @@ const updateGroupService = async (
   );
 
   if (!updatedGroup) {
-    const error = AppError.create(
+    const error = new AppError(
       "An error occured during updating the group, please try again later",
       400,
       httpStatusText.ERROR
@@ -137,21 +129,17 @@ const deleteGroupService = async (
   const group = await Group.findById(groupId);
 
   if (!group) {
-    const error = AppError.create(
-      "Invalid group id",
-      400,
-      httpStatusText.ERROR
-    );
+    const error = new AppError("Invalid group id", 400, httpStatusText.ERROR);
     return { error, type: "error" };
   }
   if (!user) {
-    const error = AppError.create("Invalid user id", 400, httpStatusText.ERROR);
+    const error = new AppError("Invalid user id", 400, httpStatusText.ERROR);
     return { error, type: "error" };
   }
 
   const userIsGroupOwner = group.createdBy.toString() === userId;
   if (!userIsGroupOwner) {
-    const error = AppError.create(
+    const error = new AppError(
       "Only group owner can delete this group",
       400,
       httpStatusText.ERROR
@@ -173,21 +161,17 @@ const joinGroupService = async (
   const group = await Group.findById(groupId);
 
   if (!user) {
-    const error = AppError.create("Invalid user id", 400, httpStatusText.ERROR);
+    const error = new AppError("Invalid user id", 400, httpStatusText.ERROR);
     return { error, type: "error" };
   }
   if (!group) {
-    const error = AppError.create(
-      "Invalid group id",
-      400,
-      httpStatusText.ERROR
-    );
+    const error = new AppError("Invalid group id", 400, httpStatusText.ERROR);
     return { error, type: "error" };
   }
 
   // Checking if the group is deleted
   if (group.isDeleted) {
-    const error = AppError.create(
+    const error = new AppError(
       "The group you are trying to join is deleted",
       400,
       httpStatusText.ERROR
@@ -200,7 +184,7 @@ const joinGroupService = async (
     (member) => member.toString() === userId
   );
   if (userIsAlreadyInGroup) {
-    const error = AppError.create(
+    const error = new AppError(
       "You are already a member in this group",
       400,
       httpStatusText.ERROR
@@ -215,7 +199,7 @@ const joinGroupService = async (
       (request) => request.toString() === userId
     );
     if (userAlreadyRequestedToJoin) {
-      const error = AppError.create(
+      const error = new AppError(
         "You already made a join request to this group",
         400,
         httpStatusText.ERROR
@@ -259,23 +243,15 @@ const handleJoinRequestsService = async (requestData: {
   const requestingUser = await User.findById(requestingUserId);
 
   if (!group) {
-    const error = AppError.create(
-      "Invalid group id",
-      400,
-      httpStatusText.ERROR
-    );
+    const error = new AppError("Invalid group id", 400, httpStatusText.ERROR);
     return { error, type: "error" };
   }
   if (!admin) {
-    const error = AppError.create(
-      "Invalid admin id",
-      400,
-      httpStatusText.ERROR
-    );
+    const error = new AppError("Invalid admin id", 400, httpStatusText.ERROR);
     return { error, type: "error" };
   }
   if (!requestingUser) {
-    const error = AppError.create(
+    const error = new AppError(
       "Invalid requesting user id",
       400,
       httpStatusText.ERROR
@@ -288,7 +264,7 @@ const handleJoinRequestsService = async (requestData: {
     (request) => request.toString() === requestingUserId
   );
   if (!userReallyRequestedToJoin) {
-    const error = AppError.create(
+    const error = new AppError(
       "Invalid join request",
       400,
       httpStatusText.ERROR
@@ -301,7 +277,7 @@ const handleJoinRequestsService = async (requestData: {
     (admin) => admin.toString() === adminId
   );
   if (!isHandlingUserAdmin) {
-    const error = AppError.create(
+    const error = new AppError(
       "You are not an admin in this group to accept or decline join requests",
       400,
       httpStatusText.ERROR
@@ -329,11 +305,11 @@ const leaveGroupService = async (
   const user = await User.findById(userId);
   const group = await Group.findById(groupId);
   if (!user) {
-    const error = AppError.create("Invalid user id", 400, httpStatusText.ERROR);
+    const error = new AppError("Invalid user id", 400, httpStatusText.ERROR);
     return { error, type: "error" };
   }
   if (!group) {
-    const error = AppError.create("Invalid user id", 400, httpStatusText.ERROR);
+    const error = new AppError("Invalid user id", 400, httpStatusText.ERROR);
     return { error, type: "error" };
   }
 
@@ -342,7 +318,7 @@ const leaveGroupService = async (
     (member) => member.toString() === userId
   );
   if (!isUserMember) {
-    const error = AppError.create(
+    const error = new AppError(
       "You are not a member of this group",
       400,
       httpStatusText.ERROR

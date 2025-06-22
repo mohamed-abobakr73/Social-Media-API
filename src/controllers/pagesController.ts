@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import asyncWrapper from "../middlewares/asyncWrapper";
 import pagesServices from "../services/pagesServices";
 import httpStatusText from "../utils/httpStatusText";
-import AppError from "../utils/appError";
+import AppError from "../utils/AppError";
 import { validationResult } from "express-validator";
 
 const getAllPages = asyncWrapper(
@@ -61,7 +61,7 @@ const createPage = asyncWrapper(
   ): Promise<Response | void> => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      const error = AppError.create(errors.array(), 400, httpStatusText.ERROR);
+      const error = new AppError(errors.array(), 400, httpStatusText.ERROR);
       return next(error);
     }
 
@@ -92,7 +92,7 @@ const updatePage = asyncWrapper(
     const { userId } = req.body;
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      const error = AppError.create(errors.array(), 400, httpStatusText.ERROR);
+      const error = new AppError(errors.array(), 400, httpStatusText.ERROR);
       return next(error);
     }
 
@@ -126,7 +126,7 @@ const deletePage = asyncWrapper(
 
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      const error = AppError.create(errors.array(), 400, httpStatusText.ERROR);
+      const error = new AppError(errors.array(), 400, httpStatusText.ERROR);
       return next(error);
     }
 
@@ -157,7 +157,7 @@ const addFollowers = asyncWrapper(
 
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      const error = AppError.create(errors.array(), 400, httpStatusText.ERROR);
+      const error = new AppError(errors.array(), 400, httpStatusText.ERROR);
       return next(error);
     }
 
@@ -188,7 +188,7 @@ const removeFollowers = asyncWrapper(
 
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      const error = AppError.create(errors.array(), 400, httpStatusText.ERROR);
+      const error = new AppError(errors.array(), 400, httpStatusText.ERROR);
       return next(error);
     }
 

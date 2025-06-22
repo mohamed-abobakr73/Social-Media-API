@@ -1,5 +1,5 @@
 import { Model, Document } from "mongoose";
-import appError, { TAppError } from "./appError";
+import appError, { TAppError } from "./AppError";
 import httpStatusText from "./httpStatusText";
 
 const findDocumentOrError = async <T extends Document>(
@@ -12,7 +12,7 @@ const findDocumentOrError = async <T extends Document>(
   if (!user) {
     return {
       type: "error",
-      error: appError.create("Invalid user id", 400, httpStatusText.ERROR),
+      error: new AppError("Invalid user id", 400, httpStatusText.ERROR),
     };
   }
   return { type: "success", data: user };

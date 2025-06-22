@@ -1,4 +1,4 @@
-import { TAppError } from "../utils/appError";
+import { TAppError } from "../utils/AppError";
 
 export type TServiceResult<T = unknown> =
   | { type: "success"; data?: T }
