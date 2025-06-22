@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
-import appError from "../utils/AppError.js";
-import httpStatusText from "../utils/httpStatusText.js";
+import AppError from "../utils/AppError";
+import httpStatusText from "../utils/httpStatusText";
 
 const imageValidation = (req: Request, res: Response, next: NextFunction) => {
   if (!req.file) {

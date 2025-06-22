@@ -1,4 +1,4 @@
-import mongoose, { UpdateWriteOpResult } from "mongoose";
+import mongoose from "mongoose";
 import {
   User,
   IUser,
@@ -6,7 +6,6 @@ import {
   IUserGroup,
   INotification,
 } from "../models/usersModel";
-import { IReport } from "../types/TReport";
 import bcrypt from "bcrypt";
 import AppError from "../utils/AppError";
 import httpStatusText from "../utils/httpStatusText";

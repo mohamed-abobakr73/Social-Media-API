@@ -3,7 +3,7 @@ import { NextFunction, Request, Response } from "express";
 import AppError from "../utils/AppError";
 import httpStatusText from "../utils/httpStatusText";
 import dotenv from "dotenv";
-import { TCurrentUser } from "../types/TCurrentUser";
+import { TCurrentUser } from "../types/";
 
 dotenv.config();
 

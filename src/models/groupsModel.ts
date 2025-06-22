@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { IReport } from "../types/TReport";
+import { IReport } from "../types/";
 export interface IGroup extends Document {
   groupName: string;
   createdBy: mongoose.Types.ObjectId;
