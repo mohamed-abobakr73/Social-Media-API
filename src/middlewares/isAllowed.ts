@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import AppError from "../utils/AppError";
 import httpStatusText from "../utils/httpStatusText";
-import { TCurrentUser } from "../types/currentUser";
+import { TCurrentUser } from "../types/TCurrentUser";
 
 const isAllowed = (...roles: string[]) => {
   // TODO add the user type that comes from the database

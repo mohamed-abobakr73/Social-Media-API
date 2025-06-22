@@ -5,7 +5,7 @@ import { Page, IPage } from "../models/pagesModel";
 import AppError from "../utils/AppError";
 import httpStatusText from "../utils/httpStatusText";
 import { TServiceResult } from "../types/serviceResult";
-import { IReport } from "../types/report";
+import { IReport } from "../types/TReport";
 
 const checkIfReportIsAlreadyMade = (reportsArr: IReport[], userId: string) => {
   return reportsArr.find((report) => report.reportedBy.toString() === userId);

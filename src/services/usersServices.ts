@@ -6,7 +6,7 @@ import {
   IUserGroup,
   INotification,
 } from "../models/usersModel";
-import { IReport } from "../types/report";
+import { IReport } from "../types/TReport";
 import bcrypt from "bcrypt";
 import AppError from "../utils/AppError";
 import httpStatusText from "../utils/httpStatusText";

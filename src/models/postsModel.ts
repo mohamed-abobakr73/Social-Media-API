@@ -1,5 +1,5 @@
 import mongoose, { Document } from "mongoose";
-import { IReport } from "../types/report";
+import { IReport } from "../types/TReport";
 
 export interface IComment {
   _id?: mongoose.Types.ObjectId;
