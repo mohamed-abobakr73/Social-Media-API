@@ -25,6 +25,7 @@ import updateGroupValidation from "./updateGroupValidation";
 import joinGroupValidation from "./joinGroupValidation";
 import createGroupValidation from "./createGroupValidation";
 import sendMessageValidation from "./sendMessageValidation";
+import validateRequestBody from "./validateRequestBody";
 
 export {
   addCommentValidation,
@@ -54,4 +55,5 @@ export {
   joinGroupValidation,
   createGroupValidation,
   sendMessageValidation,
+  validateRequestBody,
 };
