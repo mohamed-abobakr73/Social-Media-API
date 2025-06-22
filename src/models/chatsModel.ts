@@ -1,21 +1,7 @@
 import mongoose from "mongoose";
+import { TChat, TMessage } from "../types/";
 
-export interface IMessage {
-  _id?: mongoose.Types.ObjectId;
-  sender: mongoose.Types.ObjectId;
-  content: string;
-  seen: boolean;
-  createdAt?: Date;
-}
-
-export interface IChat {
-  participants: mongoose.Types.ObjectId[]; // Two users
-  messages: IMessage[];
-  createdAt?: Date;
-  lastUpdated: Date;
-}
-
-const chatSchema = new mongoose.Schema<IChat>(
+const chatSchema = new mongoose.Schema<TChat>(
   {
     participants: [
       { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
@@ -38,4 +24,4 @@ const chatSchema = new mongoose.Schema<IChat>(
   }
 );
 
-export const Chat = mongoose.model<IChat>("Chat", chatSchema);
+export const Chat = mongoose.model<TChat>("Chat", chatSchema);

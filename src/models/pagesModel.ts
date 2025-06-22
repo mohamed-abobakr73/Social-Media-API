@@ -1,19 +1,7 @@
 import mongoose from "mongoose";
-import { IReport } from "../types/";
+import { TPage } from "../types/";
 
-export interface IPage {
-  pageName: string;
-  createdBy: mongoose.Types.ObjectId;
-  followers: mongoose.Types.ObjectId[];
-  reports: IReport[];
-  posts: mongoose.Types.ObjectId[];
-  pageCover: string;
-  banned: boolean;
-  isDeleted: boolean;
-  createdAt?: Date;
-}
-
-const pagesSchema = new mongoose.Schema<IPage>(
+const pagesSchema = new mongoose.Schema<TPage>(
   {
     pageName: { type: String, required: true },
     createdBy: {
@@ -45,4 +33,4 @@ pagesSchema.pre("save", function (next) {
   next();
 });
 
-export const Page = mongoose.model<IPage>("Page", pagesSchema);
+export const Page = mongoose.model<TPage>("Page", pagesSchema);
