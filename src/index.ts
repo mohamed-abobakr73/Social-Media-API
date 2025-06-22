@@ -14,6 +14,7 @@ import postsRouter from "./routes/postsRoute";
 import pagesRouter from "./routes/pagesRoute";
 import chatsRouter from "./routes/chatsRoute";
 import searchRouter from "./routes/searchRoute";
+import globalErrorHandler from "./middlewares/globalErrorHandler";
 
 const app = express();
 const server = http.createServer(app);
@@ -80,21 +81,7 @@ app.use("/api/v1/chats", chatsRouter);
 app.use("/api/v1/search", searchRouter);
 
 // Global error handler
-app.use(
-  (
-    error: TGlobalError,
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): void => {
-    res.status(error.statusCode || 500).json({
-      status: error.statusText || httpStatusText.ERROR,
-      message: error.message,
-      code: error.statusCode || 500,
-      data: null,
-    });
-  }
-);
+app.use(globalErrorHandler);
 
 // Not found routes
 app.all("*", (req: Request, res: Response) => {
