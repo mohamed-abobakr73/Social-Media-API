@@ -19,13 +19,6 @@ const app = express();
 const server = http.createServer(app);
 export const io = new Server(server);
 
-app.get("/", (req, res) => {
-  res.sendFile(__dirname + "/index.html");
-});
-app.get("/test", (req, res) => {
-  res.sendFile(__dirname + "/test.html");
-});
-
 io.on("connection", (socket) => {
   console.log("A user connected:", socket.id);
   socket.on("chat message", ({ chatId, content, senderId, messageId }) => {
@@ -69,7 +62,7 @@ dotenv.config();
 const port = process.env.PORT;
 
 // Middlewares
-app.use(morgan("common"));
+app.use(morgan("dev"));
 app.use(helmet());
 app.use(cors());
 app.use(express.json());
@@ -104,13 +97,12 @@ app.use(
 );
 
 // Not found routes
-// @ts-ignore
-app.all("*", (req: Request, res: Response) =>
+app.all("*", (req: Request, res: Response) => {
   res.status(404).json({
     status: httpStatusText.ERROR,
     message: "Route not found.",
-  })
-);
+  });
+});
 
 server.listen(port || 5000, () => {
   console.log(`app running on port ${port}`);
