@@ -1,15 +1,14 @@
 import { User, IUser } from "../models/usersModel";
-import { Group, IGroup } from "../models/groupsModel";
-import { Page, IPage } from "../models/pagesModel";
-import AppError from "../utils/AppError";
-import httpStatusText from "../utils/httpStatusText";
+import { Group } from "../models/groupsModel";
+import { Page } from "../models/pagesModel";
 import { TServiceResult } from "../types/serviceResult";
+import { TGroup, TPage } from "../types";
 
 const searchService = async (
   type: "users" | "groups" | "pages",
   searchTerm: string,
   paginationData: { limit: number; skip: number }
-): Promise<TServiceResult<IUser[] | IGroup[] | IPage[]>> => {
+): Promise<TServiceResult<IUser[] | TGroup[] | TPage[]>> => {
   let searchData = [];
   const { limit, skip } = paginationData;
   switch (type) {

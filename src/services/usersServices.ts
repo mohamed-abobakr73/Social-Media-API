@@ -12,7 +12,7 @@ import httpStatusText from "../utils/httpStatusText";
 import generateJwt from "../utils/generateJwt";
 import { TServiceResult } from "../types/serviceResult";
 
-const getAllUsersService = async (): Promise<IUser[]> => {
+const getAllUsersService = async () => {
   const users = await User.find({}, { __v: 0 });
   return users;
 };

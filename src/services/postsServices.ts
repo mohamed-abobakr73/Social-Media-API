@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { Post, IPost } from "../models/postsModel";
+import { Post } from "../models/postsModel";
 import { User } from "../models/usersModel";
 import { Group } from "../models/groupsModel";
 import AppError from "../utils/AppError";
@@ -7,14 +7,15 @@ import httpStatusText from "../utils/httpStatusText";
 import { TServiceResult } from "../types/serviceResult";
 import { Page } from "../models/pagesModel";
 import notificationsServices from "./notificationsServices";
+import { TPost } from "../types";
 
 const getAllPostsService = async (
   type: "user" | "group" | "page",
   postSourceId: string,
   paginationData: { limit: number; skip: number }
-): Promise<TServiceResult<IPost[]>> => {
+): Promise<TServiceResult<TPost[]>> => {
   const { limit, skip } = paginationData;
-  let posts: IPost[] = [];
+  let posts: TPost[] = [];
   switch (type) {
     case "user":
       posts = await Post.find({ createdBy: postSourceId }, { __V: 0 })
@@ -60,7 +61,7 @@ const getAllPostsService = async (
 
 const getPostByIdService = async (
   postId: string
-): Promise<TServiceResult<IPost>> => {
+): Promise<TServiceResult<TPost>> => {
   const post = await Post.findById(postId, { __v: 0 });
   if (!post) {
     const error = new AppError("Invalid post id", 400, httpStatusText.ERROR);
@@ -77,7 +78,7 @@ const createPostService = async (postData: {
   createdBy: string;
   groupId?: string;
   pageId?: string;
-}): Promise<TServiceResult<IPost>> => {
+}): Promise<TServiceResult<TPost>> => {
   const {
     type,
     postTitle,
@@ -153,7 +154,7 @@ const updatePostService = async (
   userId: string,
   postId: string,
   updateData: { postTitle?: string; postContent?: string; images?: string[] }
-): Promise<TServiceResult<IPost>> => {
+): Promise<TServiceResult<TPost>> => {
   const user = await User.findById(userId);
   const post = await Post.findById(postId);
   if (!user) {
@@ -196,7 +197,7 @@ const updatePostService = async (
 const deletePostService = async (
   postId: string,
   userId: string
-): Promise<TServiceResult<IPost>> => {
+): Promise<TServiceResult<TPost>> => {
   const user = await User.findById(userId);
   const post = await Post.findById(postId);
   if (!post) {
@@ -235,7 +236,7 @@ const deletePostService = async (
 const handleLikePostService = async (
   postId: string,
   userId: mongoose.Types.ObjectId
-): Promise<TServiceResult<IPost> & { status?: "liked" | "unliked" }> => {
+): Promise<TServiceResult<TPost> & { status?: "liked" | "unliked" }> => {
   const post = await Post.findById(postId);
   const user = await User.findById(userId);
 
@@ -281,7 +282,7 @@ const addCommentService = async (
     content: string;
     createdBy: mongoose.Types.ObjectId;
   }
-): Promise<TServiceResult<IPost>> => {
+): Promise<TServiceResult<TPost>> => {
   const { createdBy } = commentData;
   const post = await Post.findById(postId);
   const user = await User.findById(createdBy);
@@ -314,7 +315,7 @@ const deleteCommentService = async (
   postId: string,
   userId: string,
   commentId: string
-): Promise<TServiceResult<IPost>> => {
+): Promise<TServiceResult<TPost>> => {
   const post = await Post.findById(postId);
   const user = await User.findById(userId);
 
@@ -363,7 +364,7 @@ const deleteCommentService = async (
 const sharePostService = async (
   postId: string,
   userId: string
-): Promise<TServiceResult<IPost>> => {
+): Promise<TServiceResult<TPost>> => {
   const post = await Post.findById(postId);
   const user = await User.findById(userId);
 

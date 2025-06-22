@@ -6,6 +6,7 @@ import httpStatusText from "../utils/httpStatusText";
 const getAllUsers = asyncWrapper(
   async (req: Request, res: Response, next: NextFunction) => {
     const users = await usersServices.getAllUsersService();
+
     return res
       .status(200)
       .json({ status: httpStatusText.SUCCESS, data: { users } });

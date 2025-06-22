@@ -1,14 +1,15 @@
-import { IPage, Page } from "../models/pagesModel";
+import { Page } from "../models/pagesModel";
 import AppError from "../utils/AppError";
 import httpStatusText from "../utils/httpStatusText";
 import { TServiceResult } from "../types/serviceResult";
 import { User } from "../models/usersModel";
 import notificationsServices from "./notificationsServices";
+import { TPage } from "../types";
 
 const getAllPagesService = async (paginationData: {
   limit: number;
   skip: number;
-}): Promise<TServiceResult<IPage[]>> => {
+}): Promise<TServiceResult<TPage[]>> => {
   const { limit, skip } = paginationData;
   const pages = await Page.find({}, { __v: 0 }).limit(limit).skip(skip);
   return { data: pages, type: "success" };
@@ -16,7 +17,7 @@ const getAllPagesService = async (paginationData: {
 
 const getPageByIdService = async (
   pageId: string
-): Promise<TServiceResult<IPage>> => {
+): Promise<TServiceResult<TPage>> => {
   const page = await Page.findById(pageId);
   if (!page) {
     const error = new AppError("Invalid page ID", 400, httpStatusText.ERROR);
@@ -29,7 +30,7 @@ const createPageService = async (pageData: {
   pageName: string;
   createdBy: string;
   pageCover?: string;
-}): Promise<TServiceResult<IPage>> => {
+}): Promise<TServiceResult<TPage>> => {
   const { pageName, createdBy, pageCover } = pageData;
   const user = await User.findById(createdBy);
   if (!user) {
@@ -59,8 +60,8 @@ const createPageService = async (pageData: {
 const updatePageService = async (
   pageId: string,
   userId: string,
-  updateData: Partial<IPage>
-): Promise<TServiceResult<IPage>> => {
+  updateData: Partial<TPage>
+): Promise<TServiceResult<TPage>> => {
   const { pageCover } = updateData;
   const page = await Page.findById(pageId);
   if (!page) {
@@ -99,7 +100,7 @@ const updatePageService = async (
 const deletePageService = async (
   pageId: string,
   userId: string
-): Promise<TServiceResult<IPage>> => {
+): Promise<TServiceResult<TPage>> => {
   const user = await User.findById(userId);
   const page = await Page.findById(pageId);
 
@@ -130,7 +131,7 @@ const deletePageService = async (
 const addFollowersService = async (
   pageId: string,
   userId: string
-): Promise<TServiceResult<IPage>> => {
+): Promise<TServiceResult<TPage>> => {
   const page = await Page.findById(pageId);
   const user = await User.findById(userId);
   if (!page) {
@@ -172,7 +173,7 @@ const addFollowersService = async (
 const removeFollowersService = async (
   pageId: string,
   userId: string
-): Promise<TServiceResult<IPage>> => {
+): Promise<TServiceResult<TPage>> => {
   const page = await Page.findById(pageId);
   const user = await User.findById(userId);
   if (!page) {
