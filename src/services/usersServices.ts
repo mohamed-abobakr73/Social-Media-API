@@ -6,7 +6,6 @@ import {
   IUserGroup,
   INotification,
 } from "../models/usersModel";
-import bcrypt from "bcrypt";
 import AppError from "../utils/AppError";
 import httpStatusText from "../utils/httpStatusText";
 import generateJwt from "../utils/generateJwt";
@@ -18,7 +17,7 @@ import compareHashedItem from "../utils/compareHashedItem";
 const createToken = (user: IUser) => {
   const { _id, username, email, role } = user;
   const tokenPayload = {
-    id: _id,
+    userId: _id,
     username: username,
     email: email,
     role: role,
@@ -78,51 +77,21 @@ const loginService = async (loginData: { email: string; password: string }) => {
 
 const updateUserService = async (
   userId: string,
-  updateData: {
-    username?: string;
-    password?: string;
-    email?: string;
-    gender?: number;
-    age?: string;
-    profilePicture?: string;
-  }
-): Promise<TServiceResult<IUser>> => {
-  const { profilePicture, password } = updateData;
-  const user = await User.findById(userId);
-
-  if (!user) {
-    const error = new AppError("Invalid user id", 400, httpStatusText.ERROR);
-    return { error, type: "error" };
-  }
-
-  let hashedPassword;
-
-  if (password) {
-    hashedPassword = bcrypt.hashSync(password, 10);
-  }
-  console.log(updateData);
-  const updatedUser = await User.findByIdAndUpdate(
+  updateData: Partial<IUser>
+) => {
+  const user = await User.findByIdAndUpdate(
     userId,
     {
       $set: {
         ...updateData,
-        profilePicture: profilePicture || user.profilePicture,
-        password: hashedPassword || user.password,
       },
     },
     { new: true }
   );
 
-  if (!updatedUser) {
-    const error = new AppError(
-      "An error occured during updating the user, please try again later",
-      400,
-      httpStatusText.ERROR
-    );
-    return { error, type: "error" };
-  }
+  doesResourceExists(user, "Error updating user");
 
-  return { data: updatedUser, type: "success" };
+  return user;
 };
 
 const deleteUserService = async (

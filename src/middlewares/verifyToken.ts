@@ -7,36 +7,45 @@ import { TCurrentUser } from "../types/";
 
 dotenv.config();
 
-const verifyToken = (
-  req: Request & { currentUser?: TCurrentUser },
-  res: Response,
-  next: NextFunction
-) => {
+const extractTokenFromHeaders = (req: Request) => {
   const authHeaders =
     req.headers["authorization"] || req.headers["Authorization"];
+
   if (!authHeaders || typeof authHeaders !== "string") {
     const error = new AppError(
       "No token provided or invalid header format",
       401,
       httpStatusText.ERROR
     );
-    return next(error);
+    throw error;
   }
-  const token = authHeaders.split(" ")[1];
 
+  const token = authHeaders.split(" ")[1];
   if (!token) {
     const error = new AppError(
-      "No token found in the header",
+      "No token found in the headers",
       401,
       httpStatusText.ERROR
     );
-    return next(error);
+    throw error;
   }
+
+  return token;
+};
+
+const verifyToken = (
+  req: Request & { currentUser?: TCurrentUser },
+  res: Response,
+  next: NextFunction
+) => {
   try {
+    const token = extractTokenFromHeaders(req);
+
     const currentUser = jwt.verify(
       token,
       process.env.JWT_SECRET_KEY as string
     ) as JwtPayload & TCurrentUser;
+
     req.currentUser = currentUser;
     next();
   } catch (error) {

@@ -50,10 +50,9 @@ usersRouter.route("/login").post(loginValidation(), validateRequestBody, login);
 
 // Update user by ID
 usersRouter
-  .route("/:userId")
+  .route("/")
   .patch(
     verifyToken,
-    upload.single("profilePicture"),
     createAndUpdateUserValidation(true),
     validateRequestBody,
     updateUser

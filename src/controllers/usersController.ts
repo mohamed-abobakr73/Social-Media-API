@@ -72,23 +72,14 @@ const updateUser = asyncWrapper(
     res: Response,
     next: NextFunction
   ): Promise<Response | void> => {
-    const { userId } = req.params;
+    const { userId } = req.currentUser!;
 
-    const profilePicture = req.file?.path;
+    const user = await usersServices.updateUserService(userId, req.body);
 
-    const updateUserResult = await usersServices.updateUserService(userId, {
-      ...req.body,
-      profilePicture,
+    return res.status(200).json({
+      status: httpStatusText.SUCCESS,
+      data: { user },
     });
-
-    if (updateUserResult.type === "error") {
-      return next(updateUserResult.error);
-    } else {
-      return res.status(200).json({
-        status: httpStatusText.SUCCESS,
-        data: { user: updateUserResult.data },
-      });
-    }
   }
 );
 

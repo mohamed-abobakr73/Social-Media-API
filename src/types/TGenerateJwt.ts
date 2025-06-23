@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
 type TGenerateJwt = {
-  id: mongoose.Types.ObjectId;
+  userId: mongoose.Types.ObjectId;
   username: string;
   email: string;
   role: "user" | "superAdmin";
