@@ -89,13 +89,10 @@ const deleteUser = asyncWrapper(
     res: Response,
     next: NextFunction
   ): Promise<Response | void> => {
-    const { userId } = req.body;
-    console.log(userId);
-    const deleteResult = await usersServices.deleteUserService(userId);
-    console.log(deleteResult);
-    if (deleteResult.type === "error") {
-      return next(deleteResult.error);
-    }
+    const { userId } = req.currentUser!;
+
+    await usersServices.deleteUserService(userId);
+
     return res.status(200).json({
       status: httpStatusText.SUCCESS,
       data: { message: "User deleted successfully" },

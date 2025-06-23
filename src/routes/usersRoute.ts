@@ -64,7 +64,7 @@ usersRouter
   .delete(removeReportValidation(), validateRequestBody, removeReport);
 
 // Delete user by ID
-usersRouter.route("/:userId").delete(verifyToken, deleteUser);
+usersRouter.route("/").delete(verifyToken, deleteUser);
 
 // Add friend request by user ID
 usersRouter

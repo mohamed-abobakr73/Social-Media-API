@@ -94,15 +94,10 @@ const updateUserService = async (
   return user;
 };
 
-const deleteUserService = async (
-  userId: string
-): Promise<TServiceResult<IUser>> => {
-  const deletedUser = await User.deleteOne({ userId });
-  if (!deletedUser.deletedCount) {
-    const error = new AppError("Invalid user id", 400, httpStatusText.ERROR);
-    return { error, type: "error" };
-  }
-  return { type: "success" };
+const deleteUserService = async (userId: string) => {
+  const deletedUser = await User.deleteOne({ _id: userId });
+
+  doesResourceExists(deletedUser.deletedCount, "Error deleting user");
 };
 
 const addFriendRequestService = async (
