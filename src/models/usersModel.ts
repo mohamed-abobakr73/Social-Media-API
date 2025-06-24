@@ -82,37 +82,8 @@ const usersSchema = new mongoose.Schema<IUser>(
     ],
     groups: [
       {
-        group: { type: mongoose.Schema.Types.ObjectId, ref: "Group" },
+        groupId: { type: mongoose.Schema.Types.ObjectId, ref: "Group" },
         notifications: { type: Boolean, default: false },
-      },
-    ],
-    friendList: {
-      type: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
-      validate: [
-        function (value: []) {
-          return value.length <= 500;
-        },
-        "Friend list exceeds the limit of 500 users",
-      ],
-    },
-    friendRequests: [
-      {
-        sender: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-        status: {
-          type: String,
-          enum: ["accepted", "declined", "pending"],
-          default: "pending",
-        },
-      },
-    ],
-    sentFriendRequests: [
-      {
-        sentTo: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-        status: {
-          type: String,
-          enum: ["accepted", "declined", "pending"],
-          default: "pending",
-        },
       },
     ],
     blockList: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
