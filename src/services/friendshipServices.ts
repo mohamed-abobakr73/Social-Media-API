@@ -39,15 +39,41 @@ const canUserUpdateFriendRequest = (
   }
 };
 
-const getFriendRequestsService = async (userId: string) => {
+const getFriendRequestsService = async (
+  userId: string,
+  type: "sent" | "received"
+) => {
   const user = await User.findById(userId);
-
   doesResourceExists(user, "You are not authorized to get friend requests");
+  let query;
+  let projection;
+  let populatedField;
 
-  const friendRequests = await FriendRequest.find(
-    { sentTo: userId, status: { $ne: "accepted" } },
-    { __v: 0, sentTo: 0 }
-  ).populate("sender", "username profilePicture");
+  switch (type) {
+    case "sent":
+      query = { sender: userId, status: { $ne: "accepted" } };
+      projection = { __v: 0, sender: 0 };
+      populatedField = {
+        path: "sentTo",
+        select: "username profilePicture",
+      };
+      break;
+    case "received":
+      query = { sentTo: userId, status: { $ne: "accepted" } };
+      projection = { __v: 0, sentTo: 0 };
+      populatedField = {
+        path: "sender",
+        select: "username profilePicture",
+      };
+      break;
+    default:
+      const error = new AppError("Invalid type", 400, httpStatusText.ERROR);
+      throw error;
+  }
+
+  const friendRequests = await FriendRequest.find(query, projection).populate(
+    populatedField
+  );
 
   return friendRequests;
 };

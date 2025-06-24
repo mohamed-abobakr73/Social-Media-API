@@ -5,14 +5,14 @@ import {
   verifyToken,
 } from "../middlewares";
 import {
-  getFriendRequests,
+  getFriendRequestsHandler,
   sendFriendRequest,
   updateFriendRequestStatusService,
 } from "../controllers/friendshipController";
 
 const friendshipRouter = Router();
 
-friendshipRouter.route("/").get(verifyToken, getFriendRequests);
+friendshipRouter.route("/").get(verifyToken, getFriendRequestsHandler);
 
 friendshipRouter.route("/:userId").post(verifyToken, sendFriendRequest);
 

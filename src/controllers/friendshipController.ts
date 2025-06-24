@@ -3,12 +3,14 @@ import { asyncWrapper } from "../middlewares";
 import httpStatusText from "../utils/httpStatusText";
 import { friendshipServices } from "../services/";
 
-const getFriendRequests = asyncWrapper(
+const getFriendRequestsHandler = asyncWrapper(
   async (req: Request, res: Response, next: NextFunction) => {
     const { userId } = req.currentUser!;
+    const type = req.query.type as "sent" | "received";
 
     const friendRequests = await friendshipServices.getFriendRequestsService(
-      userId
+      userId,
+      type
     );
 
     return res.status(200).json({
@@ -59,7 +61,7 @@ const updateFriendRequestStatusService = asyncWrapper(
 );
 
 export {
-  getFriendRequests,
+  getFriendRequestsHandler,
   sendFriendRequest,
   updateFriendRequestStatusService,
 };
