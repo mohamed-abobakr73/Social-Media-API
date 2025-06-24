@@ -4,6 +4,17 @@ import AppError from "../utils/AppError";
 import doesResourceExists from "../utils/doesResourceExists";
 import httpStatusText from "../utils/httpStatusText";
 
+const preventSelfFriendRequest = (senderId: string, recipientId: string) => {
+  if (senderId === recipientId) {
+    const error = new AppError(
+      "You can't send a friend request to yourself",
+      400,
+      httpStatusText.FAIL
+    );
+    throw error;
+  }
+};
+
 const checkUserFriendListLength = async (userId: string, message: string) => {
   const userFriendListLength = await Friendship.countDocuments({
     user: userId,
@@ -89,12 +100,15 @@ const createFriendshipService = async (userId: string, friendId: string) => {
   return friendship;
 };
 
+// Check for the blocks
 const sendFriendRequestService = async (
   senderId: string,
   recipientId: string
 ) => {
   const sender = await User.findById(senderId);
   const recipient = await User.findById(recipientId);
+
+  preventSelfFriendRequest(senderId, recipientId);
 
   doesResourceExists(sender, "You are not authorized to send a friend request");
 
@@ -143,6 +157,7 @@ const sendFriendRequestService = async (
   await friendRequest.save();
 };
 
+// TODO create chat after acceptance
 const updateFriendRequestStatusService = async (
   userId: string,
   friendRequestUpdate: { friendRequestId: string; status: TFriendRequestStatus }
