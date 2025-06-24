@@ -39,6 +39,19 @@ const canUserUpdateFriendRequest = (
   }
 };
 
+const getFriendRequestsService = async (userId: string) => {
+  const user = await User.findById(userId);
+
+  doesResourceExists(user, "You are not authorized to get friend requests");
+
+  const friendRequests = await FriendRequest.find(
+    { sentTo: userId, status: { $ne: "accepted" } },
+    { __v: 0, sentTo: 0 }
+  ).populate("sender", "username profilePicture");
+
+  return friendRequests;
+};
+
 const createFriendshipService = async (userId: string, friendId: string) => {
   const friendship = await Friendship.create({
     user: userId,
@@ -134,6 +147,7 @@ const updateFriendRequestStatusService = async (
 };
 
 export default {
+  getFriendRequestsService,
   sendFriendRequestService,
   updateFriendRequestStatusService,
 };

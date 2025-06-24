@@ -1,8 +1,22 @@
 import { NextFunction, Request, Response } from "express";
 import { asyncWrapper } from "../middlewares";
 import httpStatusText from "../utils/httpStatusText";
-import { usersServices } from "../services";
 import { friendshipServices } from "../services/";
+
+const getFriendRequests = asyncWrapper(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { userId } = req.currentUser!;
+
+    const friendRequests = await friendshipServices.getFriendRequestsService(
+      userId
+    );
+
+    return res.status(200).json({
+      status: httpStatusText.SUCCESS,
+      data: { friendRequests },
+    });
+  }
+);
 
 const sendFriendRequest = asyncWrapper(
   async (
@@ -44,4 +58,8 @@ const updateFriendRequestStatusService = asyncWrapper(
   }
 );
 
-export { sendFriendRequest, updateFriendRequestStatusService };
+export {
+  getFriendRequests,
+  sendFriendRequest,
+  updateFriendRequestStatusService,
+};
