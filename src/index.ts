@@ -16,6 +16,7 @@ import {
 } from "./routes/";
 
 import { globalErrorHandler, notFoundRoutes } from "./middlewares/";
+import friendshipRouter from "./routes/friendshipRoute";
 
 const app = express();
 const server = http.createServer(app);
@@ -75,6 +76,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // Routes
 app.use("/api/v1/users", usersRouter);
+app.use("/api/v1/friendship", friendshipRouter);
 app.use("/api/v1/groups", groupsRouter);
 app.use("/api/v1/posts", postsRouter);
 app.use("/api/v1/pages", pagesRouter);

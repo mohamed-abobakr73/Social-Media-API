@@ -6,6 +6,7 @@ import postsServices from "./postsServices";
 import searchServices from "./searchServices";
 import groupsServices from "./groupsServices";
 import notificationsServices from "./notificationsServices";
+import friendshipServices from "./friendshipServices";
 
 export {
   chatsServices,
@@ -16,4 +17,5 @@ export {
   searchServices,
   groupsServices,
   notificationsServices,
+  friendshipServices,
 };
