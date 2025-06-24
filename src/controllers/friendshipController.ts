@@ -28,30 +28,20 @@ const updateFriendRequestStatusService = asyncWrapper(
     res: Response,
     next: NextFunction
   ): Promise<Response | void> => {
-    const { userId } = req.params;
-    const { senderId, newStatus } = req.body;
+    const { friendRequestId } = req.params;
+    const { status } = req.body;
+    const { userId } = req.currentUser!;
 
-    const updatedFriendRequestStatusResult =
-      await usersServices.updateFriendRequestStatusService(userId, {
-        sender: senderId,
-        status: newStatus,
-      });
-    if (updatedFriendRequestStatusResult.type === "error") {
-      return next(updatedFriendRequestStatusResult.error);
-    } else {
-      if (newStatus === "accepted") {
-        return res.status(200).json({
-          status: httpStatusText.SUCCESS,
-          data: { message: "Friend request accepted" },
-        });
-      } else {
-        return res.status(200).json({
-          status: httpStatusText.SUCCESS,
-          data: { message: "Friend request decliend" },
-        });
-      }
-    }
+    await friendshipServices.updateFriendRequestStatusService(userId, {
+      friendRequestId,
+      status,
+    });
+
+    return res.status(200).json({
+      status: httpStatusText.SUCCESS,
+      data: { message: `Friend request ${status}` },
+    });
   }
 );
 
-export { sendFriendRequest };
+export { sendFriendRequest, updateFriendRequestStatusService };

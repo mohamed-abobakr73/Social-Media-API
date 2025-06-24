@@ -8,6 +8,7 @@ import TPage from "./TPage";
 import TComment from "./TComment";
 import TPost from "./TPost";
 import TGenerateJwt from "./TGenerateJwt";
+import TFriendRequestStatus from "./TFriendRequestStatus";
 
 export {
   TAppError,
@@ -20,4 +21,5 @@ export {
   TComment,
   TPost,
   TGenerateJwt,
+  TFriendRequestStatus,
 };

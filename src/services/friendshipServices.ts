@@ -1,4 +1,5 @@
 import { FriendRequest, Friendship, User } from "../models";
+import { TFriendRequestStatus } from "../types";
 import AppError from "../utils/AppError";
 import doesResourceExists from "../utils/doesResourceExists";
 import httpStatusText from "../utils/httpStatusText";
@@ -11,6 +12,42 @@ const checkUserFriendListLength = async (userId: string, message: string) => {
     const error = new AppError(message, 400, httpStatusText.ERROR);
     throw error;
   }
+};
+
+const checkFriendRequestStatus = (status: string) => {
+  if (status !== "pending") {
+    const error = new AppError(
+      "This friend request is already accepted or declined",
+      400,
+      httpStatusText.FAIL
+    );
+    throw error;
+  }
+};
+
+const canUserUpdateFriendRequest = (
+  friendRequestSentTo: string,
+  userId: string
+) => {
+  if (friendRequestSentTo !== userId) {
+    const error = new AppError(
+      "You are not authorized to update this friend request",
+      401,
+      httpStatusText.FAIL
+    );
+    throw error;
+  }
+};
+
+const createFriendshipService = async (userId: string, friendId: string) => {
+  const friendship = await Friendship.create({
+    user: userId,
+    friend: friendId,
+  });
+
+  doesResourceExists(friendship, "Error creating friendship");
+
+  return friendship;
 };
 
 const sendFriendRequestService = async (
@@ -68,72 +105,32 @@ const sendFriendRequestService = async (
 };
 
 const updateFriendRequestStatusService = async (
-  recpientId: string,
-  friendRequest: any
+  userId: string,
+  friendRequestUpdate: { friendRequestId: string; status: TFriendRequestStatus }
 ) => {
-  const recpient = await User.findById(recpientId);
-  const sender = await User.findById(friendRequest.sender);
+  const user = await User.findById(userId);
 
-  if (!recpient) {
-    const error = new AppError(
-      "Invalid friend request recpient id",
-      400,
-      httpStatusText.ERROR
-    );
-    return { error, type: "error" };
+  doesResourceExists(user, "You are not authorized to update a friend request");
+
+  const { friendRequestId, status } = friendRequestUpdate;
+
+  const friendRequest = await FriendRequest.findById(friendRequestId);
+
+  doesResourceExists(friendRequest, "Invalid friend request id");
+
+  canUserUpdateFriendRequest(friendRequest.sentTo.toString(), userId);
+
+  checkFriendRequestStatus(friendRequest.status);
+
+  await FriendRequest.updateOne({ _id: friendRequest._id }, { status });
+
+  switch (status) {
+    case "accepted":
+      await createFriendshipService(userId, friendRequest.sender.toString());
+      break;
+    case "declined":
+      break;
   }
-
-  if (!sender) {
-    const error = new AppError(
-      "Invalid friend request sender id",
-      400,
-      httpStatusText.ERROR
-    );
-    return { error, type: "error" };
-  }
-
-  const currentFriendRequestIndex = recpient.friendRequests.findIndex(
-    (request) => request.sender.toString() === friendRequest.sender.toString()
-  );
-  const currentSentFriendRequestIndex = sender.sentFriendRequests.findIndex(
-    (sentRequest) => sentRequest.sentTo.toString() === recpientId
-  );
-
-  // Checking if the request is already accpeted or declined
-  const currentFriendRequestStatus =
-    sender.sentFriendRequests[currentSentFriendRequestIndex].status;
-  if (currentFriendRequestStatus === "accepted") {
-    const error = new AppError(
-      "This request is already accepted",
-      400,
-      httpStatusText.ERROR
-    );
-    return { error, type: "error" };
-  } else if (currentFriendRequestStatus === "declined") {
-    const error = new AppError(
-      "This request is already declined",
-      400,
-      httpStatusText.ERROR
-    );
-    return { error, type: "error" };
-  }
-
-  if (friendRequest.status === "accepted") {
-    recpient.friendRequests[currentFriendRequestIndex].status = "accepted";
-    sender.sentFriendRequests[currentSentFriendRequestIndex].status =
-      "accepted";
-
-    recpient.friendList.push(friendRequest.sender);
-    sender.friendList.push(recpient._id);
-  } else {
-    recpient.friendRequests[currentFriendRequestIndex].status = "declined";
-    sender.sentFriendRequests[currentSentFriendRequestIndex].status =
-      "declined";
-  }
-
-  await recpient.save();
-  await sender.save();
-  return { type: "success" };
 };
 
 export default {
