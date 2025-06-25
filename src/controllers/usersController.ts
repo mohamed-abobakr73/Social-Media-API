@@ -100,60 +100,6 @@ const deleteUser = asyncWrapper(
   }
 );
 
-const addFriendRequest = asyncWrapper(
-  async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<Response | void> => {
-    const { senderId } = req.params;
-    const { recipientId } = req.body;
-
-    const sendingFriendRequestResult =
-      await usersServices.addFriendRequestService(senderId, recipientId);
-    if (sendingFriendRequestResult.type === "error") {
-      return next(sendingFriendRequestResult.error);
-    } else {
-      return res.status(200).json({
-        status: httpStatusText.SUCCESS,
-        data: { message: "Friend request sent successfuly" },
-      });
-    }
-  }
-);
-
-const updateFriendRequestStatusService = asyncWrapper(
-  async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<Response | void> => {
-    const { userId } = req.params;
-    const { senderId, newStatus } = req.body;
-
-    const updatedFriendRequestStatusResult =
-      await usersServices.updateFriendRequestStatusService(userId, {
-        sender: senderId,
-        status: newStatus,
-      });
-    if (updatedFriendRequestStatusResult.type === "error") {
-      return next(updatedFriendRequestStatusResult.error);
-    } else {
-      if (newStatus === "accepted") {
-        return res.status(200).json({
-          status: httpStatusText.SUCCESS,
-          data: { message: "Friend request accepted" },
-        });
-      } else {
-        return res.status(200).json({
-          status: httpStatusText.SUCCESS,
-          data: { message: "Friend request decliend" },
-        });
-      }
-    }
-  }
-);
-
 const addToBlockList = asyncWrapper(
   async (
     req: Request,
@@ -342,8 +288,6 @@ export {
   login,
   updateUser,
   deleteUser,
-  addFriendRequest,
-  updateFriendRequestStatusService,
   addToBlockList,
   removeFromBlockList,
   joinGroup,
@@ -351,7 +295,7 @@ export {
   addFollowedUsers,
   removeFollowedUsers,
   addFollowedPages,
-  // addFollowers,
+  // addFollowers,,
   // reportUser,
   // removeReport,
 };

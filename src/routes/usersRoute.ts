@@ -6,8 +6,6 @@ import {
   login,
   updateUser,
   deleteUser,
-  addFriendRequest,
-  updateFriendRequestStatusService,
   addToBlockList,
   removeFromBlockList,
   addFollowedUsers,
@@ -65,26 +63,6 @@ usersRouter
 
 // Delete user by ID
 usersRouter.route("/").delete(verifyToken, deleteUser);
-
-// Add friend request by user ID
-usersRouter
-  .route("/:senderId/friend-requests")
-  .post(
-    verifyToken,
-    sendFriendRequestValidation(),
-    validateRequestBody,
-    addFriendRequest
-  );
-
-// Update friend request by user ID
-usersRouter
-  .route("/:userId/friend-requests")
-  .patch(
-    verifyToken,
-    updateFriendRequestStatusValidation(),
-    validateRequestBody,
-    updateFriendRequestStatusService
-  );
 
 // Add to block list by user ID
 usersRouter.route("/:userId/block-list").post(verifyToken, addToBlockList);
