@@ -9,16 +9,17 @@ import {
   sendFriendRequest,
   updateFriendRequestStatusService,
   cancelFriendRequest,
+  deleteFriendship,
 } from "../controllers/friendshipController";
 
 const friendshipRouter = Router();
 
-friendshipRouter.route("/").get(verifyToken, getFriendRequestsHandler);
+friendshipRouter.route("/request").get(verifyToken, getFriendRequestsHandler);
 
-friendshipRouter.route("/:userId").post(verifyToken, sendFriendRequest);
+friendshipRouter.route("/request/:userId").post(verifyToken, sendFriendRequest);
 
 friendshipRouter
-  .route("/:friendRequestId")
+  .route("/request/:friendRequestId")
   .patch(
     verifyToken,
     updateFriendRequestStatusValidation(),
@@ -27,7 +28,9 @@ friendshipRouter
   );
 
 friendshipRouter
-  .route("/:friendRequestId")
+  .route("/request/:friendRequestId")
   .delete(verifyToken, cancelFriendRequest);
+
+friendshipRouter.route("/:friendshipId").delete(verifyToken, deleteFriendship);
 
 export default friendshipRouter;

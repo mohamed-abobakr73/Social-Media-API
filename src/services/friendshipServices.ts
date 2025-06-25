@@ -36,16 +36,13 @@ const checkFriendRequestStatus = (status: string) => {
   }
 };
 
-const canUserUpdateFriendRequest = (
-  friendRequestSentTo: string,
-  userId: string
-) => {
-  if (friendRequestSentTo !== userId) {
-    const error = new AppError(
-      "You are not authorized to update this friend request",
-      401,
-      httpStatusText.FAIL
-    );
+const assertUserIsAllowed = (
+  resourceOwnerId: string,
+  currentUserId: string,
+  message: string = "You are not authorized to perform this action."
+): void => {
+  if (resourceOwnerId !== currentUserId) {
+    const error = new AppError(message, 401, httpStatusText.FAIL);
     throw error;
   }
 };
@@ -118,7 +115,7 @@ const sendFriendRequestService = async (
   // const isUserBlocked = recipient.blockList.find(
   //   (blocked) => blocked.toString() === senderId
   // );
-  // const senderBlockedTheRecpient = sender.blockList.find(
+  // const senderBlockedTheRecipient = sender.blockList.find(
   //   (blocked) => blocked.toString() === recipientId
   // );
 
@@ -131,7 +128,7 @@ const sendFriendRequestService = async (
   //   return { error, type: "error" };
   // }
 
-  // if (senderBlockedTheRecpient) {
+  // if (senderBlockedTheRecipient) {
   //   const error = new AppError(
   //     "You have to unblock this user first to send him a friend request",
   //     400,
@@ -172,11 +169,9 @@ const updateFriendRequestStatusService = async (
 
   doesResourceExists(friendRequest, "Invalid friend request id");
 
-  canUserUpdateFriendRequest(friendRequest.sentTo.toString(), userId);
+  assertUserIsAllowed(friendRequest.sentTo.toString(), userId);
 
   checkFriendRequestStatus(friendRequest.status);
-
-  await FriendRequest.updateOne({ _id: friendRequest._id }, { status });
 
   switch (status) {
     case "accepted":
@@ -185,6 +180,8 @@ const updateFriendRequestStatusService = async (
     case "declined":
       break;
   }
+
+  await FriendRequest.deleteOne({ _id: friendRequest._id });
 };
 
 const cancelFriendRequestService = async (
@@ -197,11 +194,38 @@ const cancelFriendRequestService = async (
 
   const friendRequest = await FriendRequest.findById(friendRequestId);
 
-  doesResourceExists(friendRequest, "Invalid friend request id");
+  doesResourceExists(friendRequest, "Friend request not found");
 
-  canUserUpdateFriendRequest(friendRequest.sender.toString(), userId);
+  assertUserIsAllowed(friendRequest.sender.toString(), userId);
 
-  await FriendRequest.deleteOne({ _id: friendRequest._id });
+  const deleteResult = await FriendRequest.deleteOne({
+    _id: friendRequest._id,
+  });
+
+  doesResourceExists(
+    deleteResult.deletedCount,
+    "Error canceling friend request"
+  );
+};
+
+const deleteFriendshipService = async (
+  userId: string,
+  friendshipId: string
+) => {
+  const user = await User.findById(userId);
+
+  doesResourceExists(user, "You are not authorized to remove a friendship");
+
+  const friendship = await Friendship.findById(friendshipId);
+
+  doesResourceExists(friendship, "Invalid friendship id");
+
+  assertUserIsAllowed(friendship.user.toString(), userId);
+  assertUserIsAllowed(friendship.friend.toString(), userId);
+
+  const deleteResult = await Friendship.deleteOne({ _id: friendship._id });
+
+  doesResourceExists(deleteResult.deletedCount, "Error removing friendship");
 };
 
 export default {
@@ -209,4 +233,5 @@ export default {
   sendFriendRequestService,
   updateFriendRequestStatusService,
   cancelFriendRequestService,
+  deleteFriendshipService,
 };

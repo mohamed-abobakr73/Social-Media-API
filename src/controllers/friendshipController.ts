@@ -81,9 +81,28 @@ const cancelFriendRequest = asyncWrapper(
   }
 );
 
+const deleteFriendship = asyncWrapper(
+  async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<Response | void> => {
+    const { friendshipId } = req.params;
+    const { userId } = req.currentUser!;
+
+    await friendshipServices.deleteFriendshipService(userId, friendshipId);
+
+    return res.status(200).json({
+      status: httpStatusText.SUCCESS,
+      data: { message: "Friendship deleted successfully" },
+    });
+  }
+);
+
 export {
   getFriendRequestsHandler,
   sendFriendRequest,
   updateFriendRequestStatusService,
   cancelFriendRequest,
+  deleteFriendship,
 };
