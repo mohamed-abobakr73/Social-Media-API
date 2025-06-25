@@ -187,8 +187,26 @@ const updateFriendRequestStatusService = async (
   }
 };
 
+const cancelFriendRequestService = async (
+  userId: string,
+  friendRequestId: string
+) => {
+  const user = await User.findById(userId);
+
+  doesResourceExists(user, "You are not authorized to cancel a friend request");
+
+  const friendRequest = await FriendRequest.findById(friendRequestId);
+
+  doesResourceExists(friendRequest, "Invalid friend request id");
+
+  canUserUpdateFriendRequest(friendRequest.sender.toString(), userId);
+
+  await FriendRequest.deleteOne({ _id: friendRequest._id });
+};
+
 export default {
   getFriendRequestsService,
   sendFriendRequestService,
   updateFriendRequestStatusService,
+  cancelFriendRequestService,
 };

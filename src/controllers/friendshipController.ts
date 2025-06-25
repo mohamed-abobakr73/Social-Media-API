@@ -60,8 +60,30 @@ const updateFriendRequestStatusService = asyncWrapper(
   }
 );
 
+const cancelFriendRequest = asyncWrapper(
+  async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<Response | void> => {
+    const { friendRequestId } = req.params;
+    const { userId } = req.currentUser!;
+
+    await friendshipServices.cancelFriendRequestService(
+      userId,
+      friendRequestId
+    );
+
+    return res.status(200).json({
+      status: httpStatusText.SUCCESS,
+      data: { message: "Friend request canceled successfully" },
+    });
+  }
+);
+
 export {
   getFriendRequestsHandler,
   sendFriendRequest,
   updateFriendRequestStatusService,
+  cancelFriendRequest,
 };

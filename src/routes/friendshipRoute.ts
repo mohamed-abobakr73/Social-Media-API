@@ -8,6 +8,7 @@ import {
   getFriendRequestsHandler,
   sendFriendRequest,
   updateFriendRequestStatusService,
+  cancelFriendRequest,
 } from "../controllers/friendshipController";
 
 const friendshipRouter = Router();
@@ -24,5 +25,9 @@ friendshipRouter
     validateRequestBody,
     updateFriendRequestStatusService
   );
+
+friendshipRouter
+  .route("/:friendRequestId")
+  .delete(verifyToken, cancelFriendRequest);
 
 export default friendshipRouter;
