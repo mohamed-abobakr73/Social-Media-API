@@ -100,51 +100,51 @@ const deleteUser = asyncWrapper(
   }
 );
 
-const addToBlockList = asyncWrapper(
-  async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<Response | void> => {
-    const { userId } = req.params;
-    const { userToBlockId } = req.body;
-    const addToBlockListResult = await usersServices.addToBlockListService(
-      userId,
-      userToBlockId
-    );
-    if (addToBlockListResult.type === "error") {
-      return next(addToBlockListResult.error);
-    } else {
-      return res.status(200).json({
-        status: httpStatusText.SUCCESS,
-        data: { message: "You have successfuly blocked this user" },
-      });
-    }
-  }
-);
+// const addToBlockList = asyncWrapper(
+//   async (
+//     req: Request,
+//     res: Response,
+//     next: NextFunction
+//   ): Promise<Response | void> => {
+//     const { userId } = req.params;
+//     const { userToBlockId } = req.body;
+//     const addToBlockListResult = await usersServices.addToBlockListService(
+//       userId,
+//       userToBlockId
+//     );
+//     if (addToBlockListResult.type === "error") {
+//       return next(addToBlockListResult.error);
+//     } else {
+//       return res.status(200).json({
+//         status: httpStatusText.SUCCESS,
+//         data: { message: "You have successfuly blocked this user" },
+//       });
+//     }
+//   }
+// );
 
-const removeFromBlockList = asyncWrapper(
-  async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<Response | void> => {
-    const { userId } = req.params;
-    const { blockedUserId } = req.body;
-    const addToBlockListResult = await usersServices.removeFromBlockListService(
-      userId,
-      blockedUserId
-    );
-    if (addToBlockListResult.type === "error") {
-      return next(addToBlockListResult.error);
-    } else {
-      return res.status(200).json({
-        status: httpStatusText.SUCCESS,
-        data: { message: "You have successfuly unblocked this user" },
-      });
-    }
-  }
-);
+// const removeFromBlockList = asyncWrapper(
+//   async (
+//     req: Request,
+//     res: Response,
+//     next: NextFunction
+//   ): Promise<Response | void> => {
+//     const { userId } = req.params;
+//     const { blockedUserId } = req.body;
+//     const addToBlockListResult = await usersServices.removeFromBlockListService(
+//       userId,
+//       blockedUserId
+//     );
+//     if (addToBlockListResult.type === "error") {
+//       return next(addToBlockListResult.error);
+//     } else {
+//       return res.status(200).json({
+//         status: httpStatusText.SUCCESS,
+//         data: { message: "You have successfuly unblocked this user" },
+//       });
+//     }
+//   }
+// );
 
 const joinGroup = asyncWrapper(
   async (
@@ -288,8 +288,8 @@ export {
   login,
   updateUser,
   deleteUser,
-  addToBlockList,
-  removeFromBlockList,
+  // addToBlockList,
+  // removeFromBlockList,
   joinGroup,
   leaveGroup,
   addFollowedUsers,

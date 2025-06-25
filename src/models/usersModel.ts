@@ -1,16 +1,6 @@
 import mongoose from "mongoose";
 import { IReport } from "../types/";
 
-export interface IFriendRequest {
-  sender: mongoose.Types.ObjectId;
-  status: "accepted" | "declined" | "pending"; // Enum for status
-}
-
-export interface ISentFriendRequest {
-  sentTo: mongoose.Types.ObjectId;
-  status: "accepted" | "declined" | "pending"; // Enum for status
-}
-
 // Define the type for the reports
 
 export interface IMadeReports {
@@ -45,8 +35,6 @@ export interface IUser extends Document {
   posts: { postId: mongoose.Types.ObjectId; isShared: boolean }[];
   groups: IUserGroup[];
   friendList: mongoose.Types.ObjectId[];
-  friendRequests: IFriendRequest[];
-  sentFriendRequests: ISentFriendRequest[];
   blockList: mongoose.Types.ObjectId[];
   followedUsers: mongoose.Types.ObjectId[];
   followedPages: mongoose.Types.ObjectId[];

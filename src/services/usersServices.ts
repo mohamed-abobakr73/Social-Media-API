@@ -1,11 +1,5 @@
 import mongoose from "mongoose";
-import {
-  User,
-  IUser,
-  IFriendRequest,
-  IUserGroup,
-  INotification,
-} from "../models/usersModel";
+import { User, IUser, IUserGroup, INotification } from "../models/usersModel";
 import AppError from "../utils/AppError";
 import httpStatusText from "../utils/httpStatusText";
 import generateJwt from "../utils/generateJwt";
@@ -100,100 +94,100 @@ const deleteUserService = async (userId: string) => {
   doesResourceExists(deletedUser.deletedCount, "Error deleting user");
 };
 
-const addToBlockListService = async (
-  userId: string,
-  blockedUserId: mongoose.Types.ObjectId
-): Promise<TServiceResult<IUser>> => {
-  const user = await User.findById(userId);
-  const blockedUser = await User.findById(blockedUserId);
+// const addToBlockListService = async (
+//   userId: string,
+//   blockedUserId: mongoose.Types.ObjectId
+// ): Promise<TServiceResult<IUser>> => {
+//   const user = await User.findById(userId);
+//   const blockedUser = await User.findById(blockedUserId);
 
-  if (!user) {
-    const error = new AppError("Invalid user id", 400, httpStatusText.ERROR);
-    return { error, type: "error" };
-  }
+//   if (!user) {
+//     const error = new AppError("Invalid user id", 400, httpStatusText.ERROR);
+//     return { error, type: "error" };
+//   }
 
-  if (!blockedUser) {
-    const error = new AppError(
-      "Invalid user id to be blocked",
-      400,
-      httpStatusText.ERROR
-    );
-    return { error, type: "error" };
-  }
+//   if (!blockedUser) {
+//     const error = new AppError(
+//       "Invalid user id to be blocked",
+//       400,
+//       httpStatusText.ERROR
+//     );
+//     return { error, type: "error" };
+//   }
 
-  user.blockList.push(blockedUserId);
+//   user.blockList.push(blockedUserId);
 
-  const userToBlockIsFriend = user.friendList.find(
-    (friend) => friend.toString() === blockedUserId.toString()
-  );
-  if (userToBlockIsFriend) {
-    user.friendList = user.friendList.filter(
-      (friend) => friend.toString() !== blockedUserId.toString()
-    );
+//   const userToBlockIsFriend = user.friendList.find(
+//     (friend) => friend.toString() === blockedUserId.toString()
+//   );
+//   if (userToBlockIsFriend) {
+//     user.friendList = user.friendList.filter(
+//       (friend) => friend.toString() !== blockedUserId.toString()
+//     );
 
-    blockedUser.friendList = blockedUser.friendList.filter(
-      (friend) => friend.toString() !== userId
-    );
+//     blockedUser.friendList = blockedUser.friendList.filter(
+//       (friend) => friend.toString() !== userId
+//     );
 
-    // Checking who sent the request to the other to remove the requests from both users
-    // This is for the case of unblock and sending friend requests again
-    const blockedUserSentTheRequest = blockedUser.sentFriendRequests.findIndex(
-      (sentRequest) => sentRequest.sentTo.toString() === userId
-    );
-    if (blockedUserSentTheRequest !== -1) {
-      blockedUser.sentFriendRequests = blockedUser.sentFriendRequests.filter(
-        (sentRequest) => sentRequest.sentTo.toString() !== userId
-      );
-      user.friendRequests = user.friendRequests.filter(
-        (request) => request.sender.toString() !== blockedUserId.toString()
-      );
-    } else {
-      blockedUser.friendRequests = blockedUser.friendRequests.filter(
-        (request) => request.sender.toString() !== userId
-      );
-      user.sentFriendRequests = user.sentFriendRequests.filter(
-        (sentRequest) =>
-          sentRequest.sentTo.toString() !== blockedUserId.toString()
-      );
-    }
-    await blockedUser.save();
-  }
+//     // Checking who sent the request to the other to remove the requests from both users
+//     // This is for the case of unblock and sending friend requests again
+//     const blockedUserSentTheRequest = blockedUser.sentFriendRequests.findIndex(
+//       (sentRequest) => sentRequest.sentTo.toString() === userId
+//     );
+//     if (blockedUserSentTheRequest !== -1) {
+//       blockedUser.sentFriendRequests = blockedUser.sentFriendRequests.filter(
+//         (sentRequest) => sentRequest.sentTo.toString() !== userId
+//       );
+//       user.friendRequests = user.friendRequests.filter(
+//         (request) => request.sender.toString() !== blockedUserId.toString()
+//       );
+//     } else {
+//       blockedUser.friendRequests = blockedUser.friendRequests.filter(
+//         (request) => request.sender.toString() !== userId
+//       );
+//       user.sentFriendRequests = user.sentFriendRequests.filter(
+//         (sentRequest) =>
+//           sentRequest.sentTo.toString() !== blockedUserId.toString()
+//       );
+//     }
+//     await blockedUser.save();
+//   }
 
-  await user.save();
-  return { type: "success" };
-};
+//   await user.save();
+//   return { type: "success" };
+// };
 
-const removeFromBlockListService = async (
-  userId: string,
-  blockedUserId: mongoose.Types.ObjectId
-): Promise<TServiceResult<IUser>> => {
-  const user = await User.findById(userId);
-  if (!user) {
-    const error = new AppError("Invalid user id", 400, httpStatusText.ERROR);
-    return { error, type: "error" };
-  }
+// const removeFromBlockListService = async (
+//   userId: string,
+//   blockedUserId: mongoose.Types.ObjectId
+// ): Promise<TServiceResult<IUser>> => {
+//   const user = await User.findById(userId);
+//   if (!user) {
+//     const error = new AppError("Invalid user id", 400, httpStatusText.ERROR);
+//     return { error, type: "error" };
+//   }
 
-  const isUserActullayblocked = user.blockList.findIndex(
-    (blockedUser) => blockedUser.toString() === blockedUserId.toString()
-  );
+//   const isUserActullayblocked = user.blockList.findIndex(
+//     (blockedUser) => blockedUser.toString() === blockedUserId.toString()
+//   );
 
-  if (isUserActullayblocked !== -1) {
-    user.blockList.splice(isUserActullayblocked, 1);
-  } else {
-    const error = new AppError(
-      "This user is not in your block list",
-      400,
-      httpStatusText.ERROR
-    );
-    return { error, type: "error" };
-  }
+//   if (isUserActullayblocked !== -1) {
+//     user.blockList.splice(isUserActullayblocked, 1);
+//   } else {
+//     const error = new AppError(
+//       "This user is not in your block list",
+//       400,
+//       httpStatusText.ERROR
+//     );
+//     return { error, type: "error" };
+//   }
 
-  user.blockList = user.blockList.filter(
-    (blockedUser) => blockedUser.toString() !== blockedUserId.toString()
-  );
-  await user.save();
-  return { type: "success" };
-};
+//   user.blockList = user.blockList.filter(
+//     (blockedUser) => blockedUser.toString() !== blockedUserId.toString()
+//   );
+//   await user.save();
+//   return { type: "success" };
+// };
 
 // TODO needs validation to check if the group exists, also add the user to the groups members list
 // This goes for the rest of the functions below
@@ -533,8 +527,8 @@ export default {
   loginService,
   updateUserService,
   deleteUserService,
-  addToBlockListService,
-  removeFromBlockListService,
+  // addToBlockListService,
+  // removeFromBlockListService,
   joinGroupService,
   leaveGroupService,
   addFollowedUserService,
