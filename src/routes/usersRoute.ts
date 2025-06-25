@@ -6,8 +6,6 @@ import {
   login,
   updateUser,
   deleteUser,
-  // addToBlockList,
-  // removeFromBlockList,
   addFollowedUsers,
   removeFollowedUsers,
 } from "../controllers/usersController";
@@ -63,14 +61,6 @@ usersRouter
 
 // Delete user by ID
 usersRouter.route("/").delete(verifyToken, deleteUser);
-
-// Add to block list by user ID
-// usersRouter.route("/:userId/block-list").post(verifyToken, addToBlockList);
-
-// Update block list by user ID
-// usersRouter
-// .route("/:userId/block-list")
-// .delete(verifyToken, removeFromBlockList);
 
 // Join a group by user ID
 // usersRouter.post("/:userId/groups", joinGroup);

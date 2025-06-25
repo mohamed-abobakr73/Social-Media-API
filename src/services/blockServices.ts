@@ -1,7 +1,4 @@
-import mongoose from "mongoose";
-import AppError from "../utils/AppError";
-import { Block, Friendship, User } from "../models";
-import httpStatusText from "../utils/httpStatusText";
+import { Block, FriendRequest, Friendship, User } from "../models";
 import doesResourceExists from "../utils/doesResourceExists";
 import assertUserIsAllowed from "../utils/assertUserIsAllowed";
 
@@ -13,6 +10,13 @@ const removeFriendshipAfterBlock = async (
     $or: [
       { user: userId, friend: userToBlockId },
       { user: userToBlockId, friend: userId },
+    ],
+  });
+
+  await FriendRequest.deleteOne({
+    $or: [
+      { sender: userId, sentTo: userToBlockId },
+      { sentTo: userToBlockId, sender: userId },
     ],
   });
 };
