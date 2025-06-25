@@ -1,6 +1,7 @@
 import { Block, FriendRequest, Friendship, User } from "../models";
 import { TFriendRequestStatus } from "../types";
 import AppError from "../utils/AppError";
+import assertUserIsAllowed from "../utils/assertUserIsAllowed";
 import doesResourceExists from "../utils/doesResourceExists";
 import httpStatusText from "../utils/httpStatusText";
 
@@ -50,19 +51,6 @@ const checkFriendRequestStatus = (status: string) => {
       400,
       httpStatusText.FAIL
     );
-    throw error;
-  }
-};
-
-const assertUserIsAllowed = (
-  resourceOwnerId: string,
-  currentUserId: string,
-  message: string = "You are not authorized to perform this action."
-): void => {
-  console.log(resourceOwnerId);
-  console.log(currentUserId);
-  if (resourceOwnerId !== currentUserId) {
-    const error = new AppError(message, 401, httpStatusText.FAIL);
     throw error;
   }
 };

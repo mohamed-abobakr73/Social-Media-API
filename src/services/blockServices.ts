@@ -3,6 +3,7 @@ import AppError from "../utils/AppError";
 import { Block, Friendship, User } from "../models";
 import httpStatusText from "../utils/httpStatusText";
 import doesResourceExists from "../utils/doesResourceExists";
+import assertUserIsAllowed from "../utils/assertUserIsAllowed";
 
 const removeFriendshipAfterBlock = async (
   userId: string,
@@ -35,6 +36,25 @@ const blockUserService = async (userId: string, userToBlockId: string) => {
   await blockUser.save();
 };
 
+const deleteBlockService = async (userId: string, blockId: string) => {
+  const user = await User.findById(userId);
+
+  doesResourceExists(user, "You are not authorized to unblock a user");
+
+  const block = await Block.findById(blockId);
+
+  doesResourceExists(block, "Invalid block id");
+
+  assertUserIsAllowed(block.user.toString(), userId);
+
+  const deleteResult = await Block.deleteOne({
+    _id: blockId,
+  });
+
+  doesResourceExists(deleteResult.deletedCount, "Error unblocking user");
+};
+
 export default {
   blockUserService,
+  deleteBlockService,
 };
