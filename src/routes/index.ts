@@ -4,6 +4,7 @@ import postsRouter from "./postsRoute";
 import searchRouter from "./searchRoute";
 import usersRouter from "./usersRoute";
 import groupsRouter from "./groupsRoute";
+import blockRouter from "./blockRoute";
 
 export {
   chatsRouter,
@@ -12,4 +13,5 @@ export {
   searchRouter,
   usersRouter,
   groupsRouter,
+  blockRouter,
 };

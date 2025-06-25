@@ -7,7 +7,7 @@ import searchServices from "./searchServices";
 import groupsServices from "./groupsServices";
 import notificationsServices from "./notificationsServices";
 import friendshipServices from "./friendshipServices";
-
+import blockServices from "./blockServices";
 export {
   chatsServices,
   usersServices,
@@ -18,4 +18,5 @@ export {
   groupsServices,
   notificationsServices,
   friendshipServices,
+  blockServices,
 };

@@ -13,6 +13,7 @@ import {
   pagesRouter,
   chatsRouter,
   searchRouter,
+  blockRouter,
 } from "./routes/";
 
 import { globalErrorHandler, notFoundRoutes } from "./middlewares/";
@@ -77,6 +78,7 @@ app.use(express.urlencoded({ extended: true }));
 // Routes
 app.use("/api/v1/users", usersRouter);
 app.use("/api/v1/friendship", friendshipRouter);
+app.use("/api/v1/blocks", blockRouter);
 app.use("/api/v1/groups", groupsRouter);
 app.use("/api/v1/posts", postsRouter);
 app.use("/api/v1/pages", pagesRouter);
