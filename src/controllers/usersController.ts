@@ -6,6 +6,7 @@ import httpStatusText from "../utils/httpStatusText";
 const getAllUsers = asyncWrapper(
   async (req: Request, res: Response, next: NextFunction) => {
     const users = await usersServices.getAllUsersService();
+
     return res
       .status(200)
       .json({ status: httpStatusText.SUCCESS, data: { users } });
@@ -19,14 +20,12 @@ const getUserById = asyncWrapper(
     next: NextFunction
   ): Promise<Response | void> => {
     const { userId } = req.params;
+
     const user = await usersServices.getUserByIdService(userId);
-    if (user.type === "error") {
-      return next(user.error);
-    } else {
-      return res
-        .status(200)
-        .json({ status: httpStatusText.SUCCESS, data: { user } });
-    }
+
+    return res
+      .status(200)
+      .json({ status: httpStatusText.SUCCESS, data: { user } });
   }
 );
 
@@ -43,15 +42,12 @@ const createUser = asyncWrapper(
       profilePicture: uploadedImage,
     };
 
-    const userResult = await usersServices.createUserService(userData);
-    if (userResult.type === "error") {
-      return next(userResult.error);
-    } else {
-      return res.status(201).json({
-        status: httpStatusText.SUCCESS,
-        data: { user: userResult.data, token: userResult.token },
-      });
-    }
+    const { user, token } = await usersServices.createUserService(userData);
+
+    return res.status(201).json({
+      status: httpStatusText.SUCCESS,
+      data: { user, token: token },
+    });
   }
 );
 
@@ -61,15 +57,12 @@ const login = asyncWrapper(
     res: Response,
     next: NextFunction
   ): Promise<Response | void> => {
-    const loginResult = await usersServices.loginService(req.body);
-    if (loginResult.type === "error") {
-      return next(loginResult.error);
-    } else {
-      return res.status(200).json({
-        status: httpStatusText.SUCCESS,
-        data: { token: loginResult.token },
-      });
-    }
+    const { user, token } = await usersServices.loginService(req.body);
+
+    return res.status(200).json({
+      status: httpStatusText.SUCCESS,
+      data: { user, token },
+    });
   }
 );
 
@@ -79,23 +72,14 @@ const updateUser = asyncWrapper(
     res: Response,
     next: NextFunction
   ): Promise<Response | void> => {
-    const { userId } = req.params;
+    const { userId } = req.currentUser!;
 
-    const profilePicture = req.file?.path;
+    const user = await usersServices.updateUserService(userId, req.body);
 
-    const updateUserResult = await usersServices.updateUserService(userId, {
-      ...req.body,
-      profilePicture,
+    return res.status(200).json({
+      status: httpStatusText.SUCCESS,
+      data: { user },
     });
-
-    if (updateUserResult.type === "error") {
-      return next(updateUserResult.error);
-    } else {
-      return res.status(200).json({
-        status: httpStatusText.SUCCESS,
-        data: { user: updateUserResult.data },
-      });
-    }
   }
 );
 
@@ -105,13 +89,10 @@ const deleteUser = asyncWrapper(
     res: Response,
     next: NextFunction
   ): Promise<Response | void> => {
-    const { userId } = req.body;
-    console.log(userId);
-    const deleteResult = await usersServices.deleteUserService(userId);
-    console.log(deleteResult);
-    if (deleteResult.type === "error") {
-      return next(deleteResult.error);
-    }
+    const { userId } = req.currentUser!;
+
+    await usersServices.deleteUserService(userId);
+
     return res.status(200).json({
       status: httpStatusText.SUCCESS,
       data: { message: "User deleted successfully" },
@@ -119,105 +100,51 @@ const deleteUser = asyncWrapper(
   }
 );
 
-const addFriendRequest = asyncWrapper(
-  async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<Response | void> => {
-    const { senderId } = req.params;
-    const { recipientId } = req.body;
+// const addToBlockList = asyncWrapper(
+//   async (
+//     req: Request,
+//     res: Response,
+//     next: NextFunction
+//   ): Promise<Response | void> => {
+//     const { userId } = req.params;
+//     const { userToBlockId } = req.body;
+//     const addToBlockListResult = await usersServices.addToBlockListService(
+//       userId,
+//       userToBlockId
+//     );
+//     if (addToBlockListResult.type === "error") {
+//       return next(addToBlockListResult.error);
+//     } else {
+//       return res.status(200).json({
+//         status: httpStatusText.SUCCESS,
+//         data: { message: "You have successfuly blocked this user" },
+//       });
+//     }
+//   }
+// );
 
-    const sendingFriendRequestResult =
-      await usersServices.addFriendRequestService(senderId, recipientId);
-    if (sendingFriendRequestResult.type === "error") {
-      return next(sendingFriendRequestResult.error);
-    } else {
-      return res.status(200).json({
-        status: httpStatusText.SUCCESS,
-        data: { message: "Friend request sent successfuly" },
-      });
-    }
-  }
-);
-
-const updateFriendRequestStatusService = asyncWrapper(
-  async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<Response | void> => {
-    const { userId } = req.params;
-    const { senderId, newStatus } = req.body;
-
-    const updatedFriendRequestStatusResult =
-      await usersServices.updateFriendRequestStatusService(userId, {
-        sender: senderId,
-        status: newStatus,
-      });
-    if (updatedFriendRequestStatusResult.type === "error") {
-      return next(updatedFriendRequestStatusResult.error);
-    } else {
-      if (newStatus === "accepted") {
-        return res.status(200).json({
-          status: httpStatusText.SUCCESS,
-          data: { message: "Friend request accepted" },
-        });
-      } else {
-        return res.status(200).json({
-          status: httpStatusText.SUCCESS,
-          data: { message: "Friend request decliend" },
-        });
-      }
-    }
-  }
-);
-
-const addToBlockList = asyncWrapper(
-  async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<Response | void> => {
-    const { userId } = req.params;
-    const { userToBlockId } = req.body;
-    const addToBlockListResult = await usersServices.addToBlockListService(
-      userId,
-      userToBlockId
-    );
-    if (addToBlockListResult.type === "error") {
-      return next(addToBlockListResult.error);
-    } else {
-      return res.status(200).json({
-        status: httpStatusText.SUCCESS,
-        data: { message: "You have successfuly blocked this user" },
-      });
-    }
-  }
-);
-
-const removeFromBlockList = asyncWrapper(
-  async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<Response | void> => {
-    const { userId } = req.params;
-    const { blockedUserId } = req.body;
-    const addToBlockListResult = await usersServices.removeFromBlockListService(
-      userId,
-      blockedUserId
-    );
-    if (addToBlockListResult.type === "error") {
-      return next(addToBlockListResult.error);
-    } else {
-      return res.status(200).json({
-        status: httpStatusText.SUCCESS,
-        data: { message: "You have successfuly unblocked this user" },
-      });
-    }
-  }
-);
+// const removeFromBlockList = asyncWrapper(
+//   async (
+//     req: Request,
+//     res: Response,
+//     next: NextFunction
+//   ): Promise<Response | void> => {
+//     const { userId } = req.params;
+//     const { blockedUserId } = req.body;
+//     const addToBlockListResult = await usersServices.removeFromBlockListService(
+//       userId,
+//       blockedUserId
+//     );
+//     if (addToBlockListResult.type === "error") {
+//       return next(addToBlockListResult.error);
+//     } else {
+//       return res.status(200).json({
+//         status: httpStatusText.SUCCESS,
+//         data: { message: "You have successfuly unblocked this user" },
+//       });
+//     }
+//   }
+// );
 
 const joinGroup = asyncWrapper(
   async (
@@ -361,16 +288,14 @@ export {
   login,
   updateUser,
   deleteUser,
-  addFriendRequest,
-  updateFriendRequestStatusService,
-  addToBlockList,
-  removeFromBlockList,
+  // addToBlockList,
+  // removeFromBlockList,
   joinGroup,
   leaveGroup,
   addFollowedUsers,
   removeFollowedUsers,
   addFollowedPages,
-  // addFollowers,
+  // addFollowers,,
   // reportUser,
   // removeReport,
 };

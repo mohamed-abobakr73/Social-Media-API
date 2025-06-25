@@ -1,10 +1,10 @@
 import jwt from "jsonwebtoken";
-import dotenv from "dotenv";
+import { configDotenv } from "dotenv";
+import { TGenerateJwt } from "../types";
 
-type TGenerateJwt = {};
-dotenv.config();
+configDotenv();
 
-const generateJwt = async (payload: TGenerateJwt) => {
+const generateJwt = (payload: TGenerateJwt) => {
   const secretKey = process.env.JWT_SECRET_KEY;
 
   if (!secretKey) {
@@ -13,7 +13,7 @@ const generateJwt = async (payload: TGenerateJwt) => {
     );
   }
 
-  const token = await jwt.sign(payload, secretKey, {
+  const token = jwt.sign(payload, secretKey, {
     expiresIn: "30m",
   });
 

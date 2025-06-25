@@ -1,15 +1,16 @@
 import mongoose from "mongoose";
-import { Group, IGroup } from "../models/groupsModel";
+import { Group } from "../models/groupsModel";
 import AppError from "../utils/AppError";
 import httpStatusText from "../utils/httpStatusText";
 import { TServiceResult } from "../types/serviceResult";
 import { User } from "../models/usersModel";
 import notificationsServices from "./notificationsServices";
+import { TGroup } from "../types";
 
 const getAllGroupsService = async (paginationData: {
   limit: number;
   skip: number;
-}): Promise<TServiceResult<IGroup[]>> => {
+}): Promise<TServiceResult<TGroup[]>> => {
   const groups = await Group.find({}, { __v: 0 })
     .limit(paginationData.limit)
     .skip(paginationData.skip);
@@ -18,7 +19,7 @@ const getAllGroupsService = async (paginationData: {
 
 const getGroupByIdService = async (
   groupId: string
-): Promise<TServiceResult<IGroup>> => {
+): Promise<TServiceResult<TGroup>> => {
   const group = await Group.findById(groupId);
   if (!group) {
     const error = new AppError("Invalid group id", 400, httpStatusText.ERROR);
@@ -32,7 +33,7 @@ const createGroupService = async (groupData: {
   createdBy: mongoose.Types.ObjectId;
   isPrivate?: string;
   groupCover?: string;
-}): Promise<TServiceResult<IGroup>> => {
+}): Promise<TServiceResult<TGroup>> => {
   const { groupName, createdBy, isPrivate, groupCover } = groupData;
   const group = new Group({
     groupName,
@@ -64,7 +65,7 @@ const updateGroupService = async (
     isPrivate?: string;
     groupCover?: string;
   }
-): Promise<TServiceResult<IGroup>> => {
+): Promise<TServiceResult<TGroup>> => {
   const { groupCover, isPrivate } = updateData;
   const user = await User.findById(userId);
   const group = await Group.findById(groupId);
@@ -124,7 +125,7 @@ const updateGroupService = async (
 const deleteGroupService = async (
   groupId: string,
   userId: string
-): Promise<TServiceResult<IGroup>> => {
+): Promise<TServiceResult<TGroup>> => {
   const user = await User.findById(userId);
   const group = await Group.findById(groupId);
 
@@ -156,7 +157,7 @@ const joinGroupService = async (
   userId: string,
   groupId: string,
   notifications: boolean
-): Promise<TServiceResult<IGroup> & { status?: "joined" | "requsted" }> => {
+): Promise<TServiceResult<TGroup> & { status?: "joined" | "requsted" }> => {
   const user = await User.findById(userId);
   const group = await Group.findById(groupId);
 
@@ -236,7 +237,7 @@ const handleJoinRequestsService = async (requestData: {
   adminId: string;
   requestingUserId: string;
   status: "accepted" | "declined";
-}): Promise<TServiceResult<IGroup>> => {
+}): Promise<TServiceResult<TGroup>> => {
   const { groupId, adminId, requestingUserId, status } = requestData;
   const group = await Group.findById(groupId);
   const admin = await User.findById(adminId);
@@ -301,7 +302,7 @@ const handleJoinRequestsService = async (requestData: {
 const leaveGroupService = async (
   userId: string,
   groupId: string
-): Promise<TServiceResult<IGroup>> => {
+): Promise<TServiceResult<TGroup>> => {
   const user = await User.findById(userId);
   const group = await Group.findById(groupId);
   if (!user) {

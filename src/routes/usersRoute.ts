@@ -6,10 +6,8 @@ import {
   login,
   updateUser,
   deleteUser,
-  addFriendRequest,
-  updateFriendRequestStatusService,
-  addToBlockList,
-  removeFromBlockList,
+  // addToBlockList,
+  // removeFromBlockList,
   addFollowedUsers,
   removeFollowedUsers,
 } from "../controllers/usersController";
@@ -50,10 +48,9 @@ usersRouter.route("/login").post(loginValidation(), validateRequestBody, login);
 
 // Update user by ID
 usersRouter
-  .route("/:userId")
+  .route("/")
   .patch(
     verifyToken,
-    upload.single("profilePicture"),
     createAndUpdateUserValidation(true),
     validateRequestBody,
     updateUser
@@ -65,35 +62,15 @@ usersRouter
   .delete(removeReportValidation(), validateRequestBody, removeReport);
 
 // Delete user by ID
-usersRouter.route("/:userId").delete(verifyToken, deleteUser);
-
-// Add friend request by user ID
-usersRouter
-  .route("/:senderId/friend-requests")
-  .post(
-    verifyToken,
-    sendFriendRequestValidation(),
-    validateRequestBody,
-    addFriendRequest
-  );
-
-// Update friend request by user ID
-usersRouter
-  .route("/:userId/friend-requests")
-  .patch(
-    verifyToken,
-    updateFriendRequestStatusValidation(),
-    validateRequestBody,
-    updateFriendRequestStatusService
-  );
+usersRouter.route("/").delete(verifyToken, deleteUser);
 
 // Add to block list by user ID
-usersRouter.route("/:userId/block-list").post(verifyToken, addToBlockList);
+// usersRouter.route("/:userId/block-list").post(verifyToken, addToBlockList);
 
 // Update block list by user ID
-usersRouter
-  .route("/:userId/block-list")
-  .delete(verifyToken, removeFromBlockList);
+// usersRouter
+// .route("/:userId/block-list")
+// .delete(verifyToken, removeFromBlockList);
 
 // Join a group by user ID
 // usersRouter.post("/:userId/groups", joinGroup);

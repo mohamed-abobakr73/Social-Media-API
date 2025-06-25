@@ -1,11 +1,11 @@
-import { Post, IPost } from "../models/postsModel";
+import { Post } from "../models/postsModel";
 import { User, IUser } from "../models/usersModel";
-import { Group, IGroup } from "../models/groupsModel";
-import { Page, IPage } from "../models/pagesModel";
+import { Group } from "../models/groupsModel";
+import { Page } from "../models/pagesModel";
 import AppError from "../utils/AppError";
 import httpStatusText from "../utils/httpStatusText";
 import { TServiceResult } from "../types/serviceResult";
-import { IReport } from "../types/";
+import { IReport, TGroup, TPage, TPost } from "../types/";
 
 const checkIfReportIsAlreadyMade = (reportsArr: IReport[], userId: string) => {
   return reportsArr.find((report) => report.reportedBy.toString() === userId);
@@ -20,7 +20,7 @@ const addReportService = async (
     reason: string;
     reportedBy: string;
   }
-): Promise<TServiceResult<IUser | IGroup | IPage | IPost>> => {
+): Promise<TServiceResult<IUser | TGroup | TPage | TPost>> => {
   const { type, reportedItemId } = reportItem;
   const { reason, reportedBy } = reportData;
   const user = await User.findById(reportedBy);
@@ -143,7 +143,7 @@ const removeReportService = async (reportInfo: {
   type: "user" | "group" | "page" | "post";
   reportedItemId: string;
   userId: string;
-}): Promise<TServiceResult<IUser | IGroup | IPage | IPost>> => {
+}): Promise<TServiceResult<IUser | TGroup | TPage | TPost>> => {
   const { type, reportedItemId, userId } = reportInfo;
   const user = await User.findById(userId);
   if (!user) {

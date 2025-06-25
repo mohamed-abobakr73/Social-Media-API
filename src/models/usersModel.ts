@@ -1,16 +1,6 @@
 import mongoose from "mongoose";
 import { IReport } from "../types/";
 
-export interface IFriendRequest {
-  sender: mongoose.Types.ObjectId;
-  status: "accepted" | "declined" | "pending"; // Enum for status
-}
-
-export interface ISentFriendRequest {
-  sentTo: mongoose.Types.ObjectId;
-  status: "accepted" | "declined" | "pending"; // Enum for status
-}
-
 // Define the type for the reports
 
 export interface IMadeReports {
@@ -35,6 +25,7 @@ export interface IUserGroup {
 
 // Define the base User type extending the Mongoose Document
 export interface IUser extends Document {
+  _id: mongoose.Types.ObjectId;
   username: string;
   age: number;
   email: string;
@@ -44,8 +35,6 @@ export interface IUser extends Document {
   posts: { postId: mongoose.Types.ObjectId; isShared: boolean }[];
   groups: IUserGroup[];
   friendList: mongoose.Types.ObjectId[];
-  friendRequests: IFriendRequest[];
-  sentFriendRequests: ISentFriendRequest[];
   blockList: mongoose.Types.ObjectId[];
   followedUsers: mongoose.Types.ObjectId[];
   followedPages: mongoose.Types.ObjectId[];
@@ -57,11 +46,7 @@ export interface IUser extends Document {
   madeReports: IMadeReports[];
   reports: IReport[];
   banned: boolean;
-  role: {
-    type: String;
-    enum: ["user", "superAdmin"];
-    default: "user";
-  }; // Restrict the role field to the enum values
+  role: "user" | "superAdmin"; // Restrict the role field to the enum values
   token: string;
 }
 
@@ -70,7 +55,7 @@ const usersSchema = new mongoose.Schema<IUser>(
     username: { type: String, required: true },
     age: { type: Number, required: true },
     email: { type: String, required: true, unique: true },
-    password: { type: String, required: true },
+    password: { type: String, required: true, select: false },
     gender: { type: String, required: true },
     profilePicture: {
       type: String,
@@ -85,37 +70,8 @@ const usersSchema = new mongoose.Schema<IUser>(
     ],
     groups: [
       {
-        group: { type: mongoose.Schema.Types.ObjectId, ref: "Group" },
+        groupId: { type: mongoose.Schema.Types.ObjectId, ref: "Group" },
         notifications: { type: Boolean, default: false },
-      },
-    ],
-    friendList: {
-      type: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
-      validate: [
-        function (value: []) {
-          return value.length <= 500;
-        },
-        "Friend list exceeds the limit of 500 users",
-      ],
-    },
-    friendRequests: [
-      {
-        sender: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-        status: {
-          type: String,
-          enum: ["accepted", "declined", "pending"],
-          default: "pending",
-        },
-      },
-    ],
-    sentFriendRequests: [
-      {
-        sentTo: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-        status: {
-          type: String,
-          enum: ["accepted", "declined", "pending"],
-          default: "pending",
-        },
       },
     ],
     blockList: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
