@@ -41,8 +41,27 @@ const assertUserIsAllowed = (
   currentUserId: string,
   message: string = "You are not authorized to perform this action."
 ): void => {
+  console.log(resourceOwnerId);
+  console.log(currentUserId);
   if (resourceOwnerId !== currentUserId) {
     const error = new AppError(message, 401, httpStatusText.FAIL);
+    throw error;
+  }
+};
+
+const isPartOfFriendship = (
+  friendship: { user: string; friend: string },
+  userId: string
+) => {
+  const { user, friend } = friendship;
+  const isPartOfFriendship = user === userId || friend === userId;
+
+  if (!isPartOfFriendship) {
+    const error = new AppError(
+      "You are not authorized to remove this friendship",
+      401,
+      httpStatusText.FAIL
+    );
     throw error;
   }
 };
@@ -208,6 +227,18 @@ const cancelFriendRequestService = async (
   );
 };
 
+const getFriendshipsService = async (userId: string) => {
+  const user = await User.findById(userId);
+
+  doesResourceExists(user, "You are not authorized to get a friendship");
+
+  const friendships = await Friendship.find({
+    $or: [{ user: userId }, { friend: userId }],
+  });
+
+  return friendships;
+};
+
 const deleteFriendshipService = async (
   userId: string,
   friendshipId: string
@@ -220,8 +251,10 @@ const deleteFriendshipService = async (
 
   doesResourceExists(friendship, "Invalid friendship id");
 
-  assertUserIsAllowed(friendship.user.toString(), userId);
-  assertUserIsAllowed(friendship.friend.toString(), userId);
+  isPartOfFriendship(
+    { user: friendship.user.toString(), friend: friendship.friend.toString() },
+    userId
+  );
 
   const deleteResult = await Friendship.deleteOne({ _id: friendship._id });
 
@@ -233,5 +266,6 @@ export default {
   sendFriendRequestService,
   updateFriendRequestStatusService,
   cancelFriendRequestService,
+  getFriendshipsService,
   deleteFriendshipService,
 };

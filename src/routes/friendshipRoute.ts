@@ -10,6 +10,7 @@ import {
   updateFriendRequestStatusService,
   cancelFriendRequest,
   deleteFriendship,
+  getFriendships,
 } from "../controllers/friendshipController";
 
 const friendshipRouter = Router();
@@ -30,6 +31,8 @@ friendshipRouter
 friendshipRouter
   .route("/request/:friendRequestId")
   .delete(verifyToken, cancelFriendRequest);
+
+friendshipRouter.route("/").get(verifyToken, getFriendships);
 
 friendshipRouter.route("/:friendshipId").delete(verifyToken, deleteFriendship);
 
