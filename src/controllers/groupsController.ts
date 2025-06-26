@@ -35,6 +35,24 @@ const getGroupById = asyncWrapper(
   }
 );
 
+const getGroupMembers = asyncWrapper(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { groupId } = req.params;
+    const { limit, skip } = paginationQuery(req.query);
+
+    const { groupMembers, paginationInfo } =
+      await groupsServices.getGroupMembersService(groupId, {
+        limit,
+        skip,
+      });
+
+    return res.status(200).json({
+      status: httpStatusText.SUCCESS,
+      data: { members: groupMembers, paginationInfo },
+    });
+  }
+);
+
 const createGroup = asyncWrapper(
   async (
     req: Request,
@@ -186,6 +204,7 @@ const leaveGroup = asyncWrapper(
 export {
   getAllGroups,
   getGroupById,
+  getGroupMembers,
   createGroup,
   updateGroup,
   deleteGroup,

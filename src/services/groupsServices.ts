@@ -5,7 +5,7 @@ import httpStatusText from "../utils/httpStatusText";
 import { TServiceResult } from "../types/serviceResult";
 import { User } from "../models/usersModel";
 import notificationsServices from "./notificationsServices";
-import { TGroup } from "../types";
+import { TGroup, TPaginationData } from "../types";
 import paginationResult from "../utils/paginationResult";
 import doesResourceExists from "../utils/doesResourceExists";
 import { GroupJoinRequests, GroupMembership } from "../models";
@@ -88,10 +88,7 @@ const checkCurrentUserRoleInGroup = async (groupId: string, userId: string) => {
   );
 };
 
-const getAllGroupsService = async (paginationData: {
-  limit: number;
-  skip: number;
-}) => {
+const getAllGroupsService = async (paginationData: TPaginationData) => {
   const { limit, skip } = paginationData;
   const groups = await Group.find({}, { __v: 0 }).limit(limit).skip(skip);
 
@@ -114,6 +111,26 @@ const getGroupByIdService = async (groupId: string) => {
   doesResourceExists(group, "Group not found");
 
   return group;
+};
+
+const getGroupMembersService = async (
+  groupId: string,
+  paginationData: TPaginationData
+) => {
+  const { limit, skip } = paginationData;
+  const groupMembers = await GroupMembership.find(
+    { group: groupId },
+    { user: 1, role: 1 }
+  )
+    .populate("user", "username profilePicture")
+    .skip(skip)
+    .limit(limit);
+
+  const totalCount = await GroupMembership.countDocuments({ group: groupId });
+
+  const paginationInfo = paginationResult(totalCount, skip, limit);
+
+  return { groupMembers, paginationInfo };
 };
 
 const createGroupService = async (
@@ -360,6 +377,7 @@ const leaveGroupService = async (
 export default {
   getAllGroupsService,
   getGroupByIdService,
+  getGroupMembersService,
   createGroupService,
   updateGroupService,
   deleteGroupService,
