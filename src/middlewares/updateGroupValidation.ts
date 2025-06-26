@@ -10,14 +10,8 @@ const updateGroupValidation = () => {
       .withMessage("Group name must be at most 20 characters long"),
     body("isPrivate")
       .optional()
-      .customSanitizer((value) => value.toLowerCase())
-      .isIn(["true", "false"])
-      .withMessage("Is private value must be true or false"),
-    body("userId")
-      .notEmpty()
-      .withMessage("Users id is required")
-      .isMongoId()
-      .withMessage("User ID must be a valid MongoDB ObjectId"),
+      .isBoolean()
+      .withMessage("Is private must be a boolean value"),
   ];
 };
 

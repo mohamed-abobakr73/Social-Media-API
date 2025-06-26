@@ -80,6 +80,7 @@ const createGroupService = async (
   return group;
 };
 
+// TODO removed any join requests in case of the change from private to public, fix the image and things like that
 const updateGroupService = async (
   groupId: string,
   userId: string,
