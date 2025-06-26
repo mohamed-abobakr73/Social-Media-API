@@ -62,9 +62,7 @@ groupsRouter
 groupsRouter.route("/:groupId").delete(verifyToken, deleteGroup);
 
 // Join group
-groupsRouter
-  .route("/:groupId/join")
-  .post(verifyToken, joinGroupValidation(), validateRequestBody, joinGroup);
+groupsRouter.route("/:groupId/join").post(verifyToken, joinGroup);
 
 // Handle join request
 groupsRouter

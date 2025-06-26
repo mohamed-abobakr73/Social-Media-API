@@ -8,7 +8,7 @@ import notificationsServices from "./notificationsServices";
 import { TGroup } from "../types";
 import paginationResult from "../utils/paginationResult";
 import doesResourceExists from "../utils/doesResourceExists";
-import { GroupMembership } from "../models";
+import { GroupJoinRequests, GroupMembership } from "../models";
 
 const addGroupMembership = async (
   groupId: string,
@@ -21,6 +21,38 @@ const addGroupMembership = async (
     role,
   });
   await membership.save();
+};
+
+const addGroupJoinRequest = async (groupId: string, userId: string) => {
+  const joinRequest = new GroupJoinRequests({
+    group: groupId,
+    user: userId,
+  });
+  await joinRequest.save();
+};
+
+const checkIfUserAlreadyMember = async (groupId: string, userId: string) => {
+  const userAlreadyMember = await GroupMembership.findOne({
+    group: groupId,
+    user: userId,
+  });
+
+  doesResourceExists(
+    !userAlreadyMember,
+    "You are already a member in this group"
+  );
+};
+
+const checkIfUserMadeJoinRequest = async (groupId: string, userId: string) => {
+  const userAlreadyMadeRequest = await GroupJoinRequests.findOne({
+    group: groupId,
+    user: userId,
+  });
+
+  doesResourceExists(
+    !userAlreadyMadeRequest,
+    "You have already made a join request to this group"
+  );
 };
 
 const getAllGroupsService = async (paginationData: {
@@ -177,83 +209,37 @@ const deleteGroupService = async (
   return { type: "success" };
 };
 
+// TODO check the notification thing
 const joinGroupService = async (
   userId: string,
-  groupId: string,
-  notifications: boolean
-): Promise<TServiceResult<TGroup> & { status?: "joined" | "requsted" }> => {
+  groupId: string
+  // notifications: boolean
+) => {
   const user = await User.findById(userId);
   const group = await Group.findById(groupId);
 
-  if (!user) {
-    const error = new AppError("Invalid user id", 400, httpStatusText.ERROR);
-    return { error, type: "error" };
-  }
-  if (!group) {
-    const error = new AppError("Invalid group id", 400, httpStatusText.ERROR);
-    return { error, type: "error" };
-  }
+  doesResourceExists(user, "You are not authorized to join a group");
+  doesResourceExists(group, "Group not found");
 
-  // Checking if the group is deleted
-  if (group.isDeleted) {
-    const error = new AppError(
-      "The group you are trying to join is deleted",
-      400,
-      httpStatusText.ERROR
-    );
-    return { error, type: "error" };
-  }
+  const stringifiedGroupId: string = group._id.toString();
 
-  // Checking if the user is already in the group
-  // const userIsAlreadyInGroup = group.groupMembers.find(
-  //   (member) => member.toString() === userId
-  // );
-  // if (userIsAlreadyInGroup) {
-  //   const error = new AppError(
-  //     "You are already a member in this group",
-  //     400,
-  //     httpStatusText.ERROR
-  //   );
-  //   return { error, type: "error" };
-  // }
+  await checkIfUserAlreadyMember(stringifiedGroupId, userId);
 
-  // Checking if the group is private or not
+  let joinStatus: string;
+
   if (group.isPrivate) {
-    // Checking if the user already made a join request
-    const userAlreadyRequestedToJoin = group.joinRequests.find(
-      (request) => request.toString() === userId
-    );
-    if (userAlreadyRequestedToJoin) {
-      const error = new AppError(
-        "You already made a join request to this group",
-        400,
-        httpStatusText.ERROR
-      );
-      return { error, type: "error" };
-    }
+    await checkIfUserMadeJoinRequest(stringifiedGroupId, userId);
 
-    group.joinRequests.push(user._id);
-    await group.save();
-    return { status: "requsted", type: "success" };
+    await addGroupJoinRequest(stringifiedGroupId, userId);
+
+    joinStatus = "pending";
   } else {
-    user.groups.push({
-      groupId: group._id,
-      notifications: notifications ? notifications : false,
-    });
-    // group.groupMembers.push(user._id);
-    await group.save();
-    await user.save();
-    const addNotificationResult =
-      await notificationsServices.addNotificationService(
-        "joinGroup",
-        group.createdBy,
-        { username: user.username, content: group.groupName }
-      );
-    if (addNotificationResult.type === "error") {
-      return { error: addNotificationResult.error!, type: "error" };
-    }
-    return { status: "joined", type: "success" };
+    await addGroupMembership(stringifiedGroupId, userId);
+
+    joinStatus = "joined";
   }
+
+  return joinStatus;
 };
 
 const handleJoinRequestsService = async (requestData: {

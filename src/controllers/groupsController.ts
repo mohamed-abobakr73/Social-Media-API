@@ -111,39 +111,32 @@ const deleteGroup = asyncWrapper(
   }
 );
 
+// TODO check the notifications thing
 const joinGroup = asyncWrapper(
   async (
     req: Request,
     res: Response,
     next: NextFunction
   ): Promise<Response | void> => {
+    const { userId } = req.currentUser!;
     const { groupId } = req.params;
-    const { userId, notfications } = req.body;
+    // const { notifications } = req.query;
 
     const joinGroupResult = await groupsServices.joinGroupService(
       userId,
-      groupId,
-      notfications
+      groupId
+      // notifications
     );
 
-    if (joinGroupResult.type === "error") {
-      return next(joinGroupResult.error);
-    } else {
-      if (joinGroupResult.status === "joined") {
-        return res.status(200).json({
-          status: httpStatusText.SUCCESS,
-          data: { message: "You have joined this group successfully" },
-        });
-      } else {
-        return res.status(200).json({
-          status: httpStatusText.SUCCESS,
-          data: {
-            message:
-              "You have made a join request to this group, admins will review your request",
-          },
-        });
-      }
-    }
+    return res.status(200).json({
+      status: httpStatusText.SUCCESS,
+      data: {
+        message:
+          joinGroupResult === "pending"
+            ? "You have sent a join request successfully, please wait for the admin to approve"
+            : "You have joined this group successfully",
+      },
+    });
   }
 );
 
