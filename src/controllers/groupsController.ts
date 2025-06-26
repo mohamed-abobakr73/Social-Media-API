@@ -3,6 +3,7 @@ import asyncWrapper from "../middlewares/asyncWrapper";
 import groupsServices from "../services/groupsServices";
 import httpStatusText from "../utils/httpStatusText";
 import paginationQuery from "../utils/paginationQuery";
+import { TStatus } from "../types";
 
 const getAllGroups = asyncWrapper(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -38,17 +39,40 @@ const getGroupById = asyncWrapper(
 const getGroupMembers = asyncWrapper(
   async (req: Request, res: Response, next: NextFunction) => {
     const { groupId } = req.params;
-    const { limit, skip } = paginationQuery(req.query);
+    const paginationParams = paginationQuery(req.query);
 
     const { groupMembers, paginationInfo } =
-      await groupsServices.getGroupMembersService(groupId, {
-        limit,
-        skip,
-      });
+      await groupsServices.getGroupMembersService(groupId, paginationParams);
 
     return res.status(200).json({
       status: httpStatusText.SUCCESS,
       data: { members: groupMembers, paginationInfo },
+    });
+  }
+);
+
+const getJoinRequests = asyncWrapper(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { userId } = req.currentUser!;
+    const { groupId } = req.params;
+    const status =
+      typeof req.query.status === "string"
+        ? (req.query.status as TStatus)
+        : undefined;
+
+    const paginationParams = paginationQuery(req.query);
+
+    const { joinRequests, paginationInfo } =
+      await groupsServices.getJoinRequestsService(
+        userId,
+        groupId,
+        paginationParams,
+        status
+      );
+
+    return res.status(200).json({
+      status: httpStatusText.SUCCESS,
+      data: { joinRequests, paginationInfo },
     });
   }
 );
@@ -195,7 +219,7 @@ const leaveGroup = asyncWrapper(
     } else {
       return res.status(200).json({
         status: httpStatusText.SUCCESS,
-        data: { message: "You have left this group succesfully" },
+        data: { message: "You have left this group successfully" },
       });
     }
   }
@@ -205,6 +229,7 @@ export {
   getAllGroups,
   getGroupById,
   getGroupMembers,
+  getJoinRequests,
   createGroup,
   updateGroup,
   deleteGroup,

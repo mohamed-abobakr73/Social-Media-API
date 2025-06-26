@@ -5,7 +5,7 @@ import httpStatusText from "../utils/httpStatusText";
 import { TServiceResult } from "../types/serviceResult";
 import { User } from "../models/usersModel";
 import notificationsServices from "./notificationsServices";
-import { TGroup, TPaginationData } from "../types";
+import { TGroup, TPaginationData, TStatus } from "../types";
 import paginationResult from "../utils/paginationResult";
 import doesResourceExists from "../utils/doesResourceExists";
 import { GroupJoinRequests, GroupMembership } from "../models";
@@ -88,6 +88,17 @@ const checkCurrentUserRoleInGroup = async (groupId: string, userId: string) => {
   );
 };
 
+const checkGroupPrivacy = (groupPrivacy: boolean) => {
+  if (!groupPrivacy) {
+    const error = new AppError(
+      "This group is not private",
+      400,
+      httpStatusText.ERROR
+    );
+    throw error;
+  }
+};
+
 const getAllGroupsService = async (paginationData: TPaginationData) => {
   const { limit, skip } = paginationData;
   const groups = await Group.find({}, { __v: 0 }).limit(limit).skip(skip);
@@ -111,6 +122,46 @@ const getGroupByIdService = async (groupId: string) => {
   doesResourceExists(group, "Group not found");
 
   return group;
+};
+
+const getJoinRequestsService = async (
+  userId: string,
+  groupId: string,
+  paginationData: TPaginationData,
+  status?: TStatus
+) => {
+  const user = await User.findById(userId);
+  const group = await Group.findById(groupId);
+
+  doesResourceExists(user, "You are not authorized to do this action");
+  doesResourceExists(group, "Group not found");
+
+  await checkCurrentUserRoleInGroup(groupId, userId);
+
+  checkGroupPrivacy(group.isPrivate);
+
+  const { limit, skip } = paginationData;
+
+  const filter: { group: string; status?: string } = { group: groupId };
+
+  if (status) {
+    filter.status = status;
+  }
+
+  const joinRequests = await GroupJoinRequests.find(filter, {
+    user: 1,
+    status: 1,
+    respondedBy: 1,
+  })
+    .populate("user", "username profilePicture")
+    .skip(skip)
+    .limit(limit);
+
+  const totalCount = await GroupJoinRequests.countDocuments({ group: groupId });
+
+  const paginationInfo = paginationResult(totalCount, skip, limit);
+
+  return { joinRequests, paginationInfo };
 };
 
 const getGroupMembersService = async (
@@ -228,6 +279,7 @@ const updateGroupService = async (
   return { data: updatedGroup, type: "success" };
 };
 
+// TODO check what is better to totally delete or just fill the isDeleted
 const deleteGroupService = async (
   groupId: string,
   userId: string
@@ -295,7 +347,7 @@ const joinGroupService = async (
 const handleJoinRequestsService = async (
   userId: string,
   joinRequestId: string,
-  status: "accepted" | "declined"
+  status: TStatus
 ) => {
   const user = await User.findById(userId);
 
@@ -378,6 +430,7 @@ export default {
   getAllGroupsService,
   getGroupByIdService,
   getGroupMembersService,
+  getJoinRequestsService,
   createGroupService,
   updateGroupService,
   deleteGroupService,

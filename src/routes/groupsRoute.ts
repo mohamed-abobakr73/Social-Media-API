@@ -5,6 +5,7 @@ import {
   getAllGroups,
   getGroupById,
   getGroupMembers,
+  getJoinRequests,
   handleJoinRequests,
   joinGroup,
   leaveGroup,
@@ -34,6 +35,8 @@ groupsRouter.route("/").get(getAllGroups);
 groupsRouter.route("/:groupId").get(getGroupById);
 
 groupsRouter.route("/:groupId/members").get(getGroupMembers);
+
+groupsRouter.route("/:groupId/join-requests").get(verifyToken, getJoinRequests);
 
 // Create group
 groupsRouter

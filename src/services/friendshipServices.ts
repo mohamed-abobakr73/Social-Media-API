@@ -1,5 +1,5 @@
 import { Block, FriendRequest, Friendship, User } from "../models";
-import { TFriendRequestStatus } from "../types";
+import { TStatus } from "../types";
 import AppError from "../utils/AppError";
 import assertUserIsAllowed from "../utils/assertUserIsAllowed";
 import doesResourceExists from "../utils/doesResourceExists";
@@ -157,7 +157,7 @@ const sendFriendRequestService = async (
 // TODO create chat after acceptance
 const updateFriendRequestStatusService = async (
   userId: string,
-  friendRequestUpdate: { friendRequestId: string; status: TFriendRequestStatus }
+  friendRequestUpdate: { friendRequestId: string; status: TStatus }
 ) => {
   const user = await User.findById(userId);
 

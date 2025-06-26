@@ -8,7 +8,7 @@ import TPage from "./TPage";
 import TComment from "./TComment";
 import TPost from "./TPost";
 import TGenerateJwt from "./TGenerateJwt";
-import TFriendRequestStatus from "./TFriendRequestStatus";
+import TStatus from "./TStatus";
 import TFriendRequest from "./TFriendRequest";
 import TFriendship from "./TFriendship";
 import TBlock from "./TBlock";
@@ -27,7 +27,7 @@ export {
   TComment,
   TPost,
   TGenerateJwt,
-  TFriendRequestStatus,
+  TStatus,
   TFriendRequest,
   TFriendship,
   TBlock,
