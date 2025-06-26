@@ -10,15 +10,6 @@ const groupsSchema = new mongoose.Schema<TGroup>(
       immutable: true,
       required: true,
     },
-    groupMembers: {
-      type: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
-      validate: [
-        function (value: []) {
-          return value.length <= 5000;
-        },
-        "Group members exceed the limit of 5000 users",
-      ],
-    },
     posts: [{ type: mongoose.Schema.Types.ObjectId, ref: "Post" }],
     admins: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     groupCover: { type: String },

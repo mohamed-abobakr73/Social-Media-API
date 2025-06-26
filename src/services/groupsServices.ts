@@ -10,6 +10,19 @@ import paginationResult from "../utils/paginationResult";
 import doesResourceExists from "../utils/doesResourceExists";
 import { GroupMembership } from "../models";
 
+const addGroupMembership = async (
+  groupId: string,
+  userId: string,
+  role: "admin" | "member" = "member"
+) => {
+  const membership = new GroupMembership({
+    group: groupId,
+    user: userId,
+    role,
+  });
+  await membership.save();
+};
+
 const getAllGroupsService = async (paginationData: {
   limit: number;
   skip: number;
@@ -60,14 +73,9 @@ const createGroupService = async (
     groupCover: groupCover || "",
   });
 
-  const addUserToGroupMembers = new GroupMembership({
-    group: group._id,
-    user: userId,
-    role: "admin",
-  });
+  await addGroupMembership(group._id.toString(), userId, "admin");
 
   await group.save();
-  await addUserToGroupMembers.save();
 
   return group;
 };
@@ -196,17 +204,17 @@ const joinGroupService = async (
   }
 
   // Checking if the user is already in the group
-  const userIsAlreadyInGroup = group.groupMembers.find(
-    (member) => member.toString() === userId
-  );
-  if (userIsAlreadyInGroup) {
-    const error = new AppError(
-      "You are already a member in this group",
-      400,
-      httpStatusText.ERROR
-    );
-    return { error, type: "error" };
-  }
+  // const userIsAlreadyInGroup = group.groupMembers.find(
+  //   (member) => member.toString() === userId
+  // );
+  // if (userIsAlreadyInGroup) {
+  //   const error = new AppError(
+  //     "You are already a member in this group",
+  //     400,
+  //     httpStatusText.ERROR
+  //   );
+  //   return { error, type: "error" };
+  // }
 
   // Checking if the group is private or not
   if (group.isPrivate) {
@@ -231,7 +239,7 @@ const joinGroupService = async (
       groupId: group._id,
       notifications: notifications ? notifications : false,
     });
-    group.groupMembers.push(user._id);
+    // group.groupMembers.push(user._id);
     await group.save();
     await user.save();
     const addNotificationResult =
@@ -252,7 +260,7 @@ const handleJoinRequestsService = async (requestData: {
   adminId: string;
   requestingUserId: string;
   status: "accepted" | "declined";
-}): Promise<TServiceResult<TGroup>> => {
+}) => {
   const { groupId, adminId, requestingUserId, status } = requestData;
   const group = await Group.findById(groupId);
   const admin = await User.findById(adminId);
@@ -301,17 +309,17 @@ const handleJoinRequestsService = async (requestData: {
     return { error, type: "error" };
   }
 
-  group.joinRequests = group.joinRequests.filter(
-    (request) => request.toString() !== requestingUserId
-  );
-  if (status === "accepted") {
-    group.groupMembers.push(requestingUser._id);
-    await group.save();
-    return { type: "success" };
-  } else {
-    await group.save();
-    return { type: "success" };
-  }
+  //   group.joinRequests = group.joinRequests.filter(
+  //     (request) => request.toString() !== requestingUserId
+  //   );
+  //   if (status === "accepted") {
+  //     group.groupMembers.push(requestingUser._id);
+  //     await group.save();
+  //     return { type: "success" };
+  //   } else {
+  //     await group.save();
+  //     return { type: "success" };
+  //   }
 };
 
 const leaveGroupService = async (
@@ -330,22 +338,22 @@ const leaveGroupService = async (
   }
 
   // Checking if the user is really a member in the group
-  const isUserMember = group.groupMembers.find(
-    (member) => member.toString() === userId
-  );
-  if (!isUserMember) {
-    const error = new AppError(
-      "You are not a member of this group",
-      400,
-      httpStatusText.ERROR
-    );
-    return { error, type: "error" };
-  }
+  // const isUserMember = group.groupMembers.find(
+  //   (member) => member.toString() === userId
+  // );
+  // if (!isUserMember) {
+  //   const error = new AppError(
+  //     "You are not a member of this group",
+  //     400,
+  //     httpStatusText.ERROR
+  //   );
+  //   return { error, type: "error" };
+  // }
 
-  user.groups = user.groups.filter((group) => group.toString() !== groupId);
-  group.groupMembers = group.groupMembers.filter(
-    (member) => member.toString() !== userId
-  );
+  // user.groups = user.groups.filter((group) => group.toString() !== groupId);
+  // group.groupMembers = group.groupMembers.filter(
+  //   (member) => member.toString() !== userId
+  // );
   await user.save();
   await group.save();
   const addNotificationResult =
