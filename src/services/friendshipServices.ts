@@ -1,6 +1,7 @@
-import { FriendRequest, Friendship, User } from "../models";
+import { Block, FriendRequest, Friendship, User } from "../models";
 import { TFriendRequestStatus } from "../types";
 import AppError from "../utils/AppError";
+import assertUserIsAllowed from "../utils/assertUserIsAllowed";
 import doesResourceExists from "../utils/doesResourceExists";
 import httpStatusText from "../utils/httpStatusText";
 
@@ -15,10 +16,28 @@ const preventSelfFriendRequest = (senderId: string, recipientId: string) => {
   }
 };
 
+const checkIfBlockedRelationshipExists = async (
+  senderId: string,
+  recipientId: string
+) => {
+  const isUserBlocked = await Block.findOne({
+    $or: [
+      { user: senderId, blockedUser: recipientId },
+      { user: recipientId, blockedUser: senderId },
+    ],
+  });
+
+  doesResourceExists(
+    !isUserBlocked,
+    "You can't send a friend request to this user"
+  );
+};
+
 const checkUserFriendListLength = async (userId: string, message: string) => {
   const userFriendListLength = await Friendship.countDocuments({
     user: userId,
   });
+
   if (userFriendListLength >= 500) {
     const error = new AppError(message, 400, httpStatusText.ERROR);
     throw error;
@@ -32,19 +51,6 @@ const checkFriendRequestStatus = (status: string) => {
       400,
       httpStatusText.FAIL
     );
-    throw error;
-  }
-};
-
-const assertUserIsAllowed = (
-  resourceOwnerId: string,
-  currentUserId: string,
-  message: string = "You are not authorized to perform this action."
-): void => {
-  console.log(resourceOwnerId);
-  console.log(currentUserId);
-  if (resourceOwnerId !== currentUserId) {
-    const error = new AppError(message, 401, httpStatusText.FAIL);
     throw error;
   }
 };
@@ -116,7 +122,6 @@ const createFriendshipService = async (userId: string, friendId: string) => {
   return friendship;
 };
 
-// Check for the blocks
 const sendFriendRequestService = async (
   senderId: string,
   recipientId: string
@@ -130,31 +135,7 @@ const sendFriendRequestService = async (
 
   doesResourceExists(recipient, "Invalid friend request recipient id");
 
-  // Checking if any of the users blocked the other
-  // const isUserBlocked = recipient.blockList.find(
-  //   (blocked) => blocked.toString() === senderId
-  // );
-  // const senderBlockedTheRecipient = sender.blockList.find(
-  //   (blocked) => blocked.toString() === recipientId
-  // );
-
-  // if (isUserBlocked) {
-  //   const error = new AppError(
-  //     "You can't send a friend request to this user",
-  //     400,
-  //     httpStatusText.FAIL
-  //   );
-  //   return { error, type: "error" };
-  // }
-
-  // if (senderBlockedTheRecipient) {
-  //   const error = new AppError(
-  //     "You have to unblock this user first to send him a friend request",
-  //     400,
-  //     httpStatusText.FAIL
-  //   );
-  //   return { error, type: "error" };
-  // }
+  await checkIfBlockedRelationshipExists(senderId, recipientId);
 
   await checkUserFriendListLength(
     senderId,

@@ -34,7 +34,6 @@ export interface IUser extends Document {
   profilePicture: string;
   posts: { postId: mongoose.Types.ObjectId; isShared: boolean }[];
   groups: IUserGroup[];
-  friendList: mongoose.Types.ObjectId[];
   blockList: mongoose.Types.ObjectId[];
   followedUsers: mongoose.Types.ObjectId[];
   followedPages: mongoose.Types.ObjectId[];
@@ -46,7 +45,7 @@ export interface IUser extends Document {
   madeReports: IMadeReports[];
   reports: IReport[];
   banned: boolean;
-  role: "user" | "superAdmin"; // Restrict the role field to the enum values
+  role: "user" | "superAdmin";
   token: string;
 }
 

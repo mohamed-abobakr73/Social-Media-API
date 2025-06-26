@@ -4,5 +4,5 @@ import { Post } from "./postsModel";
 import { User } from "./usersModel";
 import { Friendship } from "./friendshipModel";
 import { FriendRequest } from "./friendRequestsModel";
-
-export { Chat, Group, Post, User, Friendship, FriendRequest };
+import { Block } from "./blocksModel";
+export { Chat, Group, Post, User, Friendship, FriendRequest, Block };
