@@ -6,11 +6,13 @@ import { Friendship } from "./friendshipModel";
 import { FriendRequest } from "./friendRequestsModel";
 import { Block } from "./blocksModel";
 import { GroupMembership } from "./groupMembership";
+import { GroupJoinRequests } from "./groupJoinRequests";
 
 export {
   Chat,
   Group,
   GroupMembership,
+  GroupJoinRequests,
   Post,
   User,
   Friendship,

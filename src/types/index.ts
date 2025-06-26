@@ -13,6 +13,7 @@ import TFriendRequest from "./TFriendRequest";
 import TFriendship from "./TFriendship";
 import TBlock from "./TBlock";
 import TGroupMembership from "./TGroupMembership";
+import TGroupJoinRequests from "./TGroupJoinRequests";
 
 export {
   TAppError,
@@ -30,4 +31,5 @@ export {
   TFriendship,
   TBlock,
   TGroupMembership,
+  TGroupJoinRequests,
 };
