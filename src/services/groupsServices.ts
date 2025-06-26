@@ -8,6 +8,7 @@ import notificationsServices from "./notificationsServices";
 import { TGroup } from "../types";
 import paginationResult from "../utils/paginationResult";
 import doesResourceExists from "../utils/doesResourceExists";
+import { GroupMembership } from "../models";
 
 const getAllGroupsService = async (paginationData: {
   limit: number;
@@ -37,33 +38,38 @@ const getGroupByIdService = async (groupId: string) => {
   return group;
 };
 
-const createGroupService = async (groupData: {
-  groupName: string;
-  createdBy: mongoose.Types.ObjectId;
-  isPrivate?: string;
-  groupCover?: string;
-}): Promise<TServiceResult<TGroup>> => {
-  const { groupName, createdBy, isPrivate, groupCover } = groupData;
+const createGroupService = async (
+  userId: string,
+  groupData: {
+    groupName: string;
+    createdBy: mongoose.Types.ObjectId;
+    isPrivate?: string;
+    groupCover?: string;
+  }
+) => {
+  const user = await User.findById(userId);
+
+  doesResourceExists(user, "You are not authorized to create a group");
+
+  const { groupName, isPrivate, groupCover } = groupData;
+
   const group = new Group({
     groupName,
-    createdBy,
-    isPrivate: isPrivate === "true" ? true : false,
+    createdBy: userId,
+    isPrivate,
     groupCover: groupCover || "",
   });
 
-  if (!group) {
-    const error = new AppError(
-      "An error occured during creating the group, please try again later",
-      400,
-      httpStatusText.FAIL
-    );
-    return { error, type: "error" };
-  }
+  const addUserToGroupMembers = new GroupMembership({
+    group: group._id,
+    user: userId,
+    role: "admin",
+  });
 
-  group.groupMembers.push(createdBy);
-  group.admins.push(createdBy);
-  group.save();
-  return { data: group, type: "success" };
+  await group.save();
+  await addUserToGroupMembers.save();
+
+  return group;
 };
 
 const updateGroupService = async (

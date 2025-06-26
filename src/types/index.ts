@@ -12,6 +12,8 @@ import TFriendRequestStatus from "./TFriendRequestStatus";
 import TFriendRequest from "./TFriendRequest";
 import TFriendship from "./TFriendship";
 import TBlock from "./TBlock";
+import TGroupMembership from "./TGroupMembership";
+
 export {
   TAppError,
   TCurrentUser,
@@ -27,4 +29,5 @@ export {
   TFriendRequest,
   TFriendship,
   TBlock,
+  TGroupMembership,
 };

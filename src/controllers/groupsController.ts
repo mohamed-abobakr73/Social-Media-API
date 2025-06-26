@@ -41,21 +41,18 @@ const createGroup = asyncWrapper(
     res: Response,
     next: NextFunction
   ): Promise<Response | void> => {
+    const { userId } = req.currentUser!;
     const groupCover = req.file?.path;
 
-    const createGroupResult = await groupsServices.createGroupService({
+    const group = await groupsServices.createGroupService(userId, {
       ...req.body,
       groupCover,
     });
 
-    if (createGroupResult.type === "error") {
-      return next(createGroupResult.error);
-    } else {
-      return res.status(201).json({
-        status: httpStatusText.SUCCESS,
-        data: { group: createGroupResult.data },
-      });
-    }
+    return res.status(201).json({
+      status: httpStatusText.SUCCESS,
+      data: { group },
+    });
   }
 );
 

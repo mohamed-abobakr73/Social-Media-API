@@ -9,12 +9,9 @@ const createGroupValidation = () => {
       .withMessage("Group name must be at least 4 characters long")
       .isLength({ max: 20 })
       .withMessage("Group name must be at most 20 characters long"),
-    body("createdBy").notEmpty().withMessage("Created by is required"),
     body("isPrivate")
-      .optional()
-      .customSanitizer((value) => value.toLowerCase())
-      .isIn(["true", "false"])
-      .withMessage("Is private value must be true or false"),
+      .isBoolean()
+      .withMessage("Is private must be a boolean value"),
   ];
 };
 

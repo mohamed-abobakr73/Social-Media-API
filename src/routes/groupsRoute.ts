@@ -37,7 +37,6 @@ groupsRouter
   .route("/")
   .post(
     verifyToken,
-    isAllowed("user", "superAdmin"),
     upload.single("cover"),
     createGroupValidation(),
     validateRequestBody,
