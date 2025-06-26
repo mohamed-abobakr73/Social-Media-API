@@ -66,8 +66,8 @@ groupsRouter.route("/:groupId/join").post(verifyToken, joinGroup);
 
 // Handle join request
 groupsRouter
-  .route("/:groupId/join-requests")
-  .post(
+  .route("/join-requests/:joinRequestId")
+  .patch(
     verifyToken,
     handleJoinRequestValidation(),
     validateRequestBody,

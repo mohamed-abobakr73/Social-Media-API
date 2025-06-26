@@ -9,6 +9,7 @@ import { TGroup } from "../types";
 import paginationResult from "../utils/paginationResult";
 import doesResourceExists from "../utils/doesResourceExists";
 import { GroupJoinRequests, GroupMembership } from "../models";
+import assertUserIsAllowed from "../utils/assertUserIsAllowed";
 
 const addGroupMembership = async (
   groupId: string,
@@ -52,6 +53,38 @@ const checkIfUserMadeJoinRequest = async (groupId: string, userId: string) => {
   doesResourceExists(
     !userAlreadyMadeRequest,
     "You have already made a join request to this group"
+  );
+};
+
+const checkCurrentJoinRequestStatus = (joinRequestStatus: string) => {
+  if (joinRequestStatus !== "pending") {
+    const error = new AppError(
+      "This request has already been handled",
+      400,
+      httpStatusText.ERROR
+    );
+    throw error;
+  }
+};
+
+const checkCurrentUserRoleInGroup = async (groupId: string, userId: string) => {
+  const currentUserRole = await GroupMembership.findOne(
+    {
+      group: groupId,
+      user: userId,
+    },
+    { role: 1 }
+  );
+
+  doesResourceExists(
+    currentUserRole,
+    "You are not authorized to handle a join request"
+  );
+
+  assertUserIsAllowed(
+    "admin",
+    currentUserRole.role,
+    "You are not authorized to handle a join request"
   );
 };
 
@@ -242,71 +275,40 @@ const joinGroupService = async (
   return joinStatus;
 };
 
-const handleJoinRequestsService = async (requestData: {
-  groupId: string;
-  adminId: string;
-  requestingUserId: string;
-  status: "accepted" | "declined";
-}) => {
-  const { groupId, adminId, requestingUserId, status } = requestData;
-  const group = await Group.findById(groupId);
-  const admin = await User.findById(adminId);
-  const requestingUser = await User.findById(requestingUserId);
+const handleJoinRequestsService = async (
+  userId: string,
+  joinRequestId: string,
+  status: "accepted" | "declined"
+) => {
+  const user = await User.findById(userId);
 
-  if (!group) {
-    const error = new AppError("Invalid group id", 400, httpStatusText.ERROR);
-    return { error, type: "error" };
-  }
-  if (!admin) {
-    const error = new AppError("Invalid admin id", 400, httpStatusText.ERROR);
-    return { error, type: "error" };
-  }
-  if (!requestingUser) {
-    const error = new AppError(
-      "Invalid requesting user id",
-      400,
-      httpStatusText.ERROR
-    );
-    return { error, type: "error" };
-  }
+  doesResourceExists(user, "You are not authorized to handle a join request");
 
-  // Checking if the requesting user actually made a request
-  const userReallyRequestedToJoin = group.joinRequests.find(
-    (request) => request.toString() === requestingUserId
-  );
-  if (!userReallyRequestedToJoin) {
-    const error = new AppError(
-      "Invalid join request",
-      400,
-      httpStatusText.ERROR
-    );
-    return { error, type: "error" };
+  const joinRequest = await GroupJoinRequests.findOne({
+    _id: joinRequestId,
+  });
+
+  doesResourceExists(joinRequest, "Request not found");
+
+  checkCurrentJoinRequestStatus(joinRequest.status);
+
+  checkCurrentUserRoleInGroup(joinRequest.group.toString(), userId);
+
+  switch (status) {
+    case "accepted":
+      await addGroupMembership(
+        joinRequest.group.toString(),
+        user._id.toString()
+      );
+      break;
+    case "declined":
+      break;
   }
 
-  // Checking if the user who is handling the request is an admin
-  const isHandlingUserAdmin = group.admins.find(
-    (admin) => admin.toString() === adminId
-  );
-  if (!isHandlingUserAdmin) {
-    const error = new AppError(
-      "You are not an admin in this group to accept or decline join requests",
-      400,
-      httpStatusText.ERROR
-    );
-    return { error, type: "error" };
-  }
+  joinRequest.status = status;
+  joinRequest.respondedBy = user._id;
 
-  //   group.joinRequests = group.joinRequests.filter(
-  //     (request) => request.toString() !== requestingUserId
-  //   );
-  //   if (status === "accepted") {
-  //     group.groupMembers.push(requestingUser._id);
-  //     await group.save();
-  //     return { type: "success" };
-  //   } else {
-  //     await group.save();
-  //     return { type: "success" };
-  //   }
+  await joinRequest.save();
 };
 
 const leaveGroupService = async (

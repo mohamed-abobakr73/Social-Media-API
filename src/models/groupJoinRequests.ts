@@ -14,7 +14,7 @@ const groupJoinRequestsSchema = new mongoose.Schema<TGroupJoinRequests>({
   },
   status: {
     type: String,
-    enum: ["pending", "approved", "rejected"],
+    enum: ["pending", "accepted", "declined"],
     default: "pending",
   },
   requestedAt: { type: Date, default: Date.now },

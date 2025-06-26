@@ -142,19 +142,20 @@ const joinGroup = asyncWrapper(
 
 const handleJoinRequests = asyncWrapper(
   async (req: Request, res: Response, next: NextFunction) => {
-    const { groupId } = req.params;
+    const { userId } = req.currentUser!;
+    const { joinRequestId } = req.params;
     const { status } = req.body;
 
-    const handleJoinRequestsResult =
-      await groupsServices.handleJoinRequestsService({ groupId, ...req.body });
-    //   if (handleJoinRequestsResult.type === "error") {
-    //     return next(handleJoinRequestsResult.error);
-    //   } else {
-    //     return res.status(200).json({
-    //       status: httpStatusText.SUCCESS,
-    //       data: { message: `You have ${status} this request successfully` },
-    //     });
-    //   }
+    await groupsServices.handleJoinRequestsService(
+      userId,
+      joinRequestId,
+      status
+    );
+
+    return res.status(200).json({
+      status: httpStatusText.SUCCESS,
+      data: { message: `You have ${status} this request successfully` },
+    });
   }
 );
 

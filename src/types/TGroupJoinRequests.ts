@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 type TGroupJoinRequests = {
   group: mongoose.Types.ObjectId;
   user: mongoose.Types.ObjectId;
-  status: "pending" | "approved" | "rejected";
+  status: "pending" | "accepted" | "declined";
   requestedAt: Date;
   respondedAt: Date;
   respondedBy: mongoose.Types.ObjectId;
