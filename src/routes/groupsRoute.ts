@@ -14,7 +14,6 @@ import {
 import {
   createGroupValidation,
   verifyToken,
-  isAllowed,
   joinGroupValidation,
   handleJoinRequestValidation,
   userIdValidation,
@@ -81,9 +80,7 @@ groupsRouter
   );
 
 // Leave group
-groupsRouter
-  .route("/:groupId/leave")
-  .post(verifyToken, userIdValidation(), validateRequestBody, leaveGroup);
+groupsRouter.route("/:groupId/leave").delete(verifyToken, leaveGroup);
 
 // Report a group
 groupsRouter

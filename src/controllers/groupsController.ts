@@ -202,26 +202,16 @@ const handleJoinRequests = asyncWrapper(
 );
 
 const leaveGroup = asyncWrapper(
-  async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<Response | void> => {
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { userId } = req.currentUser!;
     const { groupId } = req.params;
-    const { userId } = req.body;
 
-    const leaveGroupResult = await groupsServices.leaveGroupService(
-      userId,
-      groupId
-    );
-    if (leaveGroupResult.type === "error") {
-      return next(leaveGroupResult.error);
-    } else {
-      return res.status(200).json({
-        status: httpStatusText.SUCCESS,
-        data: { message: "You have left this group successfully" },
-      });
-    }
+    await groupsServices.leaveGroupService(userId, groupId);
+
+    return res.status(200).json({
+      status: httpStatusText.SUCCESS,
+      data: { message: "You have left this group successfully" },
+    });
   }
 );
 

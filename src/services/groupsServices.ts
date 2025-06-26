@@ -24,12 +24,31 @@ const addGroupMembership = async (
   await membership.save();
 };
 
+const removeGroupMembership = async (groupId: string, userId: string) => {
+  const deleteResult = await GroupMembership.deleteOne({
+    group: groupId,
+    user: userId,
+  });
+
+  doesResourceExists(
+    deleteResult.deletedCount,
+    "You are not a member of this group"
+  );
+};
+
 const addGroupJoinRequest = async (groupId: string, userId: string) => {
   const joinRequest = new GroupJoinRequests({
     group: groupId,
     user: userId,
   });
   await joinRequest.save();
+};
+
+const removeGroupJoinRequest = async (groupId: string, userId: string) => {
+  await GroupJoinRequests.deleteOne({
+    group: groupId,
+    user: userId,
+  });
 };
 
 const checkIfUserAlreadyMember = async (groupId: string, userId: string) => {
@@ -92,6 +111,17 @@ const checkGroupPrivacy = (groupPrivacy: boolean) => {
   if (!groupPrivacy) {
     const error = new AppError(
       "This group is not private",
+      400,
+      httpStatusText.ERROR
+    );
+    throw error;
+  }
+};
+
+const checkIfUserIsGroupOwner = (groupOwnerId: string, userId: string) => {
+  if (groupOwnerId === userId) {
+    const error = new AppError(
+      "Group owner can't leave the group",
       400,
       httpStatusText.ERROR
     );
@@ -344,6 +374,31 @@ const joinGroupService = async (
   return joinStatus;
 };
 
+const cancelJoinGroupRequestService = async (
+  userId: string,
+  joinRequestId: string
+) => {
+  const user = await User.findById(userId);
+
+  doesResourceExists(user, "You are not authorized to cancel a join request");
+
+  const joinRequest = await GroupJoinRequests.findOne({
+    _id: joinRequestId,
+  });
+
+  doesResourceExists(joinRequest, "Request not found");
+
+  assertUserIsAllowed(
+    joinRequest.user.toString(),
+    userId,
+    "You are not authorized to cancel this join request"
+  );
+
+  await GroupJoinRequests.deleteOne({
+    _id: joinRequest._id,
+  });
+};
+
 const handleJoinRequestsService = async (
   userId: string,
   joinRequestId: string,
@@ -380,50 +435,18 @@ const handleJoinRequestsService = async (
   await joinRequest.save();
 };
 
-const leaveGroupService = async (
-  userId: string,
-  groupId: string
-): Promise<TServiceResult<TGroup>> => {
+const leaveGroupService = async (userId: string, groupId: string) => {
   const user = await User.findById(userId);
   const group = await Group.findById(groupId);
-  if (!user) {
-    const error = new AppError("Invalid user id", 400, httpStatusText.ERROR);
-    return { error, type: "error" };
-  }
-  if (!group) {
-    const error = new AppError("Invalid user id", 400, httpStatusText.ERROR);
-    return { error, type: "error" };
-  }
 
-  // Checking if the user is really a member in the group
-  // const isUserMember = group.groupMembers.find(
-  //   (member) => member.toString() === userId
-  // );
-  // if (!isUserMember) {
-  //   const error = new AppError(
-  //     "You are not a member of this group",
-  //     400,
-  //     httpStatusText.ERROR
-  //   );
-  //   return { error, type: "error" };
-  // }
+  doesResourceExists(user, "You are not authorized to leave a group");
+  doesResourceExists(group, "Group not found");
 
-  // user.groups = user.groups.filter((group) => group.toString() !== groupId);
-  // group.groupMembers = group.groupMembers.filter(
-  //   (member) => member.toString() !== userId
-  // );
-  await user.save();
-  await group.save();
-  const addNotificationResult =
-    await notificationsServices.addNotificationService(
-      "leaveGroup",
-      group.createdBy,
-      { username: user.username, content: group.groupName }
-    );
-  if (addNotificationResult.type === "error") {
-    return { error: addNotificationResult.error!, type: "error" };
-  }
-  return { type: "success" };
+  checkIfUserIsGroupOwner(group.createdBy.toString(), userId);
+
+  await removeGroupMembership(groupId, userId);
+
+  await removeGroupJoinRequest(groupId, userId);
 };
 
 export default {
@@ -435,6 +458,7 @@ export default {
   updateGroupService,
   deleteGroupService,
   joinGroupService,
+  cancelJoinGroupRequestService,
   handleJoinRequestsService,
   leaveGroupService,
 };
