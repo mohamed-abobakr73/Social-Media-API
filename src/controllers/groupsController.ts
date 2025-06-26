@@ -2,29 +2,23 @@ import { Request, Response, NextFunction } from "express";
 import asyncWrapper from "../middlewares/asyncWrapper";
 import groupsServices from "../services/groupsServices";
 import httpStatusText from "../utils/httpStatusText";
+import paginationQuery from "../utils/paginationQuery";
 
 const getAllGroups = asyncWrapper(
-  async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<Response | void> => {
-    const query = req.query as { limit?: string; page?: string };
-    const limit = parseInt(query.limit || "10", 10);
-    const page = parseInt(query.page || "1", 10);
-    const skip = (page - 1) * limit;
-    const getGroupsResult = await groupsServices.getAllGroupsService({
-      limit,
-      skip,
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { limit, skip } = paginationQuery(req.query);
+
+    const { groups, paginationInfo } = await groupsServices.getAllGroupsService(
+      {
+        limit,
+        skip,
+      }
+    );
+
+    return res.status(200).json({
+      status: httpStatusText.SUCCESS,
+      data: { groups, paginationInfo },
     });
-    if (getGroupsResult.type === "error") {
-      return next(getGroupsResult.error);
-    } else {
-      return res.status(200).json({
-        status: httpStatusText.SUCCESS,
-        data: { groups: getGroupsResult.data },
-      });
-    }
   }
 );
 

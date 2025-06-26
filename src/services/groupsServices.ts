@@ -6,15 +6,20 @@ import { TServiceResult } from "../types/serviceResult";
 import { User } from "../models/usersModel";
 import notificationsServices from "./notificationsServices";
 import { TGroup } from "../types";
+import paginationResult from "../utils/paginationResult";
 
 const getAllGroupsService = async (paginationData: {
   limit: number;
   skip: number;
-}): Promise<TServiceResult<TGroup[]>> => {
-  const groups = await Group.find({}, { __v: 0 })
-    .limit(paginationData.limit)
-    .skip(paginationData.skip);
-  return { data: groups, type: "success" };
+}) => {
+  const { limit, skip } = paginationData;
+  const groups = await Group.find({}, { __v: 0 }).limit(limit).skip(skip);
+
+  const totalCount = await Group.countDocuments();
+
+  const paginationInfo = paginationResult(totalCount, skip, limit);
+
+  return { groups, paginationInfo };
 };
 
 const getGroupByIdService = async (
