@@ -23,21 +23,15 @@ const getAllGroups = asyncWrapper(
 );
 
 const getGroupById = asyncWrapper(
-  async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<Response | void> => {
+  async (req: Request, res: Response, next: NextFunction) => {
     const { groupId } = req.params;
-    const getGroupResult = await groupsServices.getGroupByIdService(groupId);
-    if (getGroupResult.type === "error") {
-      return next(getGroupResult.error);
-    } else {
-      return res.status(200).json({
-        status: httpStatusText.SUCCESS,
-        data: { group: getGroupResult.data },
-      });
-    }
+
+    const group = await groupsServices.getGroupByIdService(groupId);
+
+    return res.status(200).json({
+      status: httpStatusText.SUCCESS,
+      data: { group },
+    });
   }
 );
 

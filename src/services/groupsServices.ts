@@ -7,6 +7,7 @@ import { User } from "../models/usersModel";
 import notificationsServices from "./notificationsServices";
 import { TGroup } from "../types";
 import paginationResult from "../utils/paginationResult";
+import doesResourceExists from "../utils/doesResourceExists";
 
 const getAllGroupsService = async (paginationData: {
   limit: number;
@@ -22,15 +23,18 @@ const getAllGroupsService = async (paginationData: {
   return { groups, paginationInfo };
 };
 
-const getGroupByIdService = async (
-  groupId: string
-): Promise<TServiceResult<TGroup>> => {
-  const group = await Group.findById(groupId);
-  if (!group) {
-    const error = new AppError("Invalid group id", 400, httpStatusText.ERROR);
-    return { error, type: "error" };
-  }
-  return { data: group, type: "success" };
+const getGroupByIdService = async (groupId: string) => {
+  const group = await Group.findById(groupId, {
+    __v: 0,
+    reports: 0,
+    isDeleted: 0,
+    joinRequests: 0,
+    banned: 0,
+  });
+
+  doesResourceExists(group, "Group not found");
+
+  return group;
 };
 
 const createGroupService = async (groupData: {
