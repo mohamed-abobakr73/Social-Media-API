@@ -9,12 +9,10 @@ import { TPostType } from "../types";
 const getAllPosts = asyncWrapper(
   async (req: Request, res: Response, next: NextFunction) => {
     const paginationParams = paginationQuery(req.query);
-    const type =
-      (req.query as typeof req.query.status) === "string"
-        ? (req.query.type as TPostType)
-        : undefined;
-
-    const { postsSourceId } = req.params;
+    const { type, postsSourceId } = req.query as {
+      type: TPostType;
+      postsSourceId: string;
+    };
 
     const posts = await postsServices.getAllPostsService(
       type!,
@@ -24,7 +22,7 @@ const getAllPosts = asyncWrapper(
 
     return res.status(200).json({
       status: httpStatusText.SUCCESS,
-      data: { posts },
+      data: posts,
     });
   }
 );

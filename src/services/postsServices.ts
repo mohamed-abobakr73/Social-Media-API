@@ -20,12 +20,17 @@ const getAllPostsService = async (
   let posts: TPost[] = [];
   let postsCount: number;
 
+  console.log(postSourceId);
+
   switch (type) {
     case "user":
       const user = await User.exists({ _id: postSourceId });
       doesResourceExists(user, "User not found");
 
-      posts = await Post.find({ postOwnerId: postSourceId }, { __V: 0 })
+      posts = await Post.find(
+        { postOwnerId: postSourceId, postOwnerType: "user" },
+        { __v: 0 }
+      )
         .limit(limit)
         .skip(skip);
 
@@ -36,7 +41,7 @@ const getAllPostsService = async (
       const group = await Group.exists({ _id: postSourceId });
       doesResourceExists(!group, "Group not found");
 
-      posts = await Post.find({ postOwnerId: postSourceId }, { __V: 0 })
+      posts = await Post.find({ postOwnerId: postSourceId }, { __v: 0 })
         .limit(limit)
         .skip(skip);
 
@@ -47,7 +52,7 @@ const getAllPostsService = async (
       const page = await Page.exists({ _id: postSourceId });
       doesResourceExists(!page, "Page not found");
 
-      posts = await Post.find({ postOwnerId: postSourceId }, { __V: 0 })
+      posts = await Post.find({ postOwnerId: postSourceId }, { __v: 0 })
         .limit(limit)
         .skip(skip);
 
@@ -55,7 +60,7 @@ const getAllPostsService = async (
       break;
   }
 
-  const paginationInfo = paginationResult(posts.length, skip, limit);
+  const paginationInfo = paginationResult(postsCount, skip, limit);
 
   return { posts, paginationInfo };
 };
@@ -135,6 +140,8 @@ const createPostService = async (postData: {
     postOwnerType: type,
     postOwnerId,
   });
+
+  post.originalPostId = post._id;
 
   await post.save();
   return post;
