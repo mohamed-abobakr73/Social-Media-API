@@ -61,15 +61,11 @@ const getAllPostsService = async (
   return { posts, paginationInfo };
 };
 
-const getPostByIdService = async (
-  postId: string
-): Promise<TServiceResult<TPost>> => {
+const getPostByIdService = async (postId: string) => {
   const post = await Post.findById(postId, { __v: 0 });
-  if (!post) {
-    const error = new AppError("Invalid post id", 400, httpStatusText.ERROR);
-    return { error, type: "error" };
-  }
-  return { data: post, type: "success" };
+  doesResourceExists(post, "Post not found");
+
+  return post;
 };
 
 const createPostService = async (postData: {

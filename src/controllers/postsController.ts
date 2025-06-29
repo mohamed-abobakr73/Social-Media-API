@@ -36,15 +36,13 @@ const getPostById = asyncWrapper(
     next: NextFunction
   ): Promise<Response | void> => {
     const { postId } = req.params;
-    const getPostResult = await postsServices.getPostByIdService(postId);
-    if (getPostResult.type === "error") {
-      return next(getPostResult.error);
-    } else {
-      return res.status(200).json({
-        status: httpStatusText.SUCCESS,
-        data: { post: getPostResult.data },
-      });
-    }
+
+    const post = await postsServices.getPostByIdService(postId);
+
+    return res.status(200).json({
+      status: httpStatusText.SUCCESS,
+      data: { post },
+    });
   }
 );
 
