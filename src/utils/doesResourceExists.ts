@@ -4,10 +4,11 @@ import httpStatusText from "./httpStatusText";
 function doesResourceExists<T>(
   resource: T,
   message: string,
-  status: number = 404
+  status: number = 404,
+  statusText: string = httpStatusText.NOT_FOUND
 ): asserts resource is NonNullable<T> {
   if (!resource) {
-    throw new AppError(message, status, httpStatusText.NOT_FOUND);
+    throw new AppError(message, status, statusText);
   }
 }
 
