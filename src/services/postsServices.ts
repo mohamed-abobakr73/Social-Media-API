@@ -8,6 +8,7 @@ import notificationsServices from "./notificationsServices";
 import { TPostType, TPaginationData, TPost } from "../types";
 import paginationResult from "../utils/paginationResult";
 import doesResourceExists from "../utils/doesResourceExists";
+import groupsServices from "./groupsServices";
 
 const getAllPostsService = async (
   type: TPostType,
@@ -102,6 +103,18 @@ const createPostService = async (postData: {
     case "group":
       const group = await Group.findById(postOwnerId);
       doesResourceExists(group, "Group not found");
+
+      const userGroupMembership =
+        await groupsServices.getUserGroupMembershipService(
+          group._id.toString(),
+          author
+        );
+      doesResourceExists(
+        userGroupMembership,
+        "You are not a member of this group",
+        400,
+        httpStatusText.FAIL
+      );
       break;
 
     case "page":
