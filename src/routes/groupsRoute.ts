@@ -4,6 +4,8 @@ import {
   deleteGroup,
   getAllGroups,
   getGroupById,
+  getGroupMembers,
+  getJoinRequests,
   handleJoinRequests,
   joinGroup,
   leaveGroup,
@@ -12,7 +14,6 @@ import {
 import {
   createGroupValidation,
   verifyToken,
-  isAllowed,
   joinGroupValidation,
   handleJoinRequestValidation,
   userIdValidation,
@@ -32,12 +33,15 @@ groupsRouter.route("/").get(getAllGroups);
 // Get group by ID
 groupsRouter.route("/:groupId").get(getGroupById);
 
+groupsRouter.route("/:groupId/members").get(getGroupMembers);
+
+groupsRouter.route("/:groupId/join-requests").get(verifyToken, getJoinRequests);
+
 // Create group
 groupsRouter
   .route("/")
   .post(
     verifyToken,
-    isAllowed("user", "superAdmin"),
     upload.single("cover"),
     createGroupValidation(),
     validateRequestBody,
@@ -63,14 +67,12 @@ groupsRouter
 groupsRouter.route("/:groupId").delete(verifyToken, deleteGroup);
 
 // Join group
-groupsRouter
-  .route("/:groupId/join")
-  .post(verifyToken, joinGroupValidation(), validateRequestBody, joinGroup);
+groupsRouter.route("/:groupId/join").post(verifyToken, joinGroup);
 
 // Handle join request
 groupsRouter
-  .route("/:groupId/join-requests")
-  .post(
+  .route("/join-requests/:joinRequestId")
+  .patch(
     verifyToken,
     handleJoinRequestValidation(),
     validateRequestBody,
@@ -78,9 +80,7 @@ groupsRouter
   );
 
 // Leave group
-groupsRouter
-  .route("/:groupId/leave")
-  .post(verifyToken, userIdValidation(), validateRequestBody, leaveGroup);
+groupsRouter.route("/:groupId/leave").delete(verifyToken, leaveGroup);
 
 // Report a group
 groupsRouter

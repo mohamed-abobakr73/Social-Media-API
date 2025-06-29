@@ -1,10 +1,10 @@
 import mongoose from "mongoose";
-import { TFriendRequestStatus } from "../types";
+import { TStatus } from "../types";
 
 type TFriendRequest = {
   sender: mongoose.Types.ObjectId;
   sentTo: mongoose.Types.ObjectId;
-  status: TFriendRequestStatus;
+  status: TStatus;
   uniqueRequest: string;
 };
 

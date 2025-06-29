@@ -44,8 +44,6 @@ const createUserService = async (userData: Partial<IUser>) => {
 
   await user.save();
 
-  doesResourceExists(user, "Error creating user");
-
   const token = createToken(user);
 
   return { user, token };
@@ -56,7 +54,7 @@ const loginService = async (loginData: { email: string; password: string }) => {
 
   const user = await User.findOne({ email }).select("+password -__v");
 
-  doesResourceExists(user, "Invalid credentials");
+  doesResourceExists(user, "Invalid credentials", 400, httpStatusText.FAIL);
 
   compareHashedItem(password, user.password, "Invalid credentials");
 
@@ -83,7 +81,7 @@ const updateUserService = async (
     { new: true }
   );
 
-  doesResourceExists(user, "Error updating user");
+  doesResourceExists(user, "Error updating user", 400, httpStatusText.FAIL);
 
   return user;
 };
@@ -91,12 +89,14 @@ const updateUserService = async (
 const deleteUserService = async (userId: string) => {
   const deletedUser = await User.deleteOne({ _id: userId });
 
-  doesResourceExists(deletedUser.deletedCount, "Error deleting user");
+  doesResourceExists(
+    deletedUser.deletedCount,
+    "Error deleting user",
+    400,
+    httpStatusText.FAIL
+  );
 };
 
-// TODO needs validation to check if the group exists, also add the user to the groups members list
-// This goes for the rest of the functions below
-// Add the accept and decline for the friend requests DONE
 const joinGroupService = async (
   userId: string,
   groupData: IUserGroup

@@ -8,10 +8,14 @@ import TPage from "./TPage";
 import TComment from "./TComment";
 import TPost from "./TPost";
 import TGenerateJwt from "./TGenerateJwt";
-import TFriendRequestStatus from "./TFriendRequestStatus";
+import TStatus from "./TStatus";
 import TFriendRequest from "./TFriendRequest";
 import TFriendship from "./TFriendship";
 import TBlock from "./TBlock";
+import TGroupMembership from "./TGroupMembership";
+import TGroupJoinRequests from "./TGroupJoinRequests";
+import TPaginationData from "./TPaginationData";
+
 export {
   TAppError,
   TCurrentUser,
@@ -23,8 +27,11 @@ export {
   TComment,
   TPost,
   TGenerateJwt,
-  TFriendRequestStatus,
+  TStatus,
   TFriendRequest,
   TFriendship,
   TBlock,
+  TGroupMembership,
+  TGroupJoinRequests,
+  TPaginationData,
 };

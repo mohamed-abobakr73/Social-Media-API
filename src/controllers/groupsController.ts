@@ -2,48 +2,78 @@ import { Request, Response, NextFunction } from "express";
 import asyncWrapper from "../middlewares/asyncWrapper";
 import groupsServices from "../services/groupsServices";
 import httpStatusText from "../utils/httpStatusText";
+import paginationQuery from "../utils/paginationQuery";
+import { TStatus } from "../types";
 
 const getAllGroups = asyncWrapper(
-  async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<Response | void> => {
-    const query = req.query as { limit?: string; page?: string };
-    const limit = parseInt(query.limit || "10", 10);
-    const page = parseInt(query.page || "1", 10);
-    const skip = (page - 1) * limit;
-    const getGroupsResult = await groupsServices.getAllGroupsService({
-      limit,
-      skip,
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { limit, skip } = paginationQuery(req.query);
+
+    const { groups, paginationInfo } = await groupsServices.getAllGroupsService(
+      {
+        limit,
+        skip,
+      }
+    );
+
+    return res.status(200).json({
+      status: httpStatusText.SUCCESS,
+      data: { groups, paginationInfo },
     });
-    if (getGroupsResult.type === "error") {
-      return next(getGroupsResult.error);
-    } else {
-      return res.status(200).json({
-        status: httpStatusText.SUCCESS,
-        data: { groups: getGroupsResult.data },
-      });
-    }
   }
 );
 
 const getGroupById = asyncWrapper(
-  async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<Response | void> => {
+  async (req: Request, res: Response, next: NextFunction) => {
     const { groupId } = req.params;
-    const getGroupResult = await groupsServices.getGroupByIdService(groupId);
-    if (getGroupResult.type === "error") {
-      return next(getGroupResult.error);
-    } else {
-      return res.status(200).json({
-        status: httpStatusText.SUCCESS,
-        data: { group: getGroupResult.data },
-      });
-    }
+
+    const group = await groupsServices.getGroupByIdService(groupId);
+
+    return res.status(200).json({
+      status: httpStatusText.SUCCESS,
+      data: { group },
+    });
+  }
+);
+
+const getGroupMembers = asyncWrapper(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { groupId } = req.params;
+    const paginationParams = paginationQuery(req.query);
+
+    const { groupMembers, paginationInfo } =
+      await groupsServices.getGroupMembersService(groupId, paginationParams);
+
+    return res.status(200).json({
+      status: httpStatusText.SUCCESS,
+      data: { members: groupMembers, paginationInfo },
+    });
+  }
+);
+
+const getJoinRequests = asyncWrapper(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { userId } = req.currentUser!;
+    const { groupId } = req.params;
+    const status =
+      typeof req.query.status === "string"
+        ? (req.query.status as TStatus)
+        : undefined;
+
+    const paginationParams = paginationQuery(req.query);
+
+    const { joinRequests, paginationInfo } =
+      await groupsServices.getJoinRequestsService(
+        userId,
+        groupId,
+        paginationParams,
+        status
+      );
+
+    return res.status(200).json({
+      status: httpStatusText.SUCCESS,
+      data: { joinRequests, paginationInfo },
+    });
   }
 );
 
@@ -53,21 +83,18 @@ const createGroup = asyncWrapper(
     res: Response,
     next: NextFunction
   ): Promise<Response | void> => {
+    const { userId } = req.currentUser!;
     const groupCover = req.file?.path;
 
-    const createGroupResult = await groupsServices.createGroupService({
+    const group = await groupsServices.createGroupService(userId, {
       ...req.body,
       groupCover,
     });
 
-    if (createGroupResult.type === "error") {
-      return next(createGroupResult.error);
-    } else {
-      return res.status(201).json({
-        status: httpStatusText.SUCCESS,
-        data: { group: createGroupResult.data },
-      });
-    }
+    return res.status(201).json({
+      status: httpStatusText.SUCCESS,
+      data: { group },
+    });
   }
 );
 
@@ -126,91 +153,73 @@ const deleteGroup = asyncWrapper(
   }
 );
 
+// TODO check the notifications thing
 const joinGroup = asyncWrapper(
   async (
     req: Request,
     res: Response,
     next: NextFunction
   ): Promise<Response | void> => {
+    const { userId } = req.currentUser!;
     const { groupId } = req.params;
-    const { userId, notfications } = req.body;
+    // const { notifications } = req.query;
 
     const joinGroupResult = await groupsServices.joinGroupService(
       userId,
-      groupId,
-      notfications
+      groupId
+      // notifications
     );
 
-    if (joinGroupResult.type === "error") {
-      return next(joinGroupResult.error);
-    } else {
-      if (joinGroupResult.status === "joined") {
-        return res.status(200).json({
-          status: httpStatusText.SUCCESS,
-          data: { message: "You have joined this group successfully" },
-        });
-      } else {
-        return res.status(200).json({
-          status: httpStatusText.SUCCESS,
-          data: {
-            message:
-              "You have made a join request to this group, admins will review your request",
-          },
-        });
-      }
-    }
+    return res.status(200).json({
+      status: httpStatusText.SUCCESS,
+      data: {
+        message:
+          joinGroupResult === "pending"
+            ? "You have sent a join request successfully, please wait for the admin to approve"
+            : "You have joined this group successfully",
+      },
+    });
   }
 );
 
 const handleJoinRequests = asyncWrapper(
-  async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<Response | void> => {
-    const { groupId } = req.params;
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { userId } = req.currentUser!;
+    const { joinRequestId } = req.params;
     const { status } = req.body;
 
-    const handleJoinRequestsResult =
-      await groupsServices.handleJoinRequestsService({ groupId, ...req.body });
-    if (handleJoinRequestsResult.type === "error") {
-      return next(handleJoinRequestsResult.error);
-    } else {
-      return res.status(200).json({
-        status: httpStatusText.SUCCESS,
-        data: { message: `You have ${status} this request successfully` },
-      });
-    }
+    await groupsServices.handleJoinRequestsService(
+      userId,
+      joinRequestId,
+      status
+    );
+
+    return res.status(200).json({
+      status: httpStatusText.SUCCESS,
+      data: { message: `You have ${status} this request successfully` },
+    });
   }
 );
 
 const leaveGroup = asyncWrapper(
-  async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<Response | void> => {
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { userId } = req.currentUser!;
     const { groupId } = req.params;
-    const { userId } = req.body;
 
-    const leaveGroupResult = await groupsServices.leaveGroupService(
-      userId,
-      groupId
-    );
-    if (leaveGroupResult.type === "error") {
-      return next(leaveGroupResult.error);
-    } else {
-      return res.status(200).json({
-        status: httpStatusText.SUCCESS,
-        data: { message: "You have left this group succesfully" },
-      });
-    }
+    await groupsServices.leaveGroupService(userId, groupId);
+
+    return res.status(200).json({
+      status: httpStatusText.SUCCESS,
+      data: { message: "You have left this group successfully" },
+    });
   }
 );
 
 export {
   getAllGroups,
   getGroupById,
+  getGroupMembers,
+  getJoinRequests,
   createGroup,
   updateGroup,
   deleteGroup,
