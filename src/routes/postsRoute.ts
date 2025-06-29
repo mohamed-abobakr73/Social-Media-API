@@ -28,9 +28,7 @@ import { addReport, removeReport } from "../controllers/reportsController";
 const postsRouter = Router();
 
 // Get All posts from [users, groups, pages];
-postsRouter
-  .route("/")
-  .get(getAllPostsValidation(), validateRequestBody, getAllPosts);
+postsRouter.route("/:postsSourceId").get(getAllPosts);
 
 // Get post by ID
 postsRouter.route("/:postId").get(getPostById);

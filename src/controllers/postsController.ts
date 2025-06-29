@@ -3,32 +3,29 @@ import asyncWrapper from "../middlewares/asyncWrapper";
 import postsServices from "../services/postsServices";
 import httpStatusText from "../utils/httpStatusText";
 import AppError from "../utils/AppError";
+import paginationQuery from "../utils/paginationQuery";
+import { TGetResourcePosts } from "../types";
 
 const getAllPosts = asyncWrapper(
-  async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<Response | void> => {
-    const { type, postSourceId } = req.body;
-    const query = req.query as { limit?: string; page?: string };
-    const limit = parseInt(query.limit || "10", 10);
-    const page = parseInt(query.page || "1", 10);
-    const skip = (page - 1) * limit;
+  async (req: Request, res: Response, next: NextFunction) => {
+    const paginationParams = paginationQuery(req.query);
+    const type =
+      (req.query as typeof req.query.status) === "string"
+        ? (req.query.type as TGetResourcePosts)
+        : undefined;
 
-    const getPostsResult = await postsServices.getAllPostsService(
-      type,
-      postSourceId,
-      { limit, skip }
+    const { postsSourceId } = req.params;
+
+    const posts = await postsServices.getAllPostsService(
+      type!,
+      postsSourceId,
+      paginationParams
     );
-    if (getPostsResult.type === "error") {
-      return next(getPostsResult.error);
-    } else {
-      return res.status(200).json({
-        status: httpStatusText.SUCCESS,
-        data: { posts: getPostsResult.data },
-      });
-    }
+
+    return res.status(200).json({
+      status: httpStatusText.SUCCESS,
+      data: { posts },
+    });
   }
 );
 

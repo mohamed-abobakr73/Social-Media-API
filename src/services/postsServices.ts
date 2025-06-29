@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose, { Model } from "mongoose";
 import { Post } from "../models/postsModel";
 import { User } from "../models/usersModel";
 import { Group } from "../models/groupsModel";
@@ -7,56 +7,58 @@ import httpStatusText from "../utils/httpStatusText";
 import { TServiceResult } from "../types/serviceResult";
 import { Page } from "../models/pagesModel";
 import notificationsServices from "./notificationsServices";
-import { TPost } from "../types";
+import { TGetResourcePosts, TPaginationData, TPost } from "../types";
+import paginationResult from "../utils/paginationResult";
+import doesResourceExists from "../utils/doesResourceExists";
 
 const getAllPostsService = async (
-  type: "user" | "group" | "page",
+  type: TGetResourcePosts,
   postSourceId: string,
-  paginationData: { limit: number; skip: number }
-): Promise<TServiceResult<TPost[]>> => {
+  paginationData: TPaginationData
+) => {
   const { limit, skip } = paginationData;
+
   let posts: TPost[] = [];
+  let postsCount: number;
+
   switch (type) {
     case "user":
+      const user = await User.findById(postSourceId);
+      doesResourceExists(user, "User not found");
+
       posts = await Post.find({ createdBy: postSourceId }, { __V: 0 })
         .limit(limit)
         .skip(skip);
+
+      postsCount = await Post.countDocuments({ createdBy: postSourceId });
       break;
+
     case "group":
       const group = await Group.findById(postSourceId);
-      if (!group) {
-        const error = new AppError(
-          "Invalid group id",
-          400,
-          httpStatusText.ERROR
-        );
-        return { error, type: "error" };
-      }
+      doesResourceExists(group, "Group not found");
+
       posts = await Post.find({ _id: { $in: group.posts } }, { __V: 0 })
         .limit(limit)
         .skip(skip);
+
+      postsCount = await Post.countDocuments({ _id: { $in: group.posts } });
       break;
+
     case "page": // TODO
       const page = await Page.findById(postSourceId);
-      if (!page) {
-        const error = new AppError(
-          "Invalid page id",
-          400,
-          httpStatusText.ERROR
-        );
-        return { error, type: "error" };
-      }
+      doesResourceExists(page, "Page not found");
+
       posts = await Post.find({ _id: { $in: page.posts } }, { __V: 0 })
         .limit(limit)
         .skip(skip);
+
+      postsCount = await Post.countDocuments({ _id: { $in: page.posts } });
       break;
   }
 
-  if (!posts) {
-    const error = new AppError("Invalid user id", 400, httpStatusText.ERROR);
-    return { error, type: "error" };
-  }
-  return { data: posts, type: "success" };
+  const paginationInfo = paginationResult(posts.length, skip, limit);
+
+  return { posts, paginationInfo };
 };
 
 const getPostByIdService = async (

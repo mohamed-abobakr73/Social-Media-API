@@ -15,6 +15,7 @@ import TBlock from "./TBlock";
 import TGroupMembership from "./TGroupMembership";
 import TGroupJoinRequests from "./TGroupJoinRequests";
 import TPaginationData from "./TPaginationData";
+import TGetResourcePosts from "./TGetResourcePosts";
 
 export {
   TAppError,
@@ -34,4 +35,5 @@ export {
   TGroupMembership,
   TGroupJoinRequests,
   TPaginationData,
+  TGetResourcePosts,
 };
