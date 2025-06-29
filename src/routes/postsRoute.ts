@@ -1,14 +1,14 @@
 import { Router } from "express";
 import {
-  addComment,
+  // addComment,
   createPost,
-  deleteComment,
-  deletePost,
+  // deleteComment,
+  // deletePost,
   getAllPosts,
   getPostById,
-  handleLikePost,
-  sharePost,
-  updatePost,
+  // handleLikePost,
+  // sharePost,
+  // updatePost,
 } from "../controllers/postsController";
 import {
   createPostValidation,
@@ -46,43 +46,43 @@ postsRouter
   );
 
 // Update post
-postsRouter
-  .route("/:postId")
-  .patch(verifyToken, updatePostValidation(), validateRequestBody, updatePost);
+// postsRouter
+//   .route("/:postId")
+//   .patch(verifyToken, updatePostValidation(), validateRequestBody, updatePost);
 
-// Remove a report
-postsRouter
-  .route("/reports")
-  .delete(removeReportValidation(), validateRequestBody, removeReport);
+// // Remove a report
+// postsRouter
+//   .route("/reports")
+//   .delete(removeReportValidation(), validateRequestBody, removeReport);
 
-// Delete post
-postsRouter
-  .route("/:postId")
-  .delete(verifyToken, userIdValidation(), validateRequestBody, deletePost);
+// // Delete post
+// postsRouter
+//   .route("/:postId")
+//   .delete(verifyToken, userIdValidation(), validateRequestBody, deletePost);
 
-// Handle like post
-postsRouter
-  .route("/:postId/likes")
-  .post(verifyToken, userIdValidation(), validateRequestBody, handleLikePost);
+// // Handle like post
+// postsRouter
+//   .route("/:postId/likes")
+//   .post(verifyToken, userIdValidation(), validateRequestBody, handleLikePost);
 
-// Add comment to post
-postsRouter
-  .route("/:postId/comments")
-  .post(verifyToken, addCommentValidation(), validateRequestBody, addComment);
+// // Add comment to post
+// postsRouter
+//   .route("/:postId/comments")
+//   .post(verifyToken, addCommentValidation(), validateRequestBody, addComment);
 
-// Delete comment
-postsRouter
-  .route("/:postId/comments/:commentId")
-  .delete(verifyToken, userIdValidation(), validateRequestBody, deleteComment);
+// // Delete comment
+// postsRouter
+//   .route("/:postId/comments/:commentId")
+//   .delete(verifyToken, userIdValidation(), validateRequestBody, deleteComment);
 
-// Share post
-postsRouter
-  .route("/:postId/share")
-  .post(verifyToken, userIdValidation(), validateRequestBody, sharePost);
+// // Share post
+// postsRouter
+//   .route("/:postId/share")
+//   .post(verifyToken, userIdValidation(), validateRequestBody, sharePost);
 
-// Report a post
-postsRouter
-  .route("/reports")
-  .post(addReportValidation(), validateRequestBody, addReport);
+// // Report a post
+// postsRouter
+//   .route("/reports")
+//   .post(addReportValidation(), validateRequestBody, addReport);
 
 export default postsRouter;
