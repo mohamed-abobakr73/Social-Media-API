@@ -59,7 +59,9 @@ const checkIfUserAlreadyMember = async (groupId: string, userId: string) => {
 
   doesResourceExists(
     !userAlreadyMember,
-    "You are already a member in this group"
+    "You are already a member in this group",
+    400,
+    httpStatusText.FAIL
   );
 };
 
@@ -71,7 +73,9 @@ const checkIfUserMadeJoinRequest = async (groupId: string, userId: string) => {
 
   doesResourceExists(
     !userAlreadyMadeRequest,
-    "You have already made a join request to this group"
+    "You have already made a join request to this group",
+    400,
+    httpStatusText.FAIL
   );
 };
 
@@ -97,7 +101,9 @@ const checkCurrentUserRoleInGroup = async (groupId: string, userId: string) => {
 
   doesResourceExists(
     currentUserRole,
-    "You are not authorized to handle a join request"
+    "You are not authorized to handle a join request",
+    401,
+    httpStatusText.FAIL
   );
 
   assertUserIsAllowed(
@@ -163,7 +169,12 @@ const getJoinRequestsService = async (
   const user = await User.findById(userId);
   const group = await Group.findById(groupId);
 
-  doesResourceExists(user, "You are not authorized to do this action");
+  doesResourceExists(
+    user,
+    "You are not authorized to do this action",
+    401,
+    httpStatusText.FAIL
+  );
   doesResourceExists(group, "Group not found");
 
   await checkCurrentUserRoleInGroup(groupId, userId);
@@ -225,7 +236,12 @@ const createGroupService = async (
 ) => {
   const user = await User.findById(userId);
 
-  doesResourceExists(user, "You are not authorized to create a group");
+  doesResourceExists(
+    user,
+    "You are not authorized to create a group",
+    401,
+    httpStatusText.FAIL
+  );
 
   const { groupName, isPrivate, groupCover } = groupData;
 
@@ -350,7 +366,12 @@ const joinGroupService = async (
   const user = await User.findById(userId);
   const group = await Group.findById(groupId);
 
-  doesResourceExists(user, "You are not authorized to join a group");
+  doesResourceExists(
+    user,
+    "You are not authorized to join a group",
+    401,
+    httpStatusText.FAIL
+  );
   doesResourceExists(group, "Group not found");
 
   const stringifiedGroupId: string = group._id.toString();
@@ -380,7 +401,12 @@ const cancelJoinGroupRequestService = async (
 ) => {
   const user = await User.findById(userId);
 
-  doesResourceExists(user, "You are not authorized to cancel a join request");
+  doesResourceExists(
+    user,
+    "You are not authorized to cancel a join request",
+    401,
+    httpStatusText.FAIL
+  );
 
   const joinRequest = await GroupJoinRequests.findOne({
     _id: joinRequestId,
@@ -406,7 +432,12 @@ const handleJoinRequestsService = async (
 ) => {
   const user = await User.findById(userId);
 
-  doesResourceExists(user, "You are not authorized to handle a join request");
+  doesResourceExists(
+    user,
+    "You are not authorized to handle a join request",
+    401,
+    httpStatusText.FAIL
+  );
 
   const joinRequest = await GroupJoinRequests.findOne({
     _id: joinRequestId,
@@ -439,7 +470,13 @@ const leaveGroupService = async (userId: string, groupId: string) => {
   const user = await User.findById(userId);
   const group = await Group.findById(groupId);
 
-  doesResourceExists(user, "You are not authorized to leave a group");
+  doesResourceExists(
+    user,
+    "You are not authorized to leave a group",
+    400,
+    httpStatusText.FAIL
+  );
+
   doesResourceExists(group, "Group not found");
 
   checkIfUserIsGroupOwner(group.createdBy.toString(), userId);

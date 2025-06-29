@@ -29,7 +29,9 @@ const checkIfBlockedRelationshipExists = async (
 
   doesResourceExists(
     !isUserBlocked,
-    "You can't send a friend request to this user"
+    "You can't send a friend request to this user",
+    400,
+    httpStatusText.FAIL
   );
 };
 
@@ -77,7 +79,12 @@ const getFriendRequestsService = async (
   type: "sent" | "received"
 ) => {
   const user = await User.findById(userId);
-  doesResourceExists(user, "You are not authorized to get friend requests");
+  doesResourceExists(
+    user,
+    "You are not authorized to get friend requests",
+    401,
+    httpStatusText.FAIL
+  );
   let query;
   let projection;
   let populatedField;
@@ -117,7 +124,12 @@ const createFriendshipService = async (userId: string, friendId: string) => {
     friend: friendId,
   });
 
-  doesResourceExists(friendship, "Error creating friendship");
+  doesResourceExists(
+    friendship,
+    "Error creating friendship",
+    400,
+    httpStatusText.FAIL
+  );
 
   return friendship;
 };
@@ -131,9 +143,19 @@ const sendFriendRequestService = async (
 
   preventSelfFriendRequest(senderId, recipientId);
 
-  doesResourceExists(sender, "You are not authorized to send a friend request");
+  doesResourceExists(
+    sender,
+    "You are not authorized to send a friend request",
+    401,
+    httpStatusText.FAIL
+  );
 
-  doesResourceExists(recipient, "Invalid friend request recipient id");
+  doesResourceExists(
+    recipient,
+    "Invalid friend request recipient id",
+    400,
+    httpStatusText.FAIL
+  );
 
   await checkIfBlockedRelationshipExists(senderId, recipientId);
 
@@ -161,13 +183,23 @@ const updateFriendRequestStatusService = async (
 ) => {
   const user = await User.findById(userId);
 
-  doesResourceExists(user, "You are not authorized to update a friend request");
+  doesResourceExists(
+    user,
+    "You are not authorized to update a friend request",
+    401,
+    httpStatusText.FAIL
+  );
 
   const { friendRequestId, status } = friendRequestUpdate;
 
   const friendRequest = await FriendRequest.findById(friendRequestId);
 
-  doesResourceExists(friendRequest, "Invalid friend request id");
+  doesResourceExists(
+    friendRequest,
+    "Invalid friend request id",
+    400,
+    httpStatusText.FAIL
+  );
 
   assertUserIsAllowed(friendRequest.sentTo.toString(), userId);
 
@@ -190,7 +222,12 @@ const cancelFriendRequestService = async (
 ) => {
   const user = await User.findById(userId);
 
-  doesResourceExists(user, "You are not authorized to cancel a friend request");
+  doesResourceExists(
+    user,
+    "You are not authorized to cancel a friend request",
+    401,
+    httpStatusText.FAIL
+  );
 
   const friendRequest = await FriendRequest.findById(friendRequestId);
 
@@ -204,14 +241,21 @@ const cancelFriendRequestService = async (
 
   doesResourceExists(
     deleteResult.deletedCount,
-    "Error canceling friend request"
+    "Error canceling friend request",
+    400,
+    httpStatusText.FAIL
   );
 };
 
 const getFriendshipsService = async (userId: string) => {
   const user = await User.findById(userId);
 
-  doesResourceExists(user, "You are not authorized to get a friendship");
+  doesResourceExists(
+    user,
+    "You are not authorized to get a friendship",
+    401,
+    httpStatusText.FAIL
+  );
 
   const friendships = await Friendship.find({
     $or: [{ user: userId }, { friend: userId }],
@@ -226,11 +270,21 @@ const deleteFriendshipService = async (
 ) => {
   const user = await User.findById(userId);
 
-  doesResourceExists(user, "You are not authorized to remove a friendship");
+  doesResourceExists(
+    user,
+    "You are not authorized to remove a friendship",
+    401,
+    httpStatusText.FAIL
+  );
 
   const friendship = await Friendship.findById(friendshipId);
 
-  doesResourceExists(friendship, "Invalid friendship id");
+  doesResourceExists(
+    friendship,
+    "Invalid friendship id",
+    400,
+    httpStatusText.FAIL
+  );
 
   isPartOfFriendship(
     { user: friendship.user.toString(), friend: friendship.friend.toString() },
@@ -239,7 +293,12 @@ const deleteFriendshipService = async (
 
   const deleteResult = await Friendship.deleteOne({ _id: friendship._id });
 
-  doesResourceExists(deleteResult.deletedCount, "Error removing friendship");
+  doesResourceExists(
+    deleteResult.deletedCount,
+    "Error removing friendship",
+    400,
+    httpStatusText.FAIL
+  );
 };
 
 export default {
