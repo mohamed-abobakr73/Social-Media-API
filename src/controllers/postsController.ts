@@ -66,39 +66,23 @@ const createPost = asyncWrapper(
   }
 );
 
-// const updatePost = asyncWrapper(
-//   async (
-//     req: Request,
-//     res: Response,
-//     next: NextFunction
-//   ): Promise<Response | void> => {
-//     if (Object.keys(req.params).length === 0) {
-//       const error = new AppError(
-//         "No data sent to update",
-//         400,
-//         httpStatusText.FAIL
-//       );
-//       return next(error);
-//     }
-//     const { postId } = req.params;
-//     const { userId, postTitle, postContent } = req.body;
+const updatePost = asyncWrapper(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { userId } = req.currentUser!;
+    const { postId } = req.params;
 
-//     const updatePostReslut = await postsServices.updatePostService(
-//       userId,
-//       postId,
-//       { postTitle, postContent }
-//     );
+    const updatedPost = await postsServices.updatePostService(
+      userId,
+      postId,
+      req.body
+    );
 
-//     if (updatePostReslut.type === "error") {
-//       return next(updatePostReslut.error);
-//     } else {
-//       return res.status(200).json({
-//         status: httpStatusText.SUCCESS,
-//         data: { updatedPost: updatePostReslut.data },
-//       });
-//     }
-//   }
-// );
+    return res.status(200).json({
+      status: httpStatusText.SUCCESS,
+      data: { updatedPost },
+    });
+  }
+);
 
 // const deletePost = asyncWrapper(
 //   async (
@@ -233,7 +217,7 @@ export {
   getAllPosts,
   getPostById,
   createPost,
-  // updatePost,
+  updatePost,
   // deletePost,
   // handleLikePost,
   // addComment,

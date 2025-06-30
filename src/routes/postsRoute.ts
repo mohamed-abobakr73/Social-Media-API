@@ -8,7 +8,7 @@ import {
   getPostById,
   // handleLikePost,
   // sharePost,
-  // updatePost,
+  updatePost,
 } from "../controllers/postsController";
 import {
   createPostValidation,
@@ -48,9 +48,9 @@ postsRouter
   );
 
 // Update post
-// postsRouter
-//   .route("/:postId")
-//   .patch(verifyToken, updatePostValidation(), validateRequestBody, updatePost);
+postsRouter
+  .route("/:postId")
+  .patch(verifyToken, updatePostValidation(), validateRequestBody, updatePost);
 
 // // Remove a report
 // postsRouter

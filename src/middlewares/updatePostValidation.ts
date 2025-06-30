@@ -2,11 +2,6 @@ import { body } from "express-validator";
 
 const updatePostValidation = () => {
   return [
-    body("userId")
-      .notEmpty()
-      .withMessage("Page ID is required for page type")
-      .isMongoId()
-      .withMessage("Page ID must be a valid MongoDB ObjectId"),
     body("postTitle")
       .optional()
       .isLength({ min: 4 })

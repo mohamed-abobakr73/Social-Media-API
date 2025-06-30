@@ -10,6 +10,17 @@ import paginationResult from "../utils/paginationResult";
 import doesResourceExists from "../utils/doesResourceExists";
 import groupsServices from "./groupsServices";
 
+const checkIfUserIsAuthor = (user: string, author: string) => {
+  if (user !== author) {
+    const error = new AppError(
+      "You are not authorized to do this action",
+      401,
+      httpStatusText.FAIL
+    );
+    throw error;
+  }
+};
+
 const getAllPostsService = async (
   type: TPostType,
   postSourceId: string,
@@ -147,49 +158,35 @@ const createPostService = async (postData: {
   return post;
 };
 
-// const updatePostService = async (
-//   userId: string,
-//   postId: string,
-//   updateData: { postTitle?: string; postContent?: string; images?: string[] }
-// ): Promise<TServiceResult<TPost>> => {
-//   const user = await User.findById(userId);
-//   const post = await Post.findById(postId);
-//   if (!user) {
-//     const error = new AppError("Invalid user id", 400, httpStatusText.ERROR);
-//     return { error, type: "error" };
-//   }
-//   if (!post) {
-//     const error = new AppError("Invalid post id", 400, httpStatusText.ERROR);
-//     return { error, type: "error" };
-//   }
+const updatePostService = async (
+  userId: string,
+  postId: string,
+  updateData: { postTitle?: string; postContent?: string; images?: string[] }
+) => {
+  const user = await User.findById(userId);
+  const post = await Post.findById(postId, { __v: 0 });
 
-//   // Checking if the requesting update user is the creator of the post
-//   const isUserPostCreator = post.createdBy.toString() === userId;
-//   if (!isUserPostCreator) {
-//     const error = new AppError(
-//       "You can't update this post, only the creator can edit this post",
-//       400,
-//       httpStatusText.ERROR
-//     );
-//     return { error, type: "error" };
-//   }
+  doesResourceExists(
+    user,
+    "You are not authorized to update this post",
+    401,
+    httpStatusText.FAIL
+  );
 
-//   const updatedPost = await Post.findByIdAndUpdate(
-//     postId,
-//     { $set: updateData },
-//     { new: true }
-//   );
-//   if (!updatedPost) {
-//     const error = new AppError(
-//       "An error occured during the post update, please try again later",
-//       400,
-//       httpStatusText.ERROR
-//     );
-//     return { error, type: "error" };
-//   }
+  doesResourceExists(post, "Post not found", 400, httpStatusText.FAIL);
 
-//   return { data: updatedPost, type: "success" };
-// };
+  checkIfUserIsAuthor(userId, post.author.toString());
+
+  const { postTitle, postContent, images } = updateData;
+
+  if (postTitle) post.postTitle = postTitle;
+  if (postContent) post.postContent = postContent;
+  if (images) post.images = images;
+
+  await post.save();
+
+  return post;
+};
 
 // const deletePostService = async (
 //   postId: string,
@@ -395,7 +392,7 @@ export default {
   getAllPostsService,
   getPostByIdService,
   createPostService,
-  // updatePostService,
+  updatePostService,
   // deletePostService,
   // handleLikePostService,
   // addCommentService,
