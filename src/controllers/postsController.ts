@@ -163,6 +163,25 @@ const createComment = asyncWrapper(
   }
 );
 
+const updateComment = asyncWrapper(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { userId } = req.currentUser!;
+    const { postId, commentId } = req.params;
+    const { content } = req.body;
+
+    const updatedComment = await commentsService.updateCommentService(
+      userId,
+      postId,
+      commentId,
+      content
+    );
+
+    return res
+      .status(200)
+      .json({ status: httpStatusText.SUCCESS, data: { updatedComment } });
+  }
+);
+
 // const deleteComment = asyncWrapper(
 //   async (
 //     req: Request,
@@ -215,6 +234,7 @@ export {
   handleLikePost,
   getPostComments,
   createComment,
+  updateComment,
   // deleteComment,
   sharePost,
 };

@@ -9,17 +9,7 @@ import { TPostType, TPaginationData, TPost } from "../types";
 import paginationResult from "../utils/paginationResult";
 import doesResourceExists from "../utils/doesResourceExists";
 import groupsServices from "./groupsServices";
-
-const checkIfUserIsAuthor = (user: string, author: string) => {
-  if (user !== author) {
-    const error = new AppError(
-      "You are not authorized to do this action",
-      401,
-      httpStatusText.FAIL
-    );
-    throw error;
-  }
-};
+import assertUserIsAllowed from "../utils/assertUserIsAllowed";
 
 const getAllPostsService = async (
   type: TPostType,
@@ -106,14 +96,7 @@ const createPostService = async (postData: {
 
   switch (type) {
     case "user":
-      if (author !== postOwnerId) {
-        const error = new AppError(
-          "You can only post as yourself",
-          403,
-          httpStatusText.FAIL
-        );
-        throw error;
-      }
+      assertUserIsAllowed(postOwnerId, author, "You can only post as yourself");
       break;
 
     case "group":
@@ -175,7 +158,11 @@ const updatePostService = async (
 
   doesResourceExists(post, "Post not found", 400, httpStatusText.FAIL);
 
-  checkIfUserIsAuthor(userId, post.author.toString());
+  assertUserIsAllowed(
+    userId,
+    post.author.toString(),
+    "You can only update your own posts"
+  );
 
   const { postTitle, postContent, images } = updateData;
 
@@ -200,7 +187,11 @@ const deletePostService = async (postId: string, userId: string) => {
   );
   doesResourceExists(post, "Post not found");
 
-  checkIfUserIsAuthor(userId, post.author.toString());
+  assertUserIsAllowed(
+    userId,
+    post.author.toString(),
+    "You can only delete your own posts"
+  );
 
   post.isDeleted = true;
   await post.save();

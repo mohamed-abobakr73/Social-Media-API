@@ -1,4 +1,5 @@
 import { Comment, Post, User } from "../models";
+import assertUserIsAllowed from "../utils/assertUserIsAllowed";
 import doesResourceExists from "../utils/doesResourceExists";
 import httpStatusText from "../utils/httpStatusText";
 
@@ -54,4 +55,48 @@ const createCommentService = async (
   return comment;
 };
 
-export default { getPostCommentsService, createCommentService };
+const updateCommentService = async (
+  userId: string,
+  postId: string,
+  commentId: string,
+  content: string
+) => {
+  const user = await User.findById(userId);
+  const comment = await Comment.findById(commentId, { __v: 0 });
+  const post = await Post.findById(postId);
+
+  doesResourceExists(
+    user,
+    "You are not authorized to comment on this post",
+    401,
+    httpStatusText.FAIL
+  );
+
+  doesResourceExists(post, "Post not found");
+
+  doesResourceExists(comment, "Comment not found");
+
+  assertUserIsAllowed(
+    comment.post.toString(),
+    postId,
+    "You can't do this action, invalid input data"
+  );
+
+  assertUserIsAllowed(
+    userId,
+    comment.createdBy.toString(),
+    "You can only update your own comments"
+  );
+
+  comment.content = content;
+
+  await comment.save();
+
+  return comment;
+};
+
+export default {
+  getPostCommentsService,
+  createCommentService,
+  updateCommentService,
+};

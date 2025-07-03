@@ -1,6 +1,6 @@
 import { body } from "express-validator";
 
-const addCommentValidation = () => {
+const createOrUpdateCommentValidation = () => {
   return [
     body("content")
       .notEmpty()
@@ -12,4 +12,4 @@ const addCommentValidation = () => {
   ];
 };
 
-export default addCommentValidation;
+export default createOrUpdateCommentValidation;

@@ -7,6 +7,7 @@ import {
   getAllPosts,
   getPostById,
   getPostComments,
+  updateComment,
   handleLikePost,
   sharePost,
   updatePost,
@@ -17,8 +18,7 @@ import {
   isAllowed,
   updatePostValidation,
   getAllPostsValidation,
-  userIdValidation,
-  addCommentValidation,
+  createOrUpdateCommentValidation,
   addReportValidation,
   removeReportValidation,
   validateRequestBody,
@@ -72,9 +72,19 @@ postsRouter
   .route("/:postId/comments")
   .post(
     verifyToken,
-    addCommentValidation(),
+    createOrUpdateCommentValidation(),
     validateRequestBody,
     createComment
+  );
+
+// Update Comment
+postsRouter
+  .route("/:postId/comments/:commentId")
+  .patch(
+    verifyToken,
+    createOrUpdateCommentValidation(),
+    validateRequestBody,
+    updateComment
   );
 
 // // Delete comment
