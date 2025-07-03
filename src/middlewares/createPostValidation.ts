@@ -5,7 +5,13 @@ const createPostValidation = () => {
     body("type")
       .notEmpty()
       .withMessage("Type is required")
-      .customSanitizer((value) => value.toLowerCase())
+      .customSanitizer((value) => {
+        if (typeof value === "string") {
+          value.toLowerCase();
+        }
+        return value;
+        4;
+      })
       .isIn(["user", "group", "page"])
       .withMessage("Type value must be [user, group, page]"),
     body("postTitle")
@@ -21,19 +27,16 @@ const createPostValidation = () => {
       .withMessage("Post content must be at least 10 characters long")
       .isLength({ max: 5000 })
       .withMessage("Post content must be at most 5000 characters long"),
-    body("createdBy").notEmpty().withMessage("Created by is required"),
-    body("groupId")
-      .if(body("type").equals("group"))
+    body("author")
       .notEmpty()
-      .withMessage("Group id is required for group type")
+      .withMessage("Author is required")
       .isMongoId()
-      .withMessage("Group ID must be a valid MongoDB ObjectId"),
-    body("pageId")
-      .if(body("type").equals("page"))
+      .withMessage("Author ID must be a valid MongoDB ObjectId"),
+    body("postOwnerId")
       .notEmpty()
-      .withMessage("Page ID is required for page type")
+      .withMessage("Post owner ID is required")
       .isMongoId()
-      .withMessage("Page ID must be a valid MongoDB ObjectId"),
+      .withMessage("Post owner ID must be a valid MongoDB ObjectId"),
   ];
 };
 

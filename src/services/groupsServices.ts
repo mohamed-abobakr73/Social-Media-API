@@ -52,11 +52,23 @@ const removeGroupJoinRequest = async (groupId: string, userId: string) => {
   });
 };
 
-const checkIfUserAlreadyMember = async (groupId: string, userId: string) => {
-  const userAlreadyMember = await GroupMembership.findOne({
+const getUserGroupMembershipService = async (
+  groupId: string,
+  userId: string
+) => {
+  const userGroupMembership = await GroupMembership.findOne({
     group: groupId,
     user: userId,
   });
+
+  return userGroupMembership;
+};
+
+const checkIfUserAlreadyMember = async (groupId: string, userId: string) => {
+  const userAlreadyMember = await getUserGroupMembershipService(
+    groupId,
+    userId
+  );
 
   doesResourceExists(
     !userAlreadyMember,
@@ -492,6 +504,7 @@ export default {
   getGroupByIdService,
   getGroupMembersService,
   getJoinRequestsService,
+  getUserGroupMembershipService,
   createGroupService,
   updateGroupService,
   deleteGroupService,

@@ -1,19 +1,21 @@
 import mongoose from "mongoose";
-import TComment from "./TComment";
 import IReport from "./IReport";
+import TPostType from "./TPostType";
 
 type TPost = {
   _id: mongoose.Types.ObjectId;
   postTitle?: string;
   postContent: string;
   images: string[];
-  createdBy: mongoose.Types.ObjectId;
-  createdAt?: Date;
+  author: mongoose.Types.ObjectId;
+  postOwnerType: TPostType;
+  postOwnerId: mongoose.Types.ObjectId;
   likes: mongoose.Types.ObjectId[];
-  comments: TComment[];
-  isShared: boolean;
+  likesCount: number;
+  sharesCount: number;
+  sharedBy?: mongoose.Types.ObjectId;
+  originalPostId: mongoose.Types.ObjectId;
   reports: IReport[];
-  shares: mongoose.Types.ObjectId[];
   isDeleted: boolean;
   banned: boolean;
 };

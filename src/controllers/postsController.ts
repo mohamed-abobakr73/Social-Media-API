@@ -3,32 +3,27 @@ import asyncWrapper from "../middlewares/asyncWrapper";
 import postsServices from "../services/postsServices";
 import httpStatusText from "../utils/httpStatusText";
 import AppError from "../utils/AppError";
+import paginationQuery from "../utils/paginationQuery";
+import { TPostType } from "../types";
 
 const getAllPosts = asyncWrapper(
-  async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<Response | void> => {
-    const { type, postSourceId } = req.body;
-    const query = req.query as { limit?: string; page?: string };
-    const limit = parseInt(query.limit || "10", 10);
-    const page = parseInt(query.page || "1", 10);
-    const skip = (page - 1) * limit;
+  async (req: Request, res: Response, next: NextFunction) => {
+    const paginationParams = paginationQuery(req.query);
+    const { type, postsSourceId } = req.query as {
+      type: TPostType;
+      postsSourceId: string;
+    };
 
-    const getPostsResult = await postsServices.getAllPostsService(
-      type,
-      postSourceId,
-      { limit, skip }
+    const posts = await postsServices.getAllPostsService(
+      type!,
+      postsSourceId,
+      paginationParams
     );
-    if (getPostsResult.type === "error") {
-      return next(getPostsResult.error);
-    } else {
-      return res.status(200).json({
-        status: httpStatusText.SUCCESS,
-        data: { posts: getPostsResult.data },
-      });
-    }
+
+    return res.status(200).json({
+      status: httpStatusText.SUCCESS,
+      data: posts,
+    });
   }
 );
 
@@ -39,15 +34,13 @@ const getPostById = asyncWrapper(
     next: NextFunction
   ): Promise<Response | void> => {
     const { postId } = req.params;
-    const getPostResult = await postsServices.getPostByIdService(postId);
-    if (getPostResult.type === "error") {
-      return next(getPostResult.error);
-    } else {
-      return res.status(200).json({
-        status: httpStatusText.SUCCESS,
-        data: { post: getPostResult.data },
-      });
-    }
+
+    const post = await postsServices.getPostByIdService(postId);
+
+    return res.status(200).json({
+      status: httpStatusText.SUCCESS,
+      data: { post },
+    });
   }
 );
 
@@ -61,53 +54,33 @@ const createPost = asyncWrapper(
       (file) => file.path
     );
 
-    const createPostResult = await postsServices.createPostService({
+    const post = await postsServices.createPostService({
       ...req.body,
       postImages,
     });
 
-    if (createPostResult.type === "error") {
-      return next(createPostResult.error);
-    } else {
-      return res.status(200).json({
-        status: httpStatusText.SUCCESS,
-        data: { post: createPostResult.data },
-      });
-    }
+    return res.status(201).json({
+      status: httpStatusText.SUCCESS,
+      data: { post },
+    });
   }
 );
 
 const updatePost = asyncWrapper(
-  async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<Response | void> => {
-    if (Object.keys(req.params).length === 0) {
-      const error = new AppError(
-        "No data sent to update",
-        400,
-        httpStatusText.FAIL
-      );
-      return next(error);
-    }
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { userId } = req.currentUser!;
     const { postId } = req.params;
-    const { userId, postTitle, postContent } = req.body;
 
-    const updatePostReslut = await postsServices.updatePostService(
+    const updatedPost = await postsServices.updatePostService(
       userId,
       postId,
-      { postTitle, postContent }
+      req.body
     );
 
-    if (updatePostReslut.type === "error") {
-      return next(updatePostReslut.error);
-    } else {
-      return res.status(200).json({
-        status: httpStatusText.SUCCESS,
-        data: { updatedPost: updatePostReslut.data },
-      });
-    }
+    return res.status(200).json({
+      status: httpStatusText.SUCCESS,
+      data: { updatedPost },
+    });
   }
 );
 
@@ -117,22 +90,18 @@ const deletePost = asyncWrapper(
     res: Response,
     next: NextFunction
   ): Promise<Response | void> => {
+    const { userId } = req.currentUser!;
     const { postId } = req.params;
-    const { userId } = req.body;
 
     const deletePostResult = await postsServices.deletePostService(
       postId,
       userId
     );
 
-    if (deletePostResult.type === "error") {
-      return next(deletePostResult.error);
-    } else {
-      return res.status(200).json({
-        status: httpStatusText.SUCCESS,
-        data: { message: "Post deleted successfully" },
-      });
-    }
+    return res.status(200).json({
+      status: httpStatusText.SUCCESS,
+      data: { message: "Post deleted successfully" },
+    });
   }
 );
 
@@ -142,78 +111,68 @@ const handleLikePost = asyncWrapper(
     res: Response,
     next: NextFunction
   ): Promise<Response | void> => {
+    const { userId } = req.currentUser!;
     const { postId } = req.params;
-    const { userId } = req.body;
-    const handleLikePostResult = await postsServices.handleLikePostService(
+
+    const likeStatus = await postsServices.handlePostLikesService(
       postId,
       userId
     );
 
-    if (handleLikePostResult.type === "error") {
-      return next(handleLikePostResult.error);
-    } else {
-      if (handleLikePostResult.status === "liked") {
-        return res.status(200).json({
-          status: httpStatusText.SUCCESS,
-          data: { message: "Post liked successfully" },
-        });
-      } else {
-        return res.status(200).json({
-          status: httpStatusText.SUCCESS,
-          data: { message: "Post unliked successfully" },
-        });
-      }
-    }
+    return res.status(200).json({
+      status: httpStatusText.SUCCESS,
+      data: { message: `You have ${likeStatus}d this post successfully` },
+    });
   }
 );
 
-const addComment = asyncWrapper(
-  async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<Response | void> => {
-    const { postId } = req.params;
+// const addComment = asyncWrapper(
+//   async (
+//     req: Request,
+//     res: Response,
+//     next: NextFunction
+//   ): Promise<Response | void> => {
+//     const { postId } = req.params;
 
-    const addCommentResult = await postsServices.addCommentService(
-      postId,
-      req.body
-    );
-    if (addCommentResult.type === "error") {
-      return next(addCommentResult.error);
-    } else {
-      return res.status(200).json({
-        status: httpStatusText.SUCCESS,
-        data: { message: "Comment added successfully" },
-      });
-    }
-  }
-);
+//     const addCommentResult = await postsServices.addCommentService(
+//       postId,
+//       req.body
+//     );
+//     if (addCommentResult.type === "error") {
+//       return next(addCommentResult.error);
+//     } else {
+//       return res.status(200).json({
+//         status: httpStatusText.SUCCESS,
+//         data: { message: "Comment added successfully" },
+//       });
+//     }
+//   }
+// );
 
-const deleteComment = asyncWrapper(
-  async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<Response | void> => {
-    const { postId, commentId } = req.params;
-    const { userId } = req.body;
+// const deleteComment = asyncWrapper(
+//   async (
+//     req: Request,
+//     res: Response,
+//     next: NextFunction
+//   ): Promise<Response | void> => {
+//     const { postId, commentId } = req.params;
+//     const { userId } = req.body;
 
-    const deleteCommentResult = await postsServices.deleteCommentService(
-      postId,
-      userId,
-      commentId
-    );
-    if (deleteCommentResult.type === "error") {
-      return next(deleteCommentResult.error);
-    } else {
-      return res.status(200).json({
-        status: httpStatusText.SUCCESS,
-        data: { message: "Comment deleted successfully" },
-      });
-    }
-  }
-);
+//     const deleteCommentResult = await postsServices.deleteCommentService(
+//       postId,
+//       userId,
+//       commentId
+//     );
+//     if (deleteCommentResult.type === "error") {
+//       return next(deleteCommentResult.error);
+//     } else {
+//       return res.status(200).json({
+//         status: httpStatusText.SUCCESS,
+//         data: { message: "Comment deleted successfully" },
+//       });
+//     }
+//   }
+// );
 
 const sharePost = asyncWrapper(
   async (
@@ -221,22 +180,15 @@ const sharePost = asyncWrapper(
     res: Response,
     next: NextFunction
   ): Promise<Response | void> => {
+    const { userId } = req.currentUser!;
     const { postId } = req.params;
-    const { userId } = req.body;
 
-    const sharePostResult = await postsServices.sharePostService(
-      postId,
-      userId
-    );
+    const sharedPost = await postsServices.sharePostService(postId, userId);
 
-    if (sharePostResult.type === "error") {
-      return next(sharePostResult.error);
-    } else {
-      return res.status(200).json({
-        status: httpStatusText.SUCCESS,
-        data: { message: "Post shared successfully" },
-      });
-    }
+    return res.status(200).json({
+      status: httpStatusText.SUCCESS,
+      data: { sharedPost },
+    });
   }
 );
 
@@ -247,7 +199,7 @@ export {
   updatePost,
   deletePost,
   handleLikePost,
-  addComment,
-  deleteComment,
+  // addComment,
+  // deleteComment,
   sharePost,
 };

@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose, { Query } from "mongoose";
 import { TPost } from "../types/";
 
 const postsSchema = new mongoose.Schema<TPost>(
@@ -6,26 +6,26 @@ const postsSchema = new mongoose.Schema<TPost>(
     postTitle: { type: String },
     postContent: { type: String, required: true },
     images: [{ type: String }],
-    createdBy: {
+    author: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
       immutable: true,
     },
-    createdAt: { type: Date, immutable: true, default: Date.now },
+    postOwnerType: {
+      type: String,
+      enum: ["user", "group", "page"],
+      required: true,
+    },
+    postOwnerId: { type: mongoose.Schema.Types.ObjectId, required: true },
     likes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
-    comments: [
-      {
-        content: { type: String, required: true },
-        createdBy: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "User",
-          required: true,
-        },
-        createdAt: { type: Date, default: Date.now, immutable: true },
-      },
-    ],
-    shares: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+    likesCount: { type: Number, default: 0 },
+    sharesCount: { type: Number, default: 0 },
+    sharedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    originalPostId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Post",
+    },
     reports: [
       {
         reason: { type: String },
@@ -34,15 +34,20 @@ const postsSchema = new mongoose.Schema<TPost>(
       },
     ],
     isDeleted: { type: Boolean, default: false },
-    banned: { type: Boolean, defaut: false },
+    banned: { type: Boolean, default: false },
   },
   {
-    timestamps: true, // Automatically manages createdAt and updatedAt fields
+    timestamps: true,
   }
 );
 
 postsSchema.pre("save", function (next) {
   if (this.reports.length >= 10) this.banned = true;
+  next();
+});
+
+postsSchema.pre(/^find/, function (this: Query<any, any>, next) {
+  this.where({ isDeleted: false });
   next();
 });
 

@@ -15,6 +15,7 @@ import TBlock from "./TBlock";
 import TGroupMembership from "./TGroupMembership";
 import TGroupJoinRequests from "./TGroupJoinRequests";
 import TPaginationData from "./TPaginationData";
+import TPostType from "./TPostType";
 
 export {
   TAppError,
@@ -34,4 +35,5 @@ export {
   TGroupMembership,
   TGroupJoinRequests,
   TPaginationData,
+  TPostType,
 };

@@ -1,18 +1,23 @@
-import { body } from "express-validator";
+import { query } from "express-validator";
 
 const getAllPostsValidation = () => {
   return [
-    body("type")
+    query("type")
       .notEmpty()
       .withMessage("Type is required")
-      .customSanitizer((value) => value.toLowerCase())
+      .customSanitizer((value) => {
+        if (typeof value === "string") {
+          value.toLowerCase();
+        }
+        return value;
+      })
       .isIn(["user", "group", "page"])
       .withMessage("Type value must be [user, group, page]"),
-    body("postSourceId")
+    query("postsSourceId")
       .notEmpty()
-      .withMessage("Post source id is required")
+      .withMessage("Posts source id is required")
       .isMongoId()
-      .withMessage("Post source ID must be a valid MongoDB ObjectId"),
+      .withMessage("Posts source ID must be a valid MongoDB ObjectId"),
   ];
 };
 
