@@ -7,7 +7,7 @@ import {
   getAllPosts,
   getPostById,
   // handleLikePost,
-  // sharePost,
+  sharePost,
   updatePost,
 } from "../controllers/postsController";
 import {
@@ -77,10 +77,8 @@ postsRouter
 //   .route("/:postId/comments/:commentId")
 //   .delete(verifyToken, userIdValidation(), validateRequestBody, deleteComment);
 
-// // Share post
-// postsRouter
-//   .route("/:postId/share")
-//   .post(verifyToken, userIdValidation(), validateRequestBody, sharePost);
+// Share post
+postsRouter.route("/:postId/share").post(verifyToken, sharePost);
 
 // // Report a post
 // postsRouter

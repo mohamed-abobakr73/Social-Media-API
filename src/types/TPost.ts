@@ -16,7 +16,6 @@ type TPost = {
   sharedBy?: mongoose.Types.ObjectId;
   originalPostId: mongoose.Types.ObjectId;
   reports: IReport[];
-  shares: mongoose.Types.ObjectId[];
   isDeleted: boolean;
   banned: boolean;
 };

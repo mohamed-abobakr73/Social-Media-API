@@ -188,30 +188,23 @@ const updatePost = asyncWrapper(
 //   }
 // );
 
-// const sharePost = asyncWrapper(
-//   async (
-//     req: Request,
-//     res: Response,
-//     next: NextFunction
-//   ): Promise<Response | void> => {
-//     const { postId } = req.params;
-//     const { userId } = req.body;
+const sharePost = asyncWrapper(
+  async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<Response | void> => {
+    const { userId } = req.currentUser!;
+    const { postId } = req.params;
 
-//     const sharePostResult = await postsServices.sharePostService(
-//       postId,
-//       userId
-//     );
+    const sharedPost = await postsServices.sharePostService(postId, userId);
 
-//     if (sharePostResult.type === "error") {
-//       return next(sharePostResult.error);
-//     } else {
-//       return res.status(200).json({
-//         status: httpStatusText.SUCCESS,
-//         data: { message: "Post shared successfully" },
-//       });
-//     }
-//   }
-// );
+    return res.status(200).json({
+      status: httpStatusText.SUCCESS,
+      data: { sharedPost },
+    });
+  }
+);
 
 export {
   getAllPosts,
@@ -222,5 +215,5 @@ export {
   // handleLikePost,
   // addComment,
   // deleteComment,
-  // sharePost,
+  sharePost,
 };

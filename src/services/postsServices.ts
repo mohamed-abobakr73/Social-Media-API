@@ -355,38 +355,44 @@ const updatePostService = async (
 //   return { type: "success" };
 // };
 
-// const sharePostService = async (
-//   postId: string,
-//   userId: string
-// ): Promise<TServiceResult<TPost>> => {
-//   const post = await Post.findById(postId);
-//   const user = await User.findById(userId);
+// add notifications
+const sharePostService = async (postId: string, userId: string) => {
+  const user = await User.findById(userId);
+  const post = await Post.findById(postId, {
+    __v: 0,
+    // _id: 0,
+    createdAt: 0,
+    updatedAt: 0,
+  });
 
-//   if (!post) {
-//     const error = new AppError("Invalid post id", 400, httpStatusText.ERROR);
-//     return { error, type: "error" };
-//   }
+  doesResourceExists(
+    user,
+    "You are not authorized to share this post",
+    401,
+    httpStatusText.FAIL
+  );
+  doesResourceExists(post, "Post not found", 400, httpStatusText.FAIL);
 
-//   if (!user) {
-//     const error = new AppError("Invalid user id", 400, httpStatusText.ERROR);
-//     return { error, type: "error" };
-//   }
+  const postClone = {
+    sharedBy: user._id,
+    postTitle: post.postTitle,
+    postContent: post.postContent,
+    images: post.images,
+    author: post.author,
+    postOwnerType: post.postOwnerType,
+    postOwnerId: post.postOwnerId,
+    originalPostId: post.originalPostId,
+  };
 
-//   user.posts.push({ postId: post._id, isShared: true });
-//   post.shares.push(user._id);
-//   await user.save();
-//   await post.save();
-//   const addNotificationResult =
-//     await notificationsServices.addNotificationService(
-//       "sharePost",
-//       post.createdBy,
-//       { username: user.username }
-//     );
-//   if (addNotificationResult.type === "error") {
-//     return { error: addNotificationResult.error!, type: "error" };
-//   }
-//   return { type: "success" };
-// };
+  const sharedPost = new Post(postClone);
+
+  post.sharesCount += 1;
+
+  await post.save();
+  await sharedPost.save();
+
+  return sharedPost;
+};
 
 export default {
   getAllPostsService,
@@ -397,5 +403,5 @@ export default {
   // handleLikePostService,
   // addCommentService,
   // deleteCommentService,
-  // sharePostService,
+  sharePostService,
 };
