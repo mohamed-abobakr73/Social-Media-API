@@ -6,7 +6,7 @@ import {
   // deletePost,
   getAllPosts,
   getPostById,
-  // handleLikePost,
+  handleLikePost,
   sharePost,
   updatePost,
 } from "../controllers/postsController";
@@ -62,10 +62,8 @@ postsRouter
 //   .route("/:postId")
 //   .delete(verifyToken, userIdValidation(), validateRequestBody, deletePost);
 
-// // Handle like post
-// postsRouter
-//   .route("/:postId/likes")
-//   .post(verifyToken, userIdValidation(), validateRequestBody, handleLikePost);
+// Handle like post
+postsRouter.route("/:postId/likes").post(verifyToken, handleLikePost);
 
 // // Add comment to post
 // postsRouter

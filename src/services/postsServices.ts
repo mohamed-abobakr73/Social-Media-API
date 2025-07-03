@@ -189,6 +189,7 @@ const updatePostService = async (
 };
 
 // const deletePostService = async (
+
 //   postId: string,
 //   userId: string
 // ): Promise<TServiceResult<TPost>> => {
@@ -227,48 +228,40 @@ const updatePostService = async (
 //   return { type: "success" };
 // };
 
-// const handleLikePostService = async (
-//   postId: string,
-//   userId: mongoose.Types.ObjectId
-// ): Promise<TServiceResult<TPost> & { status?: "liked" | "unliked" }> => {
-//   const post = await Post.findById(postId);
-//   const user = await User.findById(userId);
+const handlePostLikesService = async (postId: string, userId: string) => {
+  const user = await User.findById(userId);
+  const post = await Post.findById(postId);
 
-//   if (!post) {
-//     const error = new AppError("Invalid post id", 400, httpStatusText.ERROR);
-//     return { error, type: "error" };
-//   }
+  doesResourceExists(
+    user,
+    "You are not authorized to like this post",
+    401,
+    httpStatusText.FAIL
+  );
+  doesResourceExists(post, "Post not found");
 
-//   if (!user) {
-//     const error = new AppError("Invalid user id", 400, httpStatusText.ERROR);
-//     return { error, type: "error" };
-//   }
+  let status: string;
 
-//   const userLikedPost = post.likes.find(
-//     (like) => like.toString() === userId.toString()
-//   );
+  const userLikedPost = post.likes.find(
+    (like) => like.toString() === user._id.toString()
+  );
 
-//   if (userLikedPost) {
-//     post.likes = post.likes.filter(
-//       (like) => like.toString() !== userId.toString()
-//     );
-//     await post.save();
-//     return { status: "unliked", type: "success" };
-//   } else {
-//     post.likes.push(userId);
-//     const addNotificationResult =
-//       await notificationsServices.addNotificationService(
-//         "likePost",
-//         post.createdBy,
-//         { username: user.username }
-//       );
-//     await post.save();
-//     if (addNotificationResult.type === "error") {
-//       return { error: addNotificationResult.error!, type: "error" };
-//     }
-//     return { status: "liked", type: "success" };
-//   }
-// };
+  if (userLikedPost) {
+    post.likes = post.likes.filter(
+      (like) => like.toString() !== user._id.toString()
+    );
+    post.likesCount--;
+    await post.save();
+    status = "unlike";
+  } else {
+    post.likes.push(user._id);
+    post.likesCount++;
+    await post.save();
+    status = "like";
+  }
+
+  return status;
+};
 
 // const addCommentService = async (
 //   postId: string,
@@ -400,7 +393,7 @@ export default {
   createPostService,
   updatePostService,
   // deletePostService,
-  // handleLikePostService,
+  handlePostLikesService,
   // addCommentService,
   // deleteCommentService,
   sharePostService,

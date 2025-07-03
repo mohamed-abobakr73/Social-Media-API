@@ -109,36 +109,26 @@ const updatePost = asyncWrapper(
 //   }
 // );
 
-// const handleLikePost = asyncWrapper(
-//   async (
-//     req: Request,
-//     res: Response,
-//     next: NextFunction
-//   ): Promise<Response | void> => {
-//     const { postId } = req.params;
-//     const { userId } = req.body;
-//     const handleLikePostResult = await postsServices.handleLikePostService(
-//       postId,
-//       userId
-//     );
+const handleLikePost = asyncWrapper(
+  async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<Response | void> => {
+    const { userId } = req.currentUser!;
+    const { postId } = req.params;
 
-//     if (handleLikePostResult.type === "error") {
-//       return next(handleLikePostResult.error);
-//     } else {
-//       if (handleLikePostResult.status === "liked") {
-//         return res.status(200).json({
-//           status: httpStatusText.SUCCESS,
-//           data: { message: "Post liked successfully" },
-//         });
-//       } else {
-//         return res.status(200).json({
-//           status: httpStatusText.SUCCESS,
-//           data: { message: "Post unliked successfully" },
-//         });
-//       }
-//     }
-//   }
-// );
+    const likeStatus = await postsServices.handlePostLikesService(
+      postId,
+      userId
+    );
+
+    return res.status(200).json({
+      status: httpStatusText.SUCCESS,
+      data: { message: `You have ${likeStatus}d this post successfully` },
+    });
+  }
+);
 
 // const addComment = asyncWrapper(
 //   async (
@@ -212,7 +202,7 @@ export {
   createPost,
   updatePost,
   // deletePost,
-  // handleLikePost,
+  handleLikePost,
   // addComment,
   // deleteComment,
   sharePost,
