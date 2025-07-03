@@ -5,6 +5,7 @@ import httpStatusText from "../utils/httpStatusText";
 import AppError from "../utils/AppError";
 import paginationQuery from "../utils/paginationQuery";
 import { TPostType } from "../types";
+import commentsService from "../services/commentsService";
 
 const getAllPosts = asyncWrapper(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -126,28 +127,28 @@ const handleLikePost = asyncWrapper(
   }
 );
 
-// const addComment = asyncWrapper(
-//   async (
-//     req: Request,
-//     res: Response,
-//     next: NextFunction
-//   ): Promise<Response | void> => {
-//     const { postId } = req.params;
+const createComment = asyncWrapper(
+  async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<Response | void> => {
+    const { userId } = req.currentUser!;
+    const { postId } = req.params;
+    const { content } = req.body;
 
-//     const addCommentResult = await postsServices.addCommentService(
-//       postId,
-//       req.body
-//     );
-//     if (addCommentResult.type === "error") {
-//       return next(addCommentResult.error);
-//     } else {
-//       return res.status(200).json({
-//         status: httpStatusText.SUCCESS,
-//         data: { message: "Comment added successfully" },
-//       });
-//     }
-//   }
-// );
+    const comment = await commentsService.createCommentService(
+      userId,
+      postId,
+      content
+    );
+
+    return res.status(200).json({
+      status: httpStatusText.SUCCESS,
+      data: { comment },
+    });
+  }
+);
 
 // const deleteComment = asyncWrapper(
 //   async (
@@ -199,7 +200,7 @@ export {
   updatePost,
   deletePost,
   handleLikePost,
-  // addComment,
+  createComment,
   // deleteComment,
   sharePost,
 };

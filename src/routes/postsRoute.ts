@@ -1,6 +1,6 @@
 import { Router } from "express";
 import {
-  // addComment,
+  createComment,
   createPost,
   // deleteComment,
   deletePost,
@@ -63,10 +63,15 @@ postsRouter.route("/:postId").delete(verifyToken, deletePost);
 // Handle like post
 postsRouter.route("/:postId/likes").post(verifyToken, handleLikePost);
 
-// // Add comment to post
-// postsRouter
-//   .route("/:postId/comments")
-//   .post(verifyToken, addCommentValidation(), validateRequestBody, addComment);
+// Add comment to post
+postsRouter
+  .route("/:postId/comments")
+  .post(
+    verifyToken,
+    addCommentValidation(),
+    validateRequestBody,
+    createComment
+  );
 
 // // Delete comment
 // postsRouter

@@ -7,6 +7,7 @@ import { FriendRequest } from "./friendRequestsModel";
 import { Block } from "./blocksModel";
 import { GroupMembership } from "./groupMembership";
 import { GroupJoinRequests } from "./groupJoinRequests";
+import { Comment } from "./commentsModel";
 
 export {
   Chat,
@@ -18,4 +19,5 @@ export {
   Friendship,
   FriendRequest,
   Block,
+  Comment,
 };
