@@ -232,91 +232,6 @@ const handlePostLikesService = async (postId: string, userId: string) => {
   return status;
 };
 
-// const addCommentService = async (
-//   postId: string,
-//   commentData: {
-//     content: string;
-//     createdBy: mongoose.Types.ObjectId;
-//   }
-// ): Promise<TServiceResult<TPost>> => {
-//   const { createdBy } = commentData;
-//   const post = await Post.findById(postId);
-//   const user = await User.findById(createdBy);
-
-//   if (!post) {
-//     const error = new AppError("Invalid post id", 400, httpStatusText.ERROR);
-//     return { error, type: "error" };
-//   }
-
-//   if (!user) {
-//     const error = new AppError("Invalid user id", 400, httpStatusText.ERROR);
-//     return { error, type: "error" };
-//   }
-
-//   post.comments.push(commentData);
-//   await post.save();
-//   const addNotificationResult =
-//     await notificationsServices.addNotificationService(
-//       "commentPost",
-//       post.createdBy,
-//       { username: user.username, content: commentData.content }
-//     );
-//   if (addNotificationResult.type === "error") {
-//     return { error: addNotificationResult.error!, type: "error" };
-//   }
-//   return { type: "success" };
-// };
-
-// const deleteCommentService = async (
-//   postId: string,
-//   userId: string,
-//   commentId: string
-// ): Promise<TServiceResult<TPost>> => {
-//   const post = await Post.findById(postId);
-//   const user = await User.findById(userId);
-
-//   if (!post) {
-//     const error = new AppError("Invalid post id", 400, httpStatusText.ERROR);
-//     return { error, type: "error" };
-//   }
-
-//   if (!user) {
-//     const error = new AppError("Invalid user id", 400, httpStatusText.ERROR);
-//     return { error, type: "error" };
-//   }
-
-//   const commentExists = post.comments.find(
-//     (comment) => comment._id!.toString() === commentId
-//   );
-//   if (!commentExists) {
-//     const error = new AppError(
-//       "Comment does not exist",
-//       400,
-//       httpStatusText.ERROR
-//     );
-//     return { error, type: "error" };
-//   }
-
-//   const isUserCommentCreator = post.comments.find(
-//     (comment) => comment.createdBy.toString() === userId
-//   );
-//   if (!isUserCommentCreator) {
-//     const error = new AppError(
-//       "Only the comment creator can delete this comment",
-//       400,
-//       httpStatusText.ERROR
-//     );
-//     return { error, type: "error" };
-//   }
-
-//   post.comments = post.comments.filter(
-//     (comment) => comment._id!.toString() !== commentId
-//   );
-
-//   await post.save();
-//   return { type: "success" };
-// };
-
 // add notifications
 const sharePostService = async (postId: string, userId: string) => {
   const user = await User.findById(userId);
@@ -363,7 +278,5 @@ export default {
   updatePostService,
   deletePostService,
   handlePostLikesService,
-  // addCommentService,
-  // deleteCommentService,
   sharePostService,
 };

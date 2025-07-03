@@ -182,30 +182,19 @@ const updateComment = asyncWrapper(
   }
 );
 
-// const deleteComment = asyncWrapper(
-//   async (
-//     req: Request,
-//     res: Response,
-//     next: NextFunction
-//   ): Promise<Response | void> => {
-//     const { postId, commentId } = req.params;
-//     const { userId } = req.body;
+const deleteComment = asyncWrapper(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { userId } = req.currentUser!;
+    const { postId, commentId } = req.params;
 
-//     const deleteCommentResult = await postsServices.deleteCommentService(
-//       postId,
-//       userId,
-//       commentId
-//     );
-//     if (deleteCommentResult.type === "error") {
-//       return next(deleteCommentResult.error);
-//     } else {
-//       return res.status(200).json({
-//         status: httpStatusText.SUCCESS,
-//         data: { message: "Comment deleted successfully" },
-//       });
-//     }
-//   }
-// );
+    await commentsService.deleteCommentService(userId, postId, commentId);
+
+    return res.status(200).json({
+      status: httpStatusText.SUCCESS,
+      data: { message: "Comment deleted successfully" },
+    });
+  }
+);
 
 const sharePost = asyncWrapper(
   async (
@@ -235,6 +224,6 @@ export {
   getPostComments,
   createComment,
   updateComment,
-  // deleteComment,
+  deleteComment,
   sharePost,
 };

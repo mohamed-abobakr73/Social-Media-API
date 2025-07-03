@@ -18,6 +18,41 @@ const userPostServiceStarter = async (userId: string, postId: string) => {
   return { user, post };
 };
 
+const updateOrDeleteCommentStarter = async (
+  userId: string,
+  postId: string,
+  commentId: string
+) => {
+  const user = await User.findById(userId);
+  const comment = await Comment.findById(commentId, { __v: 0 });
+  const post = await Post.findById(postId);
+
+  doesResourceExists(
+    user,
+    "You are not authorized to comment on this post",
+    401,
+    httpStatusText.FAIL
+  );
+
+  doesResourceExists(post, "Post not found");
+
+  doesResourceExists(comment, "Comment not found");
+
+  assertUserIsAllowed(
+    comment.post.toString(),
+    postId,
+    "You can't do this action, invalid input data"
+  );
+
+  assertUserIsAllowed(
+    userId,
+    comment.createdBy.toString(),
+    "You can only update your own comments"
+  );
+
+  return { user, post, comment };
+};
+
 const getPostCommentsService = async (postId: string) => {
   const post = await Post.findById(postId);
 
@@ -61,31 +96,10 @@ const updateCommentService = async (
   commentId: string,
   content: string
 ) => {
-  const user = await User.findById(userId);
-  const comment = await Comment.findById(commentId, { __v: 0 });
-  const post = await Post.findById(postId);
-
-  doesResourceExists(
-    user,
-    "You are not authorized to comment on this post",
-    401,
-    httpStatusText.FAIL
-  );
-
-  doesResourceExists(post, "Post not found");
-
-  doesResourceExists(comment, "Comment not found");
-
-  assertUserIsAllowed(
-    comment.post.toString(),
-    postId,
-    "You can't do this action, invalid input data"
-  );
-
-  assertUserIsAllowed(
+  const { comment } = await updateOrDeleteCommentStarter(
     userId,
-    comment.createdBy.toString(),
-    "You can only update your own comments"
+    postId,
+    commentId
   );
 
   comment.content = content;
@@ -95,8 +109,19 @@ const updateCommentService = async (
   return comment;
 };
 
+const deleteCommentService = async (
+  userId: string,
+  postId: string,
+  commentId: string
+) => {
+  await updateOrDeleteCommentStarter(userId, postId, commentId);
+
+  await Comment.deleteOne({ _id: commentId });
+};
+
 export default {
   getPostCommentsService,
   createCommentService,
   updateCommentService,
+  deleteCommentService,
 };

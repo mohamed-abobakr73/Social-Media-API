@@ -2,7 +2,7 @@ import { Router } from "express";
 import {
   createComment,
   createPost,
-  // deleteComment,
+  deleteComment,
   deletePost,
   getAllPosts,
   getPostById,
@@ -87,10 +87,10 @@ postsRouter
     updateComment
   );
 
-// // Delete comment
-// postsRouter
-//   .route("/:postId/comments/:commentId")
-//   .delete(verifyToken, userIdValidation(), validateRequestBody, deleteComment);
+// Delete comment
+postsRouter
+  .route("/:postId/comments/:commentId")
+  .delete(verifyToken, deleteComment);
 
 // Share post
 postsRouter.route("/:postId/share").post(verifyToken, sharePost);
