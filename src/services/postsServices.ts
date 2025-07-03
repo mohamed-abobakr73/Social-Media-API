@@ -10,6 +10,25 @@ import paginationResult from "../utils/paginationResult";
 import doesResourceExists from "../utils/doesResourceExists";
 import groupsServices from "./groupsServices";
 import assertUserIsAllowed from "../utils/assertUserIsAllowed";
+import mongoose from "mongoose";
+
+const userPostServiceStarter = async (
+  userId: string,
+  postId: string
+): Promise<{ user: any; post: any }> => {
+  const user = await User.findById(userId);
+  const post = await Post.findById(postId);
+
+  doesResourceExists(
+    user,
+    "You are not authorized to do this action",
+    401,
+    httpStatusText.FAIL
+  );
+  doesResourceExists(post, "Post not found");
+
+  return { user, post };
+};
 
 const getAllPostsService = async (
   type: TPostType,
@@ -146,17 +165,7 @@ const updatePostService = async (
   postId: string,
   updateData: { postTitle?: string; postContent?: string; images?: string[] }
 ) => {
-  const user = await User.findById(userId);
-  const post = await Post.findById(postId, { __v: 0 });
-
-  doesResourceExists(
-    user,
-    "You are not authorized to update this post",
-    401,
-    httpStatusText.FAIL
-  );
-
-  doesResourceExists(post, "Post not found", 400, httpStatusText.FAIL);
+  const { post } = await userPostServiceStarter(userId, postId);
 
   assertUserIsAllowed(
     userId,
@@ -176,16 +185,7 @@ const updatePostService = async (
 };
 
 const deletePostService = async (postId: string, userId: string) => {
-  const user = await User.findById(userId);
-  const post = await Post.findById(postId);
-
-  doesResourceExists(
-    user,
-    "You are not authorized to delete this post",
-    401,
-    httpStatusText.FAIL
-  );
-  doesResourceExists(post, "Post not found");
+  const { post } = await userPostServiceStarter(userId, postId);
 
   assertUserIsAllowed(
     userId,
@@ -198,26 +198,17 @@ const deletePostService = async (postId: string, userId: string) => {
 };
 
 const handlePostLikesService = async (postId: string, userId: string) => {
-  const user = await User.findById(userId);
-  const post = await Post.findById(postId);
-
-  doesResourceExists(
-    user,
-    "You are not authorized to like this post",
-    401,
-    httpStatusText.FAIL
-  );
-  doesResourceExists(post, "Post not found");
+  const { user, post } = await userPostServiceStarter(userId, postId);
 
   let status: string;
 
   const userLikedPost = post.likes.find(
-    (like) => like.toString() === user._id.toString()
+    (like: mongoose.Types.ObjectId) => like.toString() === user._id.toString()
   );
 
   if (userLikedPost) {
     post.likes = post.likes.filter(
-      (like) => like.toString() !== user._id.toString()
+      (like: mongoose.Types.ObjectId) => like.toString() !== user._id.toString()
     );
     post.likesCount--;
     await post.save();
@@ -234,21 +225,7 @@ const handlePostLikesService = async (postId: string, userId: string) => {
 
 // add notifications
 const sharePostService = async (postId: string, userId: string) => {
-  const user = await User.findById(userId);
-  const post = await Post.findById(postId, {
-    __v: 0,
-    // _id: 0,
-    createdAt: 0,
-    updatedAt: 0,
-  });
-
-  doesResourceExists(
-    user,
-    "You are not authorized to share this post",
-    401,
-    httpStatusText.FAIL
-  );
-  doesResourceExists(post, "Post not found", 400, httpStatusText.FAIL);
+  const { user, post } = await userPostServiceStarter(userId, postId);
 
   const postClone = {
     sharedBy: user._id,

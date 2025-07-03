@@ -3,21 +3,6 @@ import assertUserIsAllowed from "../utils/assertUserIsAllowed";
 import doesResourceExists from "../utils/doesResourceExists";
 import httpStatusText from "../utils/httpStatusText";
 
-const userPostServiceStarter = async (userId: string, postId: string) => {
-  const user = await User.findById(userId);
-  const post = await Post.findById(postId);
-
-  doesResourceExists(
-    user,
-    "You are not authorized to comment on this post",
-    401,
-    httpStatusText.FAIL
-  );
-  doesResourceExists(post, "Post not found");
-
-  return { user, post };
-};
-
 const updateOrDeleteCommentStarter = async (
   userId: string,
   postId: string,
