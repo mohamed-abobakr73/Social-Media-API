@@ -1,11 +1,13 @@
 import { Router } from "express";
 import {
-  // addComment,
+  createComment,
   createPost,
-  // deleteComment,
+  deleteComment,
   deletePost,
   getAllPosts,
   getPostById,
+  getPostComments,
+  updateComment,
   handleLikePost,
   sharePost,
   updatePost,
@@ -16,8 +18,7 @@ import {
   isAllowed,
   updatePostValidation,
   getAllPostsValidation,
-  userIdValidation,
-  addCommentValidation,
+  createOrUpdateCommentValidation,
   addReportValidation,
   removeReportValidation,
   validateRequestBody,
@@ -63,15 +64,33 @@ postsRouter.route("/:postId").delete(verifyToken, deletePost);
 // Handle like post
 postsRouter.route("/:postId/likes").post(verifyToken, handleLikePost);
 
-// // Add comment to post
-// postsRouter
-//   .route("/:postId/comments")
-//   .post(verifyToken, addCommentValidation(), validateRequestBody, addComment);
+// Get Post Comments
+postsRouter.route("/:postId/comments").get(getPostComments);
 
-// // Delete comment
-// postsRouter
-//   .route("/:postId/comments/:commentId")
-//   .delete(verifyToken, userIdValidation(), validateRequestBody, deleteComment);
+// Add comment to post
+postsRouter
+  .route("/:postId/comments")
+  .post(
+    verifyToken,
+    createOrUpdateCommentValidation(),
+    validateRequestBody,
+    createComment
+  );
+
+// Update Comment
+postsRouter
+  .route("/:postId/comments/:commentId")
+  .patch(
+    verifyToken,
+    createOrUpdateCommentValidation(),
+    validateRequestBody,
+    updateComment
+  );
+
+// Delete comment
+postsRouter
+  .route("/:postId/comments/:commentId")
+  .delete(verifyToken, deleteComment);
 
 // Share post
 postsRouter.route("/:postId/share").post(verifyToken, sharePost);

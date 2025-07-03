@@ -9,16 +9,25 @@ import { TPostType, TPaginationData, TPost } from "../types";
 import paginationResult from "../utils/paginationResult";
 import doesResourceExists from "../utils/doesResourceExists";
 import groupsServices from "./groupsServices";
+import assertUserIsAllowed from "../utils/assertUserIsAllowed";
+import mongoose from "mongoose";
 
-const checkIfUserIsAuthor = (user: string, author: string) => {
-  if (user !== author) {
-    const error = new AppError(
-      "You are not authorized to do this action",
-      401,
-      httpStatusText.FAIL
-    );
-    throw error;
-  }
+const userPostServiceStarter = async (
+  userId: string,
+  postId: string
+): Promise<{ user: any; post: any }> => {
+  const user = await User.findById(userId);
+  const post = await Post.findById(postId);
+
+  doesResourceExists(
+    user,
+    "You are not authorized to do this action",
+    401,
+    httpStatusText.FAIL
+  );
+  doesResourceExists(post, "Post not found");
+
+  return { user, post };
 };
 
 const getAllPostsService = async (
@@ -106,14 +115,7 @@ const createPostService = async (postData: {
 
   switch (type) {
     case "user":
-      if (author !== postOwnerId) {
-        const error = new AppError(
-          "You can only post as yourself",
-          403,
-          httpStatusText.FAIL
-        );
-        throw error;
-      }
+      assertUserIsAllowed(postOwnerId, author, "You can only post as yourself");
       break;
 
     case "group":
@@ -163,19 +165,13 @@ const updatePostService = async (
   postId: string,
   updateData: { postTitle?: string; postContent?: string; images?: string[] }
 ) => {
-  const user = await User.findById(userId);
-  const post = await Post.findById(postId, { __v: 0 });
+  const { post } = await userPostServiceStarter(userId, postId);
 
-  doesResourceExists(
-    user,
-    "You are not authorized to update this post",
-    401,
-    httpStatusText.FAIL
+  assertUserIsAllowed(
+    userId,
+    post.author.toString(),
+    "You can only update your own posts"
   );
-
-  doesResourceExists(post, "Post not found", 400, httpStatusText.FAIL);
-
-  checkIfUserIsAuthor(userId, post.author.toString());
 
   const { postTitle, postContent, images } = updateData;
 
@@ -189,44 +185,30 @@ const updatePostService = async (
 };
 
 const deletePostService = async (postId: string, userId: string) => {
-  const user = await User.findById(userId);
-  const post = await Post.findById(postId);
+  const { post } = await userPostServiceStarter(userId, postId);
 
-  doesResourceExists(
-    user,
-    "You are not authorized to delete this post",
-    401,
-    httpStatusText.FAIL
+  assertUserIsAllowed(
+    userId,
+    post.author.toString(),
+    "You can only delete your own posts"
   );
-  doesResourceExists(post, "Post not found");
-
-  checkIfUserIsAuthor(userId, post.author.toString());
 
   post.isDeleted = true;
   await post.save();
 };
 
 const handlePostLikesService = async (postId: string, userId: string) => {
-  const user = await User.findById(userId);
-  const post = await Post.findById(postId);
-
-  doesResourceExists(
-    user,
-    "You are not authorized to like this post",
-    401,
-    httpStatusText.FAIL
-  );
-  doesResourceExists(post, "Post not found");
+  const { user, post } = await userPostServiceStarter(userId, postId);
 
   let status: string;
 
   const userLikedPost = post.likes.find(
-    (like) => like.toString() === user._id.toString()
+    (like: mongoose.Types.ObjectId) => like.toString() === user._id.toString()
   );
 
   if (userLikedPost) {
     post.likes = post.likes.filter(
-      (like) => like.toString() !== user._id.toString()
+      (like: mongoose.Types.ObjectId) => like.toString() !== user._id.toString()
     );
     post.likesCount--;
     await post.save();
@@ -241,108 +223,9 @@ const handlePostLikesService = async (postId: string, userId: string) => {
   return status;
 };
 
-// const addCommentService = async (
-//   postId: string,
-//   commentData: {
-//     content: string;
-//     createdBy: mongoose.Types.ObjectId;
-//   }
-// ): Promise<TServiceResult<TPost>> => {
-//   const { createdBy } = commentData;
-//   const post = await Post.findById(postId);
-//   const user = await User.findById(createdBy);
-
-//   if (!post) {
-//     const error = new AppError("Invalid post id", 400, httpStatusText.ERROR);
-//     return { error, type: "error" };
-//   }
-
-//   if (!user) {
-//     const error = new AppError("Invalid user id", 400, httpStatusText.ERROR);
-//     return { error, type: "error" };
-//   }
-
-//   post.comments.push(commentData);
-//   await post.save();
-//   const addNotificationResult =
-//     await notificationsServices.addNotificationService(
-//       "commentPost",
-//       post.createdBy,
-//       { username: user.username, content: commentData.content }
-//     );
-//   if (addNotificationResult.type === "error") {
-//     return { error: addNotificationResult.error!, type: "error" };
-//   }
-//   return { type: "success" };
-// };
-
-// const deleteCommentService = async (
-//   postId: string,
-//   userId: string,
-//   commentId: string
-// ): Promise<TServiceResult<TPost>> => {
-//   const post = await Post.findById(postId);
-//   const user = await User.findById(userId);
-
-//   if (!post) {
-//     const error = new AppError("Invalid post id", 400, httpStatusText.ERROR);
-//     return { error, type: "error" };
-//   }
-
-//   if (!user) {
-//     const error = new AppError("Invalid user id", 400, httpStatusText.ERROR);
-//     return { error, type: "error" };
-//   }
-
-//   const commentExists = post.comments.find(
-//     (comment) => comment._id!.toString() === commentId
-//   );
-//   if (!commentExists) {
-//     const error = new AppError(
-//       "Comment does not exist",
-//       400,
-//       httpStatusText.ERROR
-//     );
-//     return { error, type: "error" };
-//   }
-
-//   const isUserCommentCreator = post.comments.find(
-//     (comment) => comment.createdBy.toString() === userId
-//   );
-//   if (!isUserCommentCreator) {
-//     const error = new AppError(
-//       "Only the comment creator can delete this comment",
-//       400,
-//       httpStatusText.ERROR
-//     );
-//     return { error, type: "error" };
-//   }
-
-//   post.comments = post.comments.filter(
-//     (comment) => comment._id!.toString() !== commentId
-//   );
-
-//   await post.save();
-//   return { type: "success" };
-// };
-
 // add notifications
 const sharePostService = async (postId: string, userId: string) => {
-  const user = await User.findById(userId);
-  const post = await Post.findById(postId, {
-    __v: 0,
-    // _id: 0,
-    createdAt: 0,
-    updatedAt: 0,
-  });
-
-  doesResourceExists(
-    user,
-    "You are not authorized to share this post",
-    401,
-    httpStatusText.FAIL
-  );
-  doesResourceExists(post, "Post not found", 400, httpStatusText.FAIL);
+  const { user, post } = await userPostServiceStarter(userId, postId);
 
   const postClone = {
     sharedBy: user._id,
@@ -372,7 +255,5 @@ export default {
   updatePostService,
   deletePostService,
   handlePostLikesService,
-  // addCommentService,
-  // deleteCommentService,
   sharePostService,
 };

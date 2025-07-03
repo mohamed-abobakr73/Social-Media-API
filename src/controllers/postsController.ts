@@ -5,6 +5,7 @@ import httpStatusText from "../utils/httpStatusText";
 import AppError from "../utils/AppError";
 import paginationQuery from "../utils/paginationQuery";
 import { TPostType } from "../types";
+import commentsService from "../services/commentsService";
 
 const getAllPosts = asyncWrapper(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -126,53 +127,74 @@ const handleLikePost = asyncWrapper(
   }
 );
 
-// const addComment = asyncWrapper(
-//   async (
-//     req: Request,
-//     res: Response,
-//     next: NextFunction
-//   ): Promise<Response | void> => {
-//     const { postId } = req.params;
+const getPostComments = asyncWrapper(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { postId } = req.params;
 
-//     const addCommentResult = await postsServices.addCommentService(
-//       postId,
-//       req.body
-//     );
-//     if (addCommentResult.type === "error") {
-//       return next(addCommentResult.error);
-//     } else {
-//       return res.status(200).json({
-//         status: httpStatusText.SUCCESS,
-//         data: { message: "Comment added successfully" },
-//       });
-//     }
-//   }
-// );
+    const comments = await commentsService.getPostCommentsService(postId);
 
-// const deleteComment = asyncWrapper(
-//   async (
-//     req: Request,
-//     res: Response,
-//     next: NextFunction
-//   ): Promise<Response | void> => {
-//     const { postId, commentId } = req.params;
-//     const { userId } = req.body;
+    return res.status(200).json({
+      status: httpStatusText.SUCCESS,
+      data: { comments },
+    });
+  }
+);
 
-//     const deleteCommentResult = await postsServices.deleteCommentService(
-//       postId,
-//       userId,
-//       commentId
-//     );
-//     if (deleteCommentResult.type === "error") {
-//       return next(deleteCommentResult.error);
-//     } else {
-//       return res.status(200).json({
-//         status: httpStatusText.SUCCESS,
-//         data: { message: "Comment deleted successfully" },
-//       });
-//     }
-//   }
-// );
+const createComment = asyncWrapper(
+  async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<Response | void> => {
+    const { userId } = req.currentUser!;
+    const { postId } = req.params;
+    const { content } = req.body;
+
+    const comment = await commentsService.createCommentService(
+      userId,
+      postId,
+      content
+    );
+
+    return res.status(200).json({
+      status: httpStatusText.SUCCESS,
+      data: { comment },
+    });
+  }
+);
+
+const updateComment = asyncWrapper(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { userId } = req.currentUser!;
+    const { postId, commentId } = req.params;
+    const { content } = req.body;
+
+    const updatedComment = await commentsService.updateCommentService(
+      userId,
+      postId,
+      commentId,
+      content
+    );
+
+    return res
+      .status(200)
+      .json({ status: httpStatusText.SUCCESS, data: { updatedComment } });
+  }
+);
+
+const deleteComment = asyncWrapper(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { userId } = req.currentUser!;
+    const { postId, commentId } = req.params;
+
+    await commentsService.deleteCommentService(userId, postId, commentId);
+
+    return res.status(200).json({
+      status: httpStatusText.SUCCESS,
+      data: { message: "Comment deleted successfully" },
+    });
+  }
+);
 
 const sharePost = asyncWrapper(
   async (
@@ -199,7 +221,9 @@ export {
   updatePost,
   deletePost,
   handleLikePost,
-  // addComment,
-  // deleteComment,
+  getPostComments,
+  createComment,
+  updateComment,
+  deleteComment,
   sharePost,
 };

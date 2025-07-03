@@ -1,4 +1,4 @@
-import addCommentValidation from "./addCommentValidation";
+import createOrUpdateCommentValidation from "./createOrUpdateCommentValidation";
 import addOrRemoveFollowedUsersValidation from "./addOrRemoveFollowedUsersValidation";
 import createAndUpdateUserValidation from "./createAndUpdateUserValidation";
 import loginValidation from "./loginValidation";
@@ -27,8 +27,9 @@ import createGroupValidation from "./createGroupValidation";
 import sendMessageValidation from "./sendMessageValidation";
 import validateRequestBody from "./validateRequestBody";
 import createChatValidation from "./createChatValidation";
+
 export {
-  addCommentValidation,
+  createOrUpdateCommentValidation,
   addOrRemoveFollowedUsersValidation,
   createAndUpdateUserValidation,
   loginValidation,
