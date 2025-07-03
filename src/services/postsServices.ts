@@ -188,45 +188,23 @@ const updatePostService = async (
   return post;
 };
 
-// const deletePostService = async (
+const deletePostService = async (postId: string, userId: string) => {
+  const user = await User.findById(userId);
+  const post = await Post.findById(postId);
 
-//   postId: string,
-//   userId: string
-// ): Promise<TServiceResult<TPost>> => {
-//   const user = await User.findById(userId);
-//   const post = await Post.findById(postId);
-//   if (!post) {
-//     const error = new AppError("Invalid post id", 400, httpStatusText.ERROR);
-//     return { error, type: "error" };
-//   }
-//   if (!user) {
-//     const error = new AppError("Invalid user id", 400, httpStatusText.ERROR);
-//     return { error, type: "error" };
-//   }
+  doesResourceExists(
+    user,
+    "You are not authorized to delete this post",
+    401,
+    httpStatusText.FAIL
+  );
+  doesResourceExists(post, "Post not found");
 
-//   const isUserPostCreator = post.createdBy.toString() === userId;
-//   if (!isUserPostCreator) {
-//     const error = new AppError(
-//       "Only post creator can delete this post",
-//       400,
-//       httpStatusText.ERROR
-//     );
-//     return { error, type: "error" };
-//   }
+  checkIfUserIsAuthor(userId, post.author.toString());
 
-//   if (post.isDeleted) {
-//     const error = new AppError(
-//       "This post is already deleted",
-//       400,
-//       httpStatusText.ERROR
-//     );
-//     return { error, type: "error" };
-//   }
-
-//   post.isDeleted = true;
-//   await post.save();
-//   return { type: "success" };
-// };
+  post.isDeleted = true;
+  await post.save();
+};
 
 const handlePostLikesService = async (postId: string, userId: string) => {
   const user = await User.findById(userId);
@@ -392,7 +370,7 @@ export default {
   getPostByIdService,
   createPostService,
   updatePostService,
-  // deletePostService,
+  deletePostService,
   handlePostLikesService,
   // addCommentService,
   // deleteCommentService,

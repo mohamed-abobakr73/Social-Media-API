@@ -84,30 +84,26 @@ const updatePost = asyncWrapper(
   }
 );
 
-// const deletePost = asyncWrapper(
-//   async (
-//     req: Request,
-//     res: Response,
-//     next: NextFunction
-//   ): Promise<Response | void> => {
-//     const { postId } = req.params;
-//     const { userId } = req.body;
+const deletePost = asyncWrapper(
+  async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<Response | void> => {
+    const { userId } = req.currentUser!;
+    const { postId } = req.params;
 
-//     const deletePostResult = await postsServices.deletePostService(
-//       postId,
-//       userId
-//     );
+    const deletePostResult = await postsServices.deletePostService(
+      postId,
+      userId
+    );
 
-//     if (deletePostResult.type === "error") {
-//       return next(deletePostResult.error);
-//     } else {
-//       return res.status(200).json({
-//         status: httpStatusText.SUCCESS,
-//         data: { message: "Post deleted successfully" },
-//       });
-//     }
-//   }
-// );
+    return res.status(200).json({
+      status: httpStatusText.SUCCESS,
+      data: { message: "Post deleted successfully" },
+    });
+  }
+);
 
 const handleLikePost = asyncWrapper(
   async (
@@ -201,7 +197,7 @@ export {
   getPostById,
   createPost,
   updatePost,
-  // deletePost,
+  deletePost,
   handleLikePost,
   // addComment,
   // deleteComment,

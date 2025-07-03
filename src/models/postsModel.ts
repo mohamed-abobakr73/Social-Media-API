@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose, { Query } from "mongoose";
 import { TPost } from "../types/";
 
 const postsSchema = new mongoose.Schema<TPost>(
@@ -43,6 +43,11 @@ const postsSchema = new mongoose.Schema<TPost>(
 
 postsSchema.pre("save", function (next) {
   if (this.reports.length >= 10) this.banned = true;
+  next();
+});
+
+postsSchema.pre(/^find/, function (this: Query<any, any>, next) {
+  this.where({ isDeleted: false });
   next();
 });
 

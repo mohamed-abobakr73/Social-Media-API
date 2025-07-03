@@ -3,7 +3,7 @@ import {
   // addComment,
   createPost,
   // deleteComment,
-  // deletePost,
+  deletePost,
   getAllPosts,
   getPostById,
   handleLikePost,
@@ -57,10 +57,8 @@ postsRouter
 //   .route("/reports")
 //   .delete(removeReportValidation(), validateRequestBody, removeReport);
 
-// // Delete post
-// postsRouter
-//   .route("/:postId")
-//   .delete(verifyToken, userIdValidation(), validateRequestBody, deletePost);
+// Delete post
+postsRouter.route("/:postId").delete(verifyToken, deletePost);
 
 // Handle like post
 postsRouter.route("/:postId/likes").post(verifyToken, handleLikePost);
