@@ -6,6 +6,7 @@ import {
   deletePost,
   getAllPosts,
   getPostById,
+  getPostComments,
   handleLikePost,
   sharePost,
   updatePost,
@@ -62,6 +63,9 @@ postsRouter.route("/:postId").delete(verifyToken, deletePost);
 
 // Handle like post
 postsRouter.route("/:postId/likes").post(verifyToken, handleLikePost);
+
+// Get Post Comments
+postsRouter.route("/:postId/comments").get(getPostComments);
 
 // Add comment to post
 postsRouter

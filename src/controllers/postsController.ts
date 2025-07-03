@@ -127,6 +127,19 @@ const handleLikePost = asyncWrapper(
   }
 );
 
+const getPostComments = asyncWrapper(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { postId } = req.params;
+
+    const comments = await commentsService.getPostCommentsService(postId);
+
+    return res.status(200).json({
+      status: httpStatusText.SUCCESS,
+      data: { comments },
+    });
+  }
+);
+
 const createComment = asyncWrapper(
   async (
     req: Request,
@@ -200,6 +213,7 @@ export {
   updatePost,
   deletePost,
   handleLikePost,
+  getPostComments,
   createComment,
   // deleteComment,
   sharePost,
