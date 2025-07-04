@@ -5,6 +5,7 @@ import { TServiceResult } from "../types/serviceResult";
 import { User } from "../models/usersModel";
 import notificationsServices from "./notificationsServices";
 import { TPage } from "../types";
+import doesResourceExists from "../utils/doesResourceExists";
 
 const getAllPagesService = async (paginationData: {
   limit: number;
@@ -26,22 +27,19 @@ const getAllPagesService = async (paginationData: {
   return { pages, paginationInfo };
 };
 
-const getPageByIdService = async (
-  pageId: string
-): Promise<TServiceResult<TPage>> => {
-  const page = await Page.findById(pageId);
-  if (!page) {
-    const error = new AppError("Invalid page ID", 400, httpStatusText.ERROR);
-    return { error, type: "error" };
-  }
-  return { data: page, type: "success" };
+const getPageByIdService = async (pageId: string) => {
+  const page = await Page.findById(pageId, { __v: 0 });
+
+  doesResourceExists(page, "Page not found");
+
+  return page;
 };
 
 const createPageService = async (pageData: {
   pageName: string;
   createdBy: string;
   pageCover?: string;
-}): Promise<TServiceResult<TPage>> => {
+}) => {
   const { pageName, createdBy, pageCover } = pageData;
   const user = await User.findById(createdBy);
   if (!user) {
@@ -72,7 +70,7 @@ const updatePageService = async (
   pageId: string,
   userId: string,
   updateData: Partial<TPage>
-): Promise<TServiceResult<TPage>> => {
+) => {
   const { pageCover } = updateData;
   const page = await Page.findById(pageId);
   if (!page) {
@@ -108,10 +106,7 @@ const updatePageService = async (
   return { data: updatedPage, type: "success" };
 };
 
-const deletePageService = async (
-  pageId: string,
-  userId: string
-): Promise<TServiceResult<TPage>> => {
+const deletePageService = async (pageId: string, userId: string) => {
   const user = await User.findById(userId);
   const page = await Page.findById(pageId);
 
@@ -139,10 +134,7 @@ const deletePageService = async (
   return { type: "success" };
 };
 
-const addFollowersService = async (
-  pageId: string,
-  userId: string
-): Promise<TServiceResult<TPage>> => {
+const addFollowersService = async (pageId: string, userId: string) => {
   const page = await Page.findById(pageId);
   const user = await User.findById(userId);
   if (!page) {
@@ -181,10 +173,7 @@ const addFollowersService = async (
   return { data: page, type: "success" };
 };
 
-const removeFollowersService = async (
-  pageId: string,
-  userId: string
-): Promise<TServiceResult<TPage>> => {
+const removeFollowersService = async (pageId: string, userId: string) => {
   const page = await Page.findById(pageId);
   const user = await User.findById(userId);
   if (!page) {

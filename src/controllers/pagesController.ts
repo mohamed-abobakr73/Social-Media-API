@@ -18,32 +18,20 @@ const getAllPages = asyncWrapper(
 );
 
 const getPageById = asyncWrapper(
-  async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<Response | void> => {
+  async (req: Request, res: Response, next: NextFunction) => {
     const { pageId } = req.params;
 
-    const getPageResult = await pagesServices.getPageByIdService(pageId);
+    const page = await pagesServices.getPageByIdService(pageId);
 
-    if (getPageResult.type === "error") {
-      return next(getPageResult.error);
-    } else {
-      return res.status(200).json({
-        status: httpStatusText.SUCCESS,
-        data: { page: getPageResult.data },
-      });
-    }
+    return res.status(200).json({
+      status: httpStatusText.SUCCESS,
+      data: { page },
+    });
   }
 );
 
 const createPage = asyncWrapper(
-  async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<Response | void> => {
+  async (req: Request, res: Response, next: NextFunction) => {
     const pageCover = req.file?.path;
     const createPageResult = await pagesServices.createPageService({
       ...req.body,
@@ -62,11 +50,7 @@ const createPage = asyncWrapper(
 );
 
 const updatePage = asyncWrapper(
-  async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<Response | void> => {
+  async (req: Request, res: Response, next: NextFunction) => {
     const { pageId } = req.params;
     const { userId } = req.body;
 
@@ -90,11 +74,7 @@ const updatePage = asyncWrapper(
 );
 
 const deletePage = asyncWrapper(
-  async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<Response | void> => {
+  async (req: Request, res: Response, next: NextFunction) => {
     const { pageId } = req.params;
     const { userId } = req.body;
 
@@ -115,11 +95,7 @@ const deletePage = asyncWrapper(
 );
 
 const addFollowers = asyncWrapper(
-  async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<Response | void> => {
+  async (req: Request, res: Response, next: NextFunction) => {
     const { pageId } = req.params;
     const { userId } = req.body;
 
@@ -140,11 +116,7 @@ const addFollowers = asyncWrapper(
 );
 
 const removeFollowers = asyncWrapper(
-  async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<Response | void> => {
+  async (req: Request, res: Response, next: NextFunction) => {
     const { pageId } = req.params;
     const { userId } = req.body;
 
