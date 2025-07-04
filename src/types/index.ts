@@ -16,6 +16,8 @@ import TGroupMembership from "./TGroupMembership";
 import TGroupJoinRequests from "./TGroupJoinRequests";
 import TPaginationData from "./TPaginationData";
 import TPostType from "./TPostType";
+import TFollowResourceType from "./TFollowResource";
+import TFollowers from "./TFollowers";
 
 export {
   TAppError,
@@ -36,4 +38,6 @@ export {
   TGroupJoinRequests,
   TPaginationData,
   TPostType,
+  TFollowResourceType,
+  TFollowers,
 };

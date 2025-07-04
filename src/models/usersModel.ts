@@ -38,6 +38,7 @@ export interface IUser extends Document {
   followedUsers: mongoose.Types.ObjectId[];
   followedPages: mongoose.Types.ObjectId[];
   followers: mongoose.Types.ObjectId[];
+  followersCount: number;
   chats: mongoose.Types.ObjectId[];
   notifications: INotification[];
   createdAt?: Date;
@@ -77,6 +78,7 @@ const usersSchema = new mongoose.Schema<IUser>(
     followedUsers: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     followedPages: [{ type: mongoose.Schema.Types.ObjectId, ref: "Page" }],
     followers: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+    followersCount: { type: Number, default: 0 },
     chats: [{ type: mongoose.Schema.Types.ObjectId, ref: "Chat" }],
     notifications: [
       {

@@ -5,10 +5,12 @@ import searchRouter from "./searchRoute";
 import usersRouter from "./usersRoute";
 import groupsRouter from "./groupsRoute";
 import blockRouter from "./blockRoute";
+import followersRouter from "./followersRoute";
 
 export {
   chatsRouter,
   pagesRouter,
+  followersRouter,
   postsRouter,
   searchRouter,
   usersRouter,
