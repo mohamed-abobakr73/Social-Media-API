@@ -32,20 +32,19 @@ const getPageById = asyncWrapper(
 
 const createPage = asyncWrapper(
   async (req: Request, res: Response, next: NextFunction) => {
+    const { userId } = req.currentUser!;
+
     const pageCover = req.file?.path;
-    const createPageResult = await pagesServices.createPageService({
+
+    const page = await pagesServices.createPageService(userId, {
       ...req.body,
       pageCover,
     });
 
-    if (createPageResult.type === "error") {
-      return next(createPageResult.error);
-    } else {
-      return res.status(201).json({
-        status: httpStatusText.SUCCESS,
-        data: { page: createPageResult.data },
-      });
-    }
+    return res.status(201).json({
+      status: httpStatusText.SUCCESS,
+      data: { page },
+    });
   }
 );
 

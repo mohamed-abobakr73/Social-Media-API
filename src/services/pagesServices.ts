@@ -35,35 +35,32 @@ const getPageByIdService = async (pageId: string) => {
   return page;
 };
 
-const createPageService = async (pageData: {
-  pageName: string;
-  createdBy: string;
-  pageCover?: string;
-}) => {
-  const { pageName, createdBy, pageCover } = pageData;
-  const user = await User.findById(createdBy);
-  if (!user) {
-    const error = new AppError("Invalid user id", 400, httpStatusText.ERROR);
-    return { error, type: "error" };
+const createPageService = async (
+  userId: string,
+  pageData: {
+    pageName: string;
+    pageCover?: string;
   }
+) => {
+  const { pageName, pageCover } = pageData;
+
+  const user = await User.findById(userId);
+
+  doesResourceExists(
+    user,
+    "You are not authorized to create a page",
+    401,
+    httpStatusText.FAIL
+  );
 
   const page = new Page({
     pageName,
-    createdBy,
-    pageCover: pageCover || "",
+    createdBy: userId,
+    pageCover,
   });
 
-  if (!page) {
-    const error = new AppError(
-      "An error occuerd during creating the page, please try again later",
-      400,
-      httpStatusText.ERROR
-    );
-    return { error, type: "error" };
-  }
-
   await page.save();
-  return { data: page, type: "success" };
+  return page;
 };
 
 const updatePageService = async (
