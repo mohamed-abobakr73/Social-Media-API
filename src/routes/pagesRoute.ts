@@ -5,8 +5,6 @@ import {
   createPage,
   updatePage,
   deletePage,
-  addFollowers,
-  removeFollowers,
 } from "../controllers/pagesController";
 import {
   createOrUpdatePageValidation,
@@ -57,21 +55,6 @@ pagesRouter
 
 // Delete page
 pagesRouter.route("/:pageId").delete(verifyToken, deletePage);
-
-// Add followers
-pagesRouter
-  .route("/:pageId/followers")
-  .post(verifyToken, userIdValidation(), validateRequestBody, addFollowers);
-
-// Remove Followers
-pagesRouter
-  .route("/:pageId/followers")
-  .delete(
-    verifyToken,
-    userIdValidation(),
-    validateRequestBody,
-    removeFollowers
-  );
 
 // Report a page
 pagesRouter

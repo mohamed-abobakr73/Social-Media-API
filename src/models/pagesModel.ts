@@ -9,7 +9,7 @@ const pagesSchema = new mongoose.Schema<TPage>(
       ref: "User",
       required: true,
     },
-    followers: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+    followersCount: { type: Number, default: 0 },
     reports: [
       {
         reason: { type: String },
@@ -20,10 +20,9 @@ const pagesSchema = new mongoose.Schema<TPage>(
     pageCover: { type: String },
     banned: { type: Boolean, default: false },
     isDeleted: { type: Boolean, default: false },
-    createdAt: { type: Date, immutable: true, default: Date.now },
   },
   {
-    timestamps: true, // Automatically manages createdAt and updatedAt fields
+    timestamps: true,
   }
 );
 

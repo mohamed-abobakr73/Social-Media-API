@@ -1,9 +1,6 @@
 import { Page } from "../models/pagesModel";
-import AppError from "../utils/AppError";
 import httpStatusText from "../utils/httpStatusText";
-import { TServiceResult } from "../types/serviceResult";
 import { User } from "../models/usersModel";
-import notificationsServices from "./notificationsServices";
 import { TPage } from "../types";
 import doesResourceExists from "../utils/doesResourceExists";
 import assertUserIsAllowed from "../utils/assertUserIsAllowed";
@@ -110,87 +107,10 @@ const deletePageService = async (userId: string, pageId: string) => {
   await page.save();
 };
 
-const addFollowersService = async (pageId: string, userId: string) => {
-  const page = await Page.findById(pageId);
-  const user = await User.findById(userId);
-  if (!page) {
-    const error = new AppError("Invalid page id", 400, httpStatusText.ERROR);
-    return { error, type: "error" };
-  }
-  if (!user) {
-    const error = new AppError("Invalid user id", 400, httpStatusText.ERROR);
-    return { error, type: "error" };
-  }
-
-  const userAlreadyFollowingPage = page.followers.find(
-    (follower) => follower.toString() === userId
-  );
-  if (userAlreadyFollowingPage) {
-    const error = new AppError(
-      "You are already following this page",
-      400,
-      httpStatusText.ERROR
-    );
-    return { error, type: "error" };
-  }
-  page.followers.push(user._id);
-  user.followedPages.push(page._id);
-  await page.save();
-  await user.save();
-  const addNotificationResult =
-    await notificationsServices.addNotificationService(
-      "followPage",
-      page.createdBy,
-      { username: user.username, content: page.pageName }
-    );
-  if (addNotificationResult.type === "error") {
-    return { error: addNotificationResult.error!, type: "error" };
-  }
-  return { data: page, type: "success" };
-};
-
-const removeFollowersService = async (pageId: string, userId: string) => {
-  const page = await Page.findById(pageId);
-  const user = await User.findById(userId);
-  if (!page) {
-    const error = new AppError("Invalid page id", 400, httpStatusText.ERROR);
-    return { error, type: "error" };
-  }
-  if (!user) {
-    const error = new AppError("Invalid user id", 400, httpStatusText.ERROR);
-    return { error, type: "error" };
-  }
-
-  const userFollowingPage = page.followers.find(
-    (follower) => follower.toString() === userId
-  );
-  if (!userFollowingPage) {
-    const error = new AppError(
-      "You are not a follower of this page",
-      400,
-      httpStatusText.ERROR
-    );
-    return { error, type: "error" };
-  }
-
-  page.followers = page.followers.filter(
-    (follower) => follower.toString() !== userId
-  );
-  user.followedPages = user.followedPages.filter(
-    (page) => page.toString() !== pageId
-  );
-
-  await page.save();
-  await user.save();
-  return { data: page, type: "success" };
-};
-
 export default {
   getAllPagesService,
   getPageByIdService,
   createPageService,
   updatePageService,
   deletePageService,
-  addFollowersService,
-  removeFollowersService,
 };
