@@ -69,22 +69,15 @@ const updatePage = asyncWrapper(
 
 const deletePage = asyncWrapper(
   async (req: Request, res: Response, next: NextFunction) => {
+    const { userId } = req.currentUser!;
     const { pageId } = req.params;
-    const { userId } = req.body;
 
-    const deletePageResult = await pagesServices.deletePageService(
-      pageId,
-      userId
-    );
+    await pagesServices.deletePageService(userId, pageId);
 
-    if (deletePageResult.type === "error") {
-      return next(deletePageResult.error);
-    } else {
-      return res.status(200).json({
-        status: httpStatusText.SUCCESS,
-        data: { message: "Page deleted successfully" },
-      });
-    }
+    return res.status(200).json({
+      status: httpStatusText.SUCCESS,
+      data: { message: "Page deleted successfully" },
+    });
   }
 );
 

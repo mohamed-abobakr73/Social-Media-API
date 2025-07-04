@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose, { Query } from "mongoose";
 import { TPage } from "../types/";
 
 const pagesSchema = new mongoose.Schema<TPage>(
@@ -17,7 +17,6 @@ const pagesSchema = new mongoose.Schema<TPage>(
         createdAt: { type: Date, default: Date.now },
       },
     ],
-    posts: [{ type: mongoose.Schema.Types.ObjectId, ref: "Post" }],
     pageCover: { type: String },
     banned: { type: Boolean, default: false },
     isDeleted: { type: Boolean, default: false },
@@ -30,6 +29,11 @@ const pagesSchema = new mongoose.Schema<TPage>(
 
 pagesSchema.pre("save", function (next) {
   if (this.reports.length >= 10) this.banned = true;
+  next();
+});
+
+pagesSchema.pre(/^find/, function (this: Query<any, any>, next) {
+  this.where({ isDeleted: false });
   next();
 });
 

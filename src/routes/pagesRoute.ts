@@ -56,9 +56,7 @@ pagesRouter
   .delete(removeReportValidation(), validateRequestBody, removeReport);
 
 // Delete page
-pagesRouter
-  .route("/:pageId")
-  .delete(verifyToken, userIdValidation(), validateRequestBody, deletePage);
+pagesRouter.route("/:pageId").delete(verifyToken, deletePage);
 
 // Add followers
 pagesRouter

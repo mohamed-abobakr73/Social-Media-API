@@ -8,6 +8,27 @@ import { TPage } from "../types";
 import doesResourceExists from "../utils/doesResourceExists";
 import assertUserIsAllowed from "../utils/assertUserIsAllowed";
 
+const pageAndUserStarterService = async (pageId: string, userId: string) => {
+  const page = await Page.findById(pageId, { __v: 0 });
+  const user = await User.findById(userId, { _id: 1 });
+
+  doesResourceExists(page, "Page not found");
+  doesResourceExists(
+    user,
+    "You are not authorized to do this action",
+    401,
+    httpStatusText.FAIL
+  );
+
+  assertUserIsAllowed(
+    userId,
+    page.createdBy.toString(),
+    "You can't do this action"
+  );
+
+  return { page, user };
+};
+
 const getAllPagesService = async (paginationData: {
   limit: number;
   skip: number;
@@ -71,22 +92,7 @@ const updatePageService = async (
 ) => {
   const { pageCover, pageName } = updateData;
 
-  const user = await User.findById(userId, { _id: 1 });
-  const page = await Page.findById(pageId);
-
-  doesResourceExists(
-    user,
-    "You are not authorized to update this page",
-    401,
-    httpStatusText.FAIL
-  );
-  doesResourceExists(page, "Page not found");
-
-  assertUserIsAllowed(
-    userId,
-    page.createdBy.toString(),
-    "You can't do this action"
-  );
+  const { page } = await pageAndUserStarterService(pageId, userId);
 
   page.pageCover = pageCover || page.pageCover;
   page.pageName = pageName || page.pageName;
@@ -96,32 +102,12 @@ const updatePageService = async (
   return updatedPage;
 };
 
-const deletePageService = async (pageId: string, userId: string) => {
-  const user = await User.findById(userId);
-  const page = await Page.findById(pageId);
-
-  if (!page) {
-    const error = new AppError("Invalid page id", 400, httpStatusText.ERROR);
-    return { error, type: "error" };
-  }
-  if (!user) {
-    const error = new AppError("Invalid user id", 400, httpStatusText.ERROR);
-    return { error, type: "error" };
-  }
-
-  const userIsPageOwner = page.createdBy.toString() === userId;
-  if (!userIsPageOwner) {
-    const error = new AppError(
-      "Only page owner can delete this page",
-      400,
-      httpStatusText.ERROR
-    );
-    return { error, type: "error" };
-  }
+const deletePageService = async (userId: string, pageId: string) => {
+  const { page } = await pageAndUserStarterService(pageId, userId);
 
   page.isDeleted = true;
+
   await page.save();
-  return { type: "success" };
 };
 
 const addFollowersService = async (pageId: string, userId: string) => {
