@@ -1,6 +1,6 @@
 import { body } from "express-validator";
 
-const createPageValidation = () => {
+const createOrUpdatePageValidation = () => {
   return [
     body("pageName")
       .notEmpty()
@@ -12,4 +12,4 @@ const createPageValidation = () => {
   ];
 };
 
-export default createPageValidation;
+export default createOrUpdatePageValidation;

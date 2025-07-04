@@ -50,25 +50,20 @@ const createPage = asyncWrapper(
 
 const updatePage = asyncWrapper(
   async (req: Request, res: Response, next: NextFunction) => {
+    const { userId } = req.currentUser!;
     const { pageId } = req.params;
-    const { userId } = req.body;
 
     const pageCover = req.file?.path;
 
-    const updatePageResult = await pagesServices.updatePageService(
-      pageId,
-      userId,
-      { ...req.body, pageCover }
-    );
+    const updatedPage = await pagesServices.updatePageService(userId, pageId, {
+      ...req.body,
+      pageCover,
+    });
 
-    if (updatePageResult.type === "error") {
-      return next(updatePageResult.error);
-    } else {
-      return res.status(200).json({
-        status: httpStatusText.SUCCESS,
-        data: { page: updatePageResult.data },
-      });
-    }
+    return res.status(200).json({
+      status: httpStatusText.SUCCESS,
+      data: { updatedPage },
+    });
   }
 );
 

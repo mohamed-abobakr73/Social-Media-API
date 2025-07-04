@@ -6,6 +6,7 @@ import { User } from "../models/usersModel";
 import notificationsServices from "./notificationsServices";
 import { TPage } from "../types";
 import doesResourceExists from "../utils/doesResourceExists";
+import assertUserIsAllowed from "../utils/assertUserIsAllowed";
 
 const getAllPagesService = async (paginationData: {
   limit: number;
@@ -64,43 +65,35 @@ const createPageService = async (
 };
 
 const updatePageService = async (
-  pageId: string,
   userId: string,
+  pageId: string,
   updateData: Partial<TPage>
 ) => {
-  const { pageCover } = updateData;
+  const { pageCover, pageName } = updateData;
+
+  const user = await User.findById(userId, { _id: 1 });
   const page = await Page.findById(pageId);
-  if (!page) {
-    const error = new AppError("Invalid page id", 400, httpStatusText.ERROR);
-    return { error, type: "error" };
-  }
 
-  const userIsPageOwner = page.createdBy.toString() === userId;
-  if (!userIsPageOwner) {
-    const error = new AppError(
-      "Only page owner can delete this page",
-      400,
-      httpStatusText.ERROR
-    );
-    return { error, type: "error" };
-  }
+  doesResourceExists(
+    user,
+    "You are not authorized to update this page",
+    401,
+    httpStatusText.FAIL
+  );
+  doesResourceExists(page, "Page not found");
 
-  const updatedPage = await Page.findByIdAndUpdate(
-    pageId,
-    { $set: { ...updateData, pageCover: pageCover || page.pageCover } },
-    { new: true }
+  assertUserIsAllowed(
+    userId,
+    page.createdBy.toString(),
+    "You can't do this action"
   );
 
-  if (!updatedPage) {
-    const error = new AppError(
-      "An error occured during updating the page, please try again later",
-      400,
-      httpStatusText.ERROR
-    );
-    return { error, type: "error" };
-  }
+  page.pageCover = pageCover || page.pageCover;
+  page.pageName = pageName || page.pageName;
 
-  return { data: updatedPage, type: "success" };
+  const updatedPage = await page.save();
+
+  return updatedPage;
 };
 
 const deletePageService = async (pageId: string, userId: string) => {

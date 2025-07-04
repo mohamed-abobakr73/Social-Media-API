@@ -9,9 +9,8 @@ import {
   removeFollowers,
 } from "../controllers/pagesController";
 import {
-  createPageValidation,
+  createOrUpdatePageValidation,
   userIdValidation,
-  updatePageValidation,
   verifyToken,
   validateRequestBody,
   addReportValidation,
@@ -35,7 +34,7 @@ pagesRouter
   .post(
     verifyToken,
     upload.single("cover"),
-    createPageValidation(),
+    createOrUpdatePageValidation(),
     validateRequestBody,
     createPage
   );
@@ -46,7 +45,7 @@ pagesRouter
   .patch(
     verifyToken,
     upload.single("cover"),
-    updatePageValidation(),
+    createOrUpdatePageValidation(),
     validateRequestBody,
     updatePage
   );
