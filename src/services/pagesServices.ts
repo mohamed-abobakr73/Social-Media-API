@@ -9,10 +9,21 @@ import { TPage } from "../types";
 const getAllPagesService = async (paginationData: {
   limit: number;
   skip: number;
-}): Promise<TServiceResult<TPage[]>> => {
+}) => {
   const { limit, skip } = paginationData;
+
   const pages = await Page.find({}, { __v: 0 }).limit(limit).skip(skip);
-  return { data: pages, type: "success" };
+
+  const totalCount = await Page.countDocuments();
+
+  const paginationInfo = {
+    totalItems: totalCount,
+    totalPages: Math.ceil(totalCount / limit),
+    currentPage: Math.ceil(skip / limit) + 1,
+    itemsPerPage: limit,
+  };
+
+  return { pages, paginationInfo };
 };
 
 const getPageByIdService = async (

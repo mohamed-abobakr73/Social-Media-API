@@ -2,31 +2,18 @@ import { Request, Response, NextFunction } from "express";
 import asyncWrapper from "../middlewares/asyncWrapper";
 import pagesServices from "../services/pagesServices";
 import httpStatusText from "../utils/httpStatusText";
+import paginationQuery from "../utils/paginationQuery";
 
 const getAllPages = asyncWrapper(
-  async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<Response | void> => {
-    const query = req.query as { limit?: string; page?: string };
-    const limit = parseInt(query.limit || "10", 10);
-    const page = parseInt(query.page || "1", 10);
-    const skip = (page - 1) * limit;
+  async (req: Request, res: Response, next: NextFunction) => {
+    const pagination = paginationQuery(req.query);
 
-    const getAllPagesResult = await pagesServices.getAllPagesService({
-      limit,
-      skip,
+    const pages = await pagesServices.getAllPagesService(pagination);
+
+    return res.status(200).json({
+      status: httpStatusText.SUCCESS,
+      data: pages,
     });
-
-    if (getAllPagesResult.type === "error") {
-      return next(getAllPagesResult.error);
-    } else {
-      return res.status(200).json({
-        status: httpStatusText.SUCCESS,
-        data: { pages: getAllPagesResult.data },
-      });
-    }
   }
 );
 
