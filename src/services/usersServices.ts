@@ -1,11 +1,12 @@
-import { User, IUser } from "../models/usersModel";
+import { User } from "../models/usersModel";
 import httpStatusText from "../utils/httpStatusText";
 import generateJwt from "../utils/generateJwt";
 import doesResourceExists from "../utils/doesResourceExists";
 import hashItem from "../utils/hashItem";
 import compareHashedItem from "../utils/compareHashedItem";
+import { TUser } from "../types";
 
-const createToken = (user: IUser) => {
+const createToken = (user: TUser) => {
   const { _id, username, email, role } = user;
   const tokenPayload = {
     userId: _id,
@@ -32,7 +33,7 @@ const getUserByIdService = async (userId: string) => {
   return user;
 };
 
-const createUserService = async (userData: Partial<IUser>) => {
+const createUserService = async (userData: Partial<TUser>) => {
   const { password } = userData;
 
   userData.password = hashItem(password);
@@ -66,7 +67,7 @@ const loginService = async (loginData: { email: string; password: string }) => {
 
 const updateUserService = async (
   userId: string,
-  updateData: Partial<IUser>
+  updateData: Partial<TUser>
 ) => {
   const user = await User.findByIdAndUpdate(
     userId,
