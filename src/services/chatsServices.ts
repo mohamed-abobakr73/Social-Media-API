@@ -36,20 +36,20 @@ const createOrGetChatService = async (
     return { error, type: "error" };
   }
 
-  const isBlocked = users.some(
-    (user) =>
-      user.blockList.includes(firstUserId) ||
-      user.blockList.includes(secondUserId)
-  );
+  // const isBlocked = users.some(
+  //   (user) =>
+  //     user.blockList.includes(firstUserId) ||
+  //     user.blockList.includes(secondUserId)
+  // );
 
-  if (isBlocked) {
-    const error = new AppError(
-      "Cannot chat with a blocked user",
-      400,
-      httpStatusText.ERROR
-    );
-    return { error, type: "error" };
-  }
+  // if (isBlocked) {
+  //   const error = new AppError(
+  //     "Cannot chat with a blocked user",
+  //     400,
+  //     httpStatusText.ERROR
+  //   );
+  //   return { error, type: "error" };
+  // }
 
   // Check if chat already exists
   const existingChat = await Chat.findOne({
