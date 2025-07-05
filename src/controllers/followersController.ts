@@ -2,6 +2,29 @@ import { NextFunction, Request, Response } from "express";
 import { asyncWrapper } from "../middlewares";
 import followersService from "../services/followersService";
 import { TFollowResourceType } from "../types";
+import paginationQuery from "../utils/paginationQuery";
+
+const getFollowers = asyncWrapper(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { resourceType, resourceId } = req.query as {
+      resourceType: TFollowResourceType;
+      resourceId: string;
+    };
+
+    const pagination = paginationQuery(req.query);
+
+    const followers = await followersService.getFollowersService(
+      resourceId,
+      resourceType,
+      pagination
+    );
+
+    return res.status(200).json({
+      status: "success",
+      data: followers,
+    });
+  }
+);
 
 const followResource = asyncWrapper(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -39,4 +62,4 @@ const removeFollow = asyncWrapper(
   }
 );
 
-export { followResource, removeFollow };
+export { getFollowers, followResource, removeFollow };
