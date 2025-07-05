@@ -14,16 +14,11 @@ import {
 import {
   createGroupValidation,
   verifyToken,
-  joinGroupValidation,
   handleJoinRequestValidation,
-  userIdValidation,
   updateGroupValidation,
-  addReportValidation,
-  removeReportValidation,
   validateRequestBody,
 } from "../middlewares/";
 import { upload } from "../config/";
-import { addReport, removeReport } from "../controllers/reportsController";
 
 const groupsRouter = Router();
 
@@ -58,11 +53,6 @@ groupsRouter
     updateGroup
   );
 
-// Remove a report
-groupsRouter
-  .route("/reports")
-  .delete(removeReportValidation(), validateRequestBody, removeReport);
-
 // Delete group
 groupsRouter.route("/:groupId").delete(verifyToken, deleteGroup);
 
@@ -81,10 +71,5 @@ groupsRouter
 
 // Leave group
 groupsRouter.route("/:groupId/leave").delete(verifyToken, leaveGroup);
-
-// Report a group
-groupsRouter
-  .route("/reports")
-  .post(addReportValidation(), validateRequestBody, addReport);
 
 export default groupsRouter;

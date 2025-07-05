@@ -19,12 +19,9 @@ import {
   updatePostValidation,
   getAllPostsValidation,
   createOrUpdateCommentValidation,
-  addReportValidation,
-  removeReportValidation,
   validateRequestBody,
 } from "../middlewares/";
 import { upload } from "../config/";
-import { addReport, removeReport } from "../controllers/reportsController";
 
 const postsRouter = Router();
 
@@ -52,11 +49,6 @@ postsRouter
 postsRouter
   .route("/:postId")
   .patch(verifyToken, updatePostValidation(), validateRequestBody, updatePost);
-
-// // Remove a report
-// postsRouter
-//   .route("/reports")
-//   .delete(removeReportValidation(), validateRequestBody, removeReport);
 
 // Delete post
 postsRouter.route("/:postId").delete(verifyToken, deletePost);
@@ -94,10 +86,5 @@ postsRouter
 
 // Share post
 postsRouter.route("/:postId/share").post(verifyToken, sharePost);
-
-// // Report a post
-// postsRouter
-//   .route("/reports")
-//   .post(addReportValidation(), validateRequestBody, addReport);
 
 export default postsRouter;

@@ -4,7 +4,6 @@ import { Group } from "../models/groupsModel";
 import AppError from "../utils/AppError";
 import httpStatusText from "../utils/httpStatusText";
 import { Page } from "../models/pagesModel";
-import notificationsServices from "./notificationsServices";
 import { TPostType, TPaginationData, TPost } from "../types";
 import paginationResult from "../utils/paginationResult";
 import doesResourceExists from "../utils/doesResourceExists";
