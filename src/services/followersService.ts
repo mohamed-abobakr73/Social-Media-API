@@ -3,9 +3,6 @@ import { TFollowResourceType, TPaginationData } from "../types";
 import assertUserIsAllowed from "../utils/assertUserIsAllowed";
 import doesResourceExists from "../utils/doesResourceExists";
 import httpStatusText from "../utils/httpStatusText";
-import paginationResult from "../utils/paginationResult";
-
-// TODO Add notifications
 
 const checkIfUserAlreadyFollowing = async (
   userId: string,
