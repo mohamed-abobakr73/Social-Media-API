@@ -1,8 +1,9 @@
 import { User, Follower, Page } from "../models";
-import { TFollowResourceType } from "../types";
+import { TFollowResourceType, TPaginationData } from "../types";
 import assertUserIsAllowed from "../utils/assertUserIsAllowed";
 import doesResourceExists from "../utils/doesResourceExists";
 import httpStatusText from "../utils/httpStatusText";
+import paginationResult from "../utils/paginationResult";
 
 const checkIfUserAlreadyFollowing = async (
   userId: string,
@@ -32,6 +33,43 @@ const checkIfUserFollowingHimself = async (
     400,
     httpStatusText.FAIL
   );
+};
+
+const getFollowersService = async (
+  resourceId: string,
+  resourceType: TFollowResourceType,
+  paginationData: TPaginationData
+) => {
+  let followers;
+  let followersCount;
+
+  const { limit, skip } = paginationData;
+
+  switch (resourceType) {
+    case "user":
+      const user = await User.findById(resourceId);
+      doesResourceExists(user, "User not found");
+      followers = await Follower.find({ following: user._id }, { follower: 1 })
+        .limit(limit)
+        .skip(skip)
+        .populate("follower", { username: 1, profilePicture: 1 });
+      followersCount = user.followersCount;
+      break;
+
+    case "page":
+      const page = await Page.findById(resourceId);
+      doesResourceExists(page, "Page not found");
+      followers = await Follower.find({ following: page._id }, { follower: 1 })
+        .limit(limit)
+        .skip(skip)
+        .populate("follower", { username: 1, profilePicture: 1 });
+      followersCount = page.followersCount;
+      break;
+  }
+
+  const paginationInfo = paginationResult(followersCount, skip, limit);
+
+  return { followers, followersCount, paginationInfo };
 };
 
 const followResourceService = async (
@@ -124,4 +162,8 @@ const removeFollowService = async (
   await Follower.deleteOne({ _id: follow._id });
 };
 
-export default { followResourceService, removeFollowService };
+export default {
+  getFollowersService,
+  followResourceService,
+  removeFollowService,
+};

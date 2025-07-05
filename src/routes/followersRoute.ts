@@ -1,6 +1,7 @@
 import { Router } from "express";
 import {
   followResource,
+  getFollowers,
   removeFollow,
 } from "../controllers/followersController";
 import {
@@ -11,6 +12,10 @@ import {
 } from "../middlewares";
 
 const followersRouter = Router();
+
+followersRouter
+  .route("/")
+  .get(followResourceValidation(), validateRequestBody, getFollowers);
 
 followersRouter
   .route("/")
