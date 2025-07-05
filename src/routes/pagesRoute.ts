@@ -5,13 +5,10 @@ import {
   createPage,
   updatePage,
   deletePage,
-  addFollowers,
-  removeFollowers,
 } from "../controllers/pagesController";
 import {
-  createPageValidation,
+  createOrUpdatePageValidation,
   userIdValidation,
-  updatePageValidation,
   verifyToken,
   validateRequestBody,
   addReportValidation,
@@ -35,7 +32,7 @@ pagesRouter
   .post(
     verifyToken,
     upload.single("cover"),
-    createPageValidation(),
+    createOrUpdatePageValidation(),
     validateRequestBody,
     createPage
   );
@@ -46,7 +43,7 @@ pagesRouter
   .patch(
     verifyToken,
     upload.single("cover"),
-    updatePageValidation(),
+    createOrUpdatePageValidation(),
     validateRequestBody,
     updatePage
   );
@@ -57,24 +54,7 @@ pagesRouter
   .delete(removeReportValidation(), validateRequestBody, removeReport);
 
 // Delete page
-pagesRouter
-  .route("/:pageId")
-  .delete(verifyToken, userIdValidation(), validateRequestBody, deletePage);
-
-// Add followers
-pagesRouter
-  .route("/:pageId/followers")
-  .post(verifyToken, userIdValidation(), validateRequestBody, addFollowers);
-
-// Remove Followers
-pagesRouter
-  .route("/:pageId/followers")
-  .delete(
-    verifyToken,
-    userIdValidation(),
-    validateRequestBody,
-    removeFollowers
-  );
+pagesRouter.route("/:pageId").delete(verifyToken, deletePage);
 
 // Report a page
 pagesRouter

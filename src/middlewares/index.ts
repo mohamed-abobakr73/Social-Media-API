@@ -9,8 +9,7 @@ import verifyToken from "./verifyToken";
 import addReportValidation from "./addReportValidation";
 import removeReportValidation from "./removeReportValidation";
 import userIdValidation from "./userIdValidation";
-import createPageValidation from "./createPageValidation";
-import updatePageValidation from "./updatePageValidation";
+import createOrUpdatePageValidation from "./createOrUpdatePageValidation";
 import createPostValidation from "./createPostValidation";
 import updatePostValidation from "./updatePostValidation";
 import getAllPostsValidation from "./getAllPostsValidation";
@@ -27,6 +26,8 @@ import createGroupValidation from "./createGroupValidation";
 import sendMessageValidation from "./sendMessageValidation";
 import validateRequestBody from "./validateRequestBody";
 import createChatValidation from "./createChatValidation";
+import followResourceValidation from "./followResourceValidation";
+import unFollowResourceValidation from "./unFollowResourceValidation";
 
 export {
   createOrUpdateCommentValidation,
@@ -40,8 +41,7 @@ export {
   addReportValidation,
   removeReportValidation,
   userIdValidation,
-  createPageValidation,
-  updatePageValidation,
+  createOrUpdatePageValidation,
   createPostValidation,
   updatePostValidation,
   getAllPostsValidation,
@@ -58,4 +58,6 @@ export {
   sendMessageValidation,
   validateRequestBody,
   createChatValidation,
+  followResourceValidation,
+  unFollowResourceValidation,
 };

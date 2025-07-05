@@ -2,187 +2,83 @@ import { Request, Response, NextFunction } from "express";
 import asyncWrapper from "../middlewares/asyncWrapper";
 import pagesServices from "../services/pagesServices";
 import httpStatusText from "../utils/httpStatusText";
+import paginationQuery from "../utils/paginationQuery";
 
 const getAllPages = asyncWrapper(
-  async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<Response | void> => {
-    const query = req.query as { limit?: string; page?: string };
-    const limit = parseInt(query.limit || "10", 10);
-    const page = parseInt(query.page || "1", 10);
-    const skip = (page - 1) * limit;
+  async (req: Request, res: Response, next: NextFunction) => {
+    const pagination = paginationQuery(req.query);
 
-    const getAllPagesResult = await pagesServices.getAllPagesService({
-      limit,
-      skip,
+    const pages = await pagesServices.getAllPagesService(pagination);
+
+    return res.status(200).json({
+      status: httpStatusText.SUCCESS,
+      data: pages,
     });
-
-    if (getAllPagesResult.type === "error") {
-      return next(getAllPagesResult.error);
-    } else {
-      return res.status(200).json({
-        status: httpStatusText.SUCCESS,
-        data: { pages: getAllPagesResult.data },
-      });
-    }
   }
 );
 
 const getPageById = asyncWrapper(
-  async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<Response | void> => {
+  async (req: Request, res: Response, next: NextFunction) => {
     const { pageId } = req.params;
 
-    const getPageResult = await pagesServices.getPageByIdService(pageId);
+    const page = await pagesServices.getPageByIdService(pageId);
 
-    if (getPageResult.type === "error") {
-      return next(getPageResult.error);
-    } else {
-      return res.status(200).json({
-        status: httpStatusText.SUCCESS,
-        data: { page: getPageResult.data },
-      });
-    }
+    return res.status(200).json({
+      status: httpStatusText.SUCCESS,
+      data: { page },
+    });
   }
 );
 
 const createPage = asyncWrapper(
-  async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<Response | void> => {
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { userId } = req.currentUser!;
+
     const pageCover = req.file?.path;
-    const createPageResult = await pagesServices.createPageService({
+
+    const page = await pagesServices.createPageService(userId, {
       ...req.body,
       pageCover,
     });
 
-    if (createPageResult.type === "error") {
-      return next(createPageResult.error);
-    } else {
-      return res.status(201).json({
-        status: httpStatusText.SUCCESS,
-        data: { page: createPageResult.data },
-      });
-    }
+    return res.status(201).json({
+      status: httpStatusText.SUCCESS,
+      data: { page },
+    });
   }
 );
 
 const updatePage = asyncWrapper(
-  async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<Response | void> => {
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { userId } = req.currentUser!;
     const { pageId } = req.params;
-    const { userId } = req.body;
 
     const pageCover = req.file?.path;
 
-    const updatePageResult = await pagesServices.updatePageService(
-      pageId,
-      userId,
-      { ...req.body, pageCover }
-    );
+    const updatedPage = await pagesServices.updatePageService(userId, pageId, {
+      ...req.body,
+      pageCover,
+    });
 
-    if (updatePageResult.type === "error") {
-      return next(updatePageResult.error);
-    } else {
-      return res.status(200).json({
-        status: httpStatusText.SUCCESS,
-        data: { page: updatePageResult.data },
-      });
-    }
+    return res.status(200).json({
+      status: httpStatusText.SUCCESS,
+      data: { updatedPage },
+    });
   }
 );
 
 const deletePage = asyncWrapper(
-  async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<Response | void> => {
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { userId } = req.currentUser!;
     const { pageId } = req.params;
-    const { userId } = req.body;
 
-    const deletePageResult = await pagesServices.deletePageService(
-      pageId,
-      userId
-    );
+    await pagesServices.deletePageService(userId, pageId);
 
-    if (deletePageResult.type === "error") {
-      return next(deletePageResult.error);
-    } else {
-      return res.status(200).json({
-        status: httpStatusText.SUCCESS,
-        data: { message: "Page deleted successfully" },
-      });
-    }
+    return res.status(200).json({
+      status: httpStatusText.SUCCESS,
+      data: { message: "Page deleted successfully" },
+    });
   }
 );
 
-const addFollowers = asyncWrapper(
-  async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<Response | void> => {
-    const { pageId } = req.params;
-    const { userId } = req.body;
-
-    const addFollowersResult = await pagesServices.addFollowersService(
-      pageId,
-      userId
-    );
-
-    if (addFollowersResult.type === "error") {
-      return next(addFollowersResult.error);
-    } else {
-      return res.status(200).json({
-        status: httpStatusText.SUCCESS,
-        data: { message: "You are now following this page" },
-      });
-    }
-  }
-);
-
-const removeFollowers = asyncWrapper(
-  async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<Response | void> => {
-    const { pageId } = req.params;
-    const { userId } = req.body;
-
-    const removeFollowersResult = await pagesServices.removeFollowersService(
-      pageId,
-      userId
-    );
-
-    if (removeFollowersResult.type === "error") {
-      return next(removeFollowersResult.error);
-    } else {
-      return res.status(200).json({
-        status: httpStatusText.SUCCESS,
-        data: { message: "You are not following this page anymore" },
-      });
-    }
-  }
-);
-
-export {
-  getAllPages,
-  getPageById,
-  createPage,
-  updatePage,
-  deletePage,
-  addFollowers,
-  removeFollowers,
-};
+export { getAllPages, getPageById, createPage, updatePage, deletePage };

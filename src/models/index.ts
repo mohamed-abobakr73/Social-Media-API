@@ -8,6 +8,8 @@ import { Block } from "./blocksModel";
 import { GroupMembership } from "./groupMembership";
 import { GroupJoinRequests } from "./groupJoinRequests";
 import { Comment } from "./commentsModel";
+import { Page } from "./pagesModel";
+import { Follower } from "./followersModel";
 
 export {
   Chat,
@@ -20,4 +22,6 @@ export {
   FriendRequest,
   Block,
   Comment,
+  Page,
+  Follower,
 };

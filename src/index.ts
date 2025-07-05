@@ -14,6 +14,7 @@ import {
   chatsRouter,
   searchRouter,
   blockRouter,
+  followersRouter,
 } from "./routes/";
 
 import { globalErrorHandler, notFoundRoutes } from "./middlewares/";
@@ -82,6 +83,7 @@ app.use("/api/v1/blocks", blockRouter);
 app.use("/api/v1/groups", groupsRouter);
 app.use("/api/v1/posts", postsRouter);
 app.use("/api/v1/pages", pagesRouter);
+app.use("/api/v1/followers", followersRouter);
 app.use("/api/v1/chats", chatsRouter);
 app.use("/api/v1/search", searchRouter);
 
