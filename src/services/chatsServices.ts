@@ -23,62 +23,26 @@ const getAllChatsService = async (
 const createOrGetChatService = async (
   firstUserId: mongoose.Types.ObjectId,
   secondUserId: mongoose.Types.ObjectId
-): Promise<TServiceResult<TChat>> => {
+) => {
   // Ensure participants exist and aren't blocked
   const users = await User.find({ _id: { $in: [firstUserId, secondUserId] } });
-
-  if (users.length !== 2) {
-    const error = new AppError(
-      "Invalid paricipants ids",
-      400,
-      httpStatusText.ERROR
-    );
-    return { error, type: "error" };
-  }
-
-  // const isBlocked = users.some(
-  //   (user) =>
-  //     user.blockList.includes(firstUserId) ||
-  //     user.blockList.includes(secondUserId)
-  // );
-
-  // if (isBlocked) {
-  //   const error = new AppError(
-  //     "Cannot chat with a blocked user",
-  //     400,
-  //     httpStatusText.ERROR
-  //   );
-  //   return { error, type: "error" };
-  // }
-
-  // Check if chat already exists
-  const existingChat = await Chat.findOne({
-    participants: { $all: [firstUserId, secondUserId] },
-  });
-  if (existingChat) {
-    return { data: existingChat, type: "success" };
-  }
 
   // Create a new chat
   const newChat = new Chat({
     participants: [firstUserId, secondUserId],
     messages: [],
   });
+
   await newChat.save();
 
-  // Add the chat to each user Chats property
-  // users.forEach(async (user) => {
-  //   user.chats.push(newChat._id);
-  //   await user.save();
-  // });
-  return { data: newChat, type: "success" };
+  // return { data: newChat, type: "success" };
 };
 
 const sendMessageService = async (
   chatId: string,
   senderId: string,
   content: string
-): Promise<TServiceResult<TMessage>> => {
+) => {
   const chat = await Chat.findById(chatId);
   if (!chat) {
     const error = new AppError("Invalid chat id", 400, httpStatusText.ERROR);
@@ -104,9 +68,9 @@ const sendMessageService = async (
     content,
     seen: false,
   };
-  chat.messages.push(message);
+  // chat.messages.push(message);
   await chat.save();
-  return { data: message, type: "success" };
+  // return { data: message, type: "success" };
 };
 
 const updateOrDeleteMessageService = async (
@@ -138,32 +102,32 @@ const updateOrDeleteMessageService = async (
     return { error, type: "error" };
   }
 
-  const messageIndex = chat.messages.findIndex(
-    (message) => message._id!.toString() === messageId
-  );
+  // const messageIndex = chat.messages.findIndex(
+  //   (message) => message._id!.toString() === messageId
+  // );
 
-  const message = chat.messages[messageIndex];
-  if (!message) {
-    const error = new AppError("Invalid message id", 400, httpStatusText.ERROR);
-    return { error, type: "error" };
-  }
+  // const message = chat.messages[messageIndex];
+  // if (!message) {
+  //   const error = new AppError("Invalid message id", 400, httpStatusText.ERROR);
+  //   return { error, type: "error" };
+  // }
 
-  if (message.sender.toString() !== senderId) {
-    const error = new AppError(
-      "User is not message sender",
-      400,
-      httpStatusText.ERROR
-    );
-    return { error, type: "error" };
-  }
+  // if (message.sender.toString() !== senderId) {
+  //   const error = new AppError(
+  //     "User is not message sender",
+  //     400,
+  //     httpStatusText.ERROR
+  //   );
+  //   return { error, type: "error" };
+  // }
 
   switch (type) {
     case "update":
-      chat.messages[messageIndex].content = newContent!;
+      // chat.messages[messageIndex].content = newContent!;
       await chat.save();
       break;
     case "delete":
-      chat.messages.splice(messageIndex, 1);
+      // chat.messages.splice(messageIndex, 1);
       await chat.save();
       break;
   }

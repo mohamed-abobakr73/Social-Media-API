@@ -41,14 +41,14 @@ const createOrGetChat = asyncWrapper(
       secondUserId
     );
 
-    if (createChatResult.type === "error") {
-      return next(createChatResult.error);
-    } else {
-      return res.status(201).json({
-        status: httpStatusText.SUCCESS,
-        data: { chat: createChatResult.data },
-      });
-    }
+    // if (createChatResult.type === "error") {
+    //   return next(createChatResult.error);
+    // } else {
+    //   return res.status(201).json({
+    //     status: httpStatusText.SUCCESS,
+    //     data: { chat: createChatResult.data },
+    //   });
+    // }
   }
 );
 
@@ -66,15 +66,15 @@ const sendMessage = asyncWrapper(
       senderId,
       content
     );
-    if (sendMessageResult.type === "error") {
-      return next(sendMessageResult.error);
-    } else {
-      // io.to(chatId).emit("chat message", content);
-      return res.status(200).json({
-        status: httpStatusText.SUCCESS,
-        data: { message: sendMessageResult.data },
-      });
-    }
+    // if (sendMessageResult.type === "error") {
+    //   return next(sendMessageResult.error);
+    // } else {
+    //   // io.to(chatId).emit("chat message", content);
+    //   return res.status(200).json({
+    //     status: httpStatusText.SUCCESS,
+    //     data: { message: sendMessageResult.data },
+    //   });
+    // }
   }
 );
 
