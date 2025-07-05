@@ -27,6 +27,7 @@ import sendMessageValidation from "./sendMessageValidation";
 import validateRequestBody from "./validateRequestBody";
 import createChatValidation from "./createChatValidation";
 import followResourceValidation from "./followResourceValidation";
+import unFollowResourceValidation from "./unFollowResourceValidation";
 
 export {
   createOrUpdateCommentValidation,
@@ -58,4 +59,5 @@ export {
   validateRequestBody,
   createChatValidation,
   followResourceValidation,
+  unFollowResourceValidation,
 };

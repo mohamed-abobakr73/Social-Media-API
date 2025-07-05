@@ -24,4 +24,19 @@ const followResource = asyncWrapper(
   }
 );
 
-export { followResource };
+const removeFollow = asyncWrapper(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { userId } = req.currentUser!;
+    const { followId } = req.params;
+    const { followType } = req.query as { followType: TFollowResourceType };
+
+    await followersService.removeFollowService(userId, followId, followType);
+
+    return res.status(200).json({
+      status: "success",
+      data: { message: "Follow removed successfully" },
+    });
+  }
+);
+
+export { followResource, removeFollow };

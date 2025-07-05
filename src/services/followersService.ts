@@ -1,5 +1,6 @@
 import { User, Follower, Page } from "../models";
 import { TFollowResourceType } from "../types";
+import assertUserIsAllowed from "../utils/assertUserIsAllowed";
 import doesResourceExists from "../utils/doesResourceExists";
 import httpStatusText from "../utils/httpStatusText";
 
@@ -83,4 +84,44 @@ const followResourceService = async (
   return follow;
 };
 
-export default { followResourceService };
+const removeFollowService = async (
+  userId: string,
+  followId: string,
+  followType: TFollowResourceType
+) => {
+  const user = await User.findById(userId);
+  doesResourceExists(
+    user,
+    "You are not authorized to do this action",
+    401,
+    httpStatusText.FAIL
+  );
+
+  const follow = await Follower.findById(followId);
+  doesResourceExists(follow, "Follow not found");
+
+  assertUserIsAllowed(
+    userId,
+    follow.follower.toString(),
+    "You can't do this action"
+  );
+
+  switch (followType) {
+    case "user":
+      const userToUnfollow = await User.findById(follow.following);
+      doesResourceExists(userToUnfollow, "User to unfollow not found");
+      userToUnfollow!.followersCount--;
+      await userToUnfollow!.save();
+      break;
+    case "page":
+      const pageToUnfollow = await Page.findById(follow.following);
+      doesResourceExists(pageToUnfollow, "Page to unfollow not found");
+      pageToUnfollow.followersCount--;
+      await pageToUnfollow.save();
+      break;
+  }
+
+  await Follower.deleteOne({ _id: follow._id });
+};
+
+export default { followResourceService, removeFollowService };
