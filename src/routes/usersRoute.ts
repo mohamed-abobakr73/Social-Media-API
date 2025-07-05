@@ -6,22 +6,14 @@ import {
   login,
   updateUser,
   deleteUser,
-  addFollowedUsers,
-  removeFollowedUsers,
 } from "../controllers/usersController";
 import { upload } from "../config/";
 import {
   createAndUpdateUserValidation,
   loginValidation,
-  updateFriendRequestStatusValidation,
-  sendFriendRequestValidation,
-  addOrRemoveFollowedUsersValidation,
-  removeReportValidation,
   verifyToken,
-  addReportValidation,
   validateRequestBody,
 } from "../middlewares/";
-import { addReport, removeReport } from "../controllers/reportsController";
 
 const usersRouter = Router();
 
@@ -54,49 +46,7 @@ usersRouter
     updateUser
   );
 
-// Remove a report
-usersRouter
-  .route("/reports")
-  .delete(removeReportValidation(), validateRequestBody, removeReport);
-
 // Delete user by ID
 usersRouter.route("/").delete(verifyToken, deleteUser);
-
-// Join a group by user ID
-// usersRouter.post("/:userId/groups", joinGroup);
-
-// Leave a group by user ID
-// usersRouter.delete("/:id/groups", leaveGroup);
-
-// Add followed users by user ID
-usersRouter
-  .route("/:userId/followed-users")
-  .post(
-    verifyToken,
-    addOrRemoveFollowedUsersValidation(),
-    validateRequestBody,
-    addFollowedUsers
-  );
-
-// Remove followed users by user ID
-usersRouter
-  .route("/:userId/followed-users")
-  .delete(
-    verifyToken,
-    addOrRemoveFollowedUsersValidation(),
-    validateRequestBody,
-    removeFollowedUsers
-  );
-
-// Add followed pages by user ID
-// usersRouter.post("/:userId/followedPages", addFollowedPages);
-
-// Add followers by user ID
-// usersRouter.post("/:userId/followers", addFollowers);
-
-// Report a user
-usersRouter
-  .route("/reports")
-  .post(addReportValidation(), validateRequestBody, addReport);
 
 export default usersRouter;

@@ -18,6 +18,7 @@ import TPaginationData from "./TPaginationData";
 import TPostType from "./TPostType";
 import TFollowResourceType from "./TFollowResource";
 import TFollowers from "./TFollowers";
+import TUser from "./TUser";
 
 export {
   TAppError,
@@ -40,4 +41,5 @@ export {
   TPostType,
   TFollowResourceType,
   TFollowers,
+  TUser,
 };

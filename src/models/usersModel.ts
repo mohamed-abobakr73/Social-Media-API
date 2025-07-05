@@ -1,56 +1,7 @@
 import mongoose from "mongoose";
-import { IReport } from "../types/";
+import { TUser } from "../types";
 
-// Define the type for the reports
-
-export interface IMadeReports {
-  reportedItemId: mongoose.Types.ObjectId;
-  reason: string;
-  createdAt?: Date;
-}
-
-// Define the type for the notifications
-export interface INotification {
-  _id?: { type: mongoose.Schema.Types.ObjectId };
-  message: string;
-  read?: boolean;
-  createdAt?: Date;
-}
-
-// Define the type for the user's groups
-export interface IUserGroup {
-  groupId: mongoose.Types.ObjectId;
-  notifications: boolean;
-}
-
-// Define the base User type extending the Mongoose Document
-export interface IUser extends Document {
-  _id: mongoose.Types.ObjectId;
-  username: string;
-  age: number;
-  email: string;
-  password: string;
-  gender: string;
-  profilePicture: string;
-  posts: { postId: mongoose.Types.ObjectId; isShared: boolean }[];
-  groups: IUserGroup[];
-  blockList: mongoose.Types.ObjectId[];
-  followedUsers: mongoose.Types.ObjectId[];
-  followedPages: mongoose.Types.ObjectId[];
-  followers: mongoose.Types.ObjectId[];
-  followersCount: number;
-  chats: mongoose.Types.ObjectId[];
-  notifications: INotification[];
-  createdAt?: Date;
-  updatedAt: Date;
-  madeReports: IMadeReports[];
-  reports: IReport[];
-  banned: boolean;
-  role: "user" | "superAdmin";
-  token: string;
-}
-
-const usersSchema = new mongoose.Schema<IUser>(
+const usersSchema = new mongoose.Schema<TUser>(
   {
     username: { type: String, required: true },
     age: { type: Number, required: true },
@@ -61,63 +12,13 @@ const usersSchema = new mongoose.Schema<IUser>(
       type: String,
       default: "https://example.com/default-profile-picture.png",
     },
-    posts: [
-      {
-        postId: { type: mongoose.Schema.Types.ObjectId, ref: "Post" },
-        isShared: { type: Boolean, default: false },
-        _id: false,
-      },
-    ],
-    groups: [
-      {
-        groupId: { type: mongoose.Schema.Types.ObjectId, ref: "Group" },
-        notifications: { type: Boolean, default: false },
-      },
-    ],
-    blockList: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
-    followedUsers: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
-    followedPages: [{ type: mongoose.Schema.Types.ObjectId, ref: "Page" }],
-    followers: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     followersCount: { type: Number, default: 0 },
-    chats: [{ type: mongoose.Schema.Types.ObjectId, ref: "Chat" }],
-    notifications: [
-      {
-        _id: {
-          type: mongoose.Schema.Types.ObjectId,
-          default: () => new mongoose.Types.ObjectId(),
-        }, // Generate a unique ID
-        message: { type: String },
-        read: { type: Boolean, default: false },
-        createdAt: { type: Date, default: Date.now },
-      },
-    ],
-    createdAt: { type: Date, immutable: true, default: Date.now },
-    updatedAt: { type: Date, default: Date.now },
-    madeReports: [
-      {
-        reportedItemId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-        reason: { type: String },
-        createdAt: { type: Date, default: Date.now },
-      },
-    ],
-    reports: [
-      {
-        reason: { type: String },
-        reportedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-        createdAt: { type: Date, default: Date.now },
-      },
-    ],
     banned: { type: Boolean, default: false },
     role: { type: String, enum: ["user", "superAdmin"], default: "user" },
   },
   {
-    timestamps: true, // Automatically manages createdAt and updatedAt fields
+    timestamps: true,
   }
 );
 
-usersSchema.pre<IUser>("save", function (next) {
-  if (this.reports.length >= 10) this.banned = true;
-  next();
-});
-
-export const User = mongoose.model<IUser>("User", usersSchema);
+export const User = mongoose.model<TUser>("User", usersSchema);
