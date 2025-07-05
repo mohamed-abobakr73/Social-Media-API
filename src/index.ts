@@ -16,9 +16,10 @@ import {
   blockRouter,
   followersRouter,
 } from "./routes/";
-
 import { globalErrorHandler, notFoundRoutes } from "./middlewares/";
 import friendshipRouter from "./routes/friendshipRoute";
+
+// TODO add the get blocklist route, the followed resources route
 
 const app = express();
 const server = http.createServer(app);

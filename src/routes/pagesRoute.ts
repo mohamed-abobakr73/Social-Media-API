@@ -8,15 +8,10 @@ import {
 } from "../controllers/pagesController";
 import {
   createOrUpdatePageValidation,
-  userIdValidation,
   verifyToken,
   validateRequestBody,
-  addReportValidation,
-  removeReportValidation,
 } from "../middlewares/";
 import { upload } from "../config/";
-
-import { addReport, removeReport } from "../controllers/reportsController";
 
 const pagesRouter = Router();
 
@@ -48,17 +43,7 @@ pagesRouter
     updatePage
   );
 
-// Remove a report
-pagesRouter
-  .route("/reports")
-  .delete(removeReportValidation(), validateRequestBody, removeReport);
-
 // Delete page
 pagesRouter.route("/:pageId").delete(verifyToken, deletePage);
-
-// Report a page
-pagesRouter
-  .route("/reports")
-  .post(addReportValidation(), validateRequestBody, addReport);
 
 export default pagesRouter;

@@ -67,10 +67,10 @@ const createOrGetChatService = async (
   await newChat.save();
 
   // Add the chat to each user Chats property
-  users.forEach(async (user) => {
-    user.chats.push(newChat._id);
-    await user.save();
-  });
+  // users.forEach(async (user) => {
+  //   user.chats.push(newChat._id);
+  //   await user.save();
+  // });
   return { data: newChat, type: "success" };
 };
 

@@ -1,283 +1,283 @@
-import { Post } from "../models/postsModel";
-import { User, IUser } from "../models/usersModel";
-import { Group } from "../models/groupsModel";
-import { Page } from "../models/pagesModel";
-import AppError from "../utils/AppError";
-import httpStatusText from "../utils/httpStatusText";
-import { TServiceResult } from "../types/serviceResult";
-import { IReport, TGroup, TPage, TPost } from "../types/";
+// import { Post } from "../models/postsModel";
+// import { User, IUser } from "../models/usersModel";
+// import { Group } from "../models/groupsModel";
+// import { Page } from "../models/pagesModel";
+// import AppError from "../utils/AppError";
+// import httpStatusText from "../utils/httpStatusText";
+// import { TServiceResult } from "../types/serviceResult";
+// import { IReport, TGroup, TPage, TPost } from "../types/";
 
-const checkIfReportIsAlreadyMade = (reportsArr: IReport[], userId: string) => {
-  return reportsArr.find((report) => report.reportedBy.toString() === userId);
-};
+// const checkIfReportIsAlreadyMade = (reportsArr: IReport[], userId: string) => {
+//   return reportsArr.find((report) => report.reportedBy.toString() === userId);
+// };
 
-const addReportService = async (
-  reportItem: {
-    type: "user" | "group" | "page" | "post";
-    reportedItemId: string;
-  },
-  reportData: {
-    reason: string;
-    reportedBy: string;
-  }
-): Promise<TServiceResult<IUser | TGroup | TPage | TPost>> => {
-  const { type, reportedItemId } = reportItem;
-  const { reason, reportedBy } = reportData;
-  const user = await User.findById(reportedBy);
-  if (!user) {
-    const error = new AppError("Invalid user id", 400, httpStatusText.ERROR);
-    return { error, type: "error" };
-  }
+// const addReportService = async (
+//   reportItem: {
+//     type: "user" | "group" | "page" | "post";
+//     reportedItemId: string;
+//   },
+//   reportData: {
+//     reason: string;
+//     reportedBy: string;
+//   }
+// ): Promise<TServiceResult<IUser | TGroup | TPage | TPost>> => {
+//   const { type, reportedItemId } = reportItem;
+//   const { reason, reportedBy } = reportData;
+//   const user = await User.findById(reportedBy);
+//   if (!user) {
+//     const error = new AppError("Invalid user id", 400, httpStatusText.ERROR);
+//     return { error, type: "error" };
+//   }
 
-  switch (type) {
-    case "user":
-      const reportedUser = await User.findById(reportedItemId);
-      if (!reportedUser) {
-        const error = new AppError(
-          "Invalid reported user id",
-          400,
-          httpStatusText.ERROR
-        );
-        return { error, type: "error" };
-      }
+//   switch (type) {
+//     case "user":
+//       const reportedUser = await User.findById(reportedItemId);
+//       if (!reportedUser) {
+//         const error = new AppError(
+//           "Invalid reported user id",
+//           400,
+//           httpStatusText.ERROR
+//         );
+//         return { error, type: "error" };
+//       }
 
-      if (checkIfReportIsAlreadyMade(reportedUser.reports, reportedBy)) {
-        const error = new AppError(
-          "You have already reported this user",
-          400,
-          httpStatusText.ERROR
-        );
-        return { error, type: "error" };
-      }
+//       if (checkIfReportIsAlreadyMade(reportedUser.reports, reportedBy)) {
+//         const error = new AppError(
+//           "You have already reported this user",
+//           400,
+//           httpStatusText.ERROR
+//         );
+//         return { error, type: "error" };
+//       }
 
-      reportedUser.reports.push({ reason, reportedBy: user._id });
-      user.madeReports.push({ reportedItemId: reportedUser._id, reason });
-      await reportedUser.save();
-      await user.save();
-      break;
-    case "group":
-      const reportedGroup = await Group.findById(reportedItemId);
-      if (!reportedGroup) {
-        const error = new AppError(
-          "Invalid reported group id",
-          400,
-          httpStatusText.ERROR
-        );
-        return { error, type: "error" };
-      }
+//       reportedUser.reports.push({ reason, reportedBy: user._id });
+//       user.madeReports.push({ reportedItemId: reportedUser._id, reason });
+//       await reportedUser.save();
+//       await user.save();
+//       break;
+//     case "group":
+//       const reportedGroup = await Group.findById(reportedItemId);
+//       if (!reportedGroup) {
+//         const error = new AppError(
+//           "Invalid reported group id",
+//           400,
+//           httpStatusText.ERROR
+//         );
+//         return { error, type: "error" };
+//       }
 
-      if (checkIfReportIsAlreadyMade(reportedGroup.reports, reportedBy)) {
-        const error = new AppError(
-          "You have already reported this group",
-          400,
-          httpStatusText.ERROR
-        );
-        return { error, type: "error" };
-      }
+//       if (checkIfReportIsAlreadyMade(reportedGroup.reports, reportedBy)) {
+//         const error = new AppError(
+//           "You have already reported this group",
+//           400,
+//           httpStatusText.ERROR
+//         );
+//         return { error, type: "error" };
+//       }
 
-      reportedGroup.reports.push({ reason, reportedBy: user._id });
-      user.madeReports.push({ reportedItemId: reportedGroup._id, reason });
-      await reportedGroup.save();
-      await user.save();
-      break;
-    case "page":
-      const reportedPage = await Page.findById(reportedItemId);
-      if (!reportedPage) {
-        const error = new AppError(
-          "Invalid reported page id",
-          400,
-          httpStatusText.ERROR
-        );
-        return { error, type: "error" };
-      }
+//       reportedGroup.reports.push({ reason, reportedBy: user._id });
+//       user.madeReports.push({ reportedItemId: reportedGroup._id, reason });
+//       await reportedGroup.save();
+//       await user.save();
+//       break;
+//     case "page":
+//       const reportedPage = await Page.findById(reportedItemId);
+//       if (!reportedPage) {
+//         const error = new AppError(
+//           "Invalid reported page id",
+//           400,
+//           httpStatusText.ERROR
+//         );
+//         return { error, type: "error" };
+//       }
 
-      if (checkIfReportIsAlreadyMade(reportedPage.reports, reportedBy)) {
-        const error = new AppError(
-          "You have already reported this page",
-          400,
-          httpStatusText.ERROR
-        );
-        return { error, type: "error" };
-      }
+//       if (checkIfReportIsAlreadyMade(reportedPage.reports, reportedBy)) {
+//         const error = new AppError(
+//           "You have already reported this page",
+//           400,
+//           httpStatusText.ERROR
+//         );
+//         return { error, type: "error" };
+//       }
 
-      reportedPage.reports.push({ reason, reportedBy: user._id });
-      user.madeReports.push({ reportedItemId: reportedPage._id, reason });
-      await reportedPage.save();
-      await user.save();
-      break;
-    case "post":
-      const reportedPost = await Post.findById(reportedItemId);
-      if (!reportedPost) {
-        const error = new AppError(
-          "Invalid reported user id",
-          400,
-          httpStatusText.ERROR
-        );
-        return { error, type: "error" };
-      }
+//       reportedPage.reports.push({ reason, reportedBy: user._id });
+//       user.madeReports.push({ reportedItemId: reportedPage._id, reason });
+//       await reportedPage.save();
+//       await user.save();
+//       break;
+//     case "post":
+//       const reportedPost = await Post.findById(reportedItemId);
+//       if (!reportedPost) {
+//         const error = new AppError(
+//           "Invalid reported user id",
+//           400,
+//           httpStatusText.ERROR
+//         );
+//         return { error, type: "error" };
+//       }
 
-      if (checkIfReportIsAlreadyMade(reportedPost.reports, reportedBy)) {
-        const error = new AppError(
-          "You have already reported this post",
-          400,
-          httpStatusText.ERROR
-        );
-        return { error, type: "error" };
-      }
+//       if (checkIfReportIsAlreadyMade(reportedPost.reports, reportedBy)) {
+//         const error = new AppError(
+//           "You have already reported this post",
+//           400,
+//           httpStatusText.ERROR
+//         );
+//         return { error, type: "error" };
+//       }
 
-      reportedPost.reports.push({ reason, reportedBy: user._id });
-      user.madeReports.push({ reportedItemId: reportedPost._id, reason });
-      await reportedPost.save();
-      await user.save();
-      break;
-  }
+//       reportedPost.reports.push({ reason, reportedBy: user._id });
+//       user.madeReports.push({ reportedItemId: reportedPost._id, reason });
+//       await reportedPost.save();
+//       await user.save();
+//       break;
+//   }
 
-  return { type: "success" };
-};
+//   return { type: "success" };
+// };
 
-const isUserTheReportOwner = (reportsArr: IReport[], userId: string) => {
-  return reportsArr.find((report) => report.reportedBy.toString() === userId);
-};
+// const isUserTheReportOwner = (reportsArr: IReport[], userId: string) => {
+//   return reportsArr.find((report) => report.reportedBy.toString() === userId);
+// };
 
-const removeReportService = async (reportInfo: {
-  type: "user" | "group" | "page" | "post";
-  reportedItemId: string;
-  userId: string;
-}): Promise<TServiceResult<IUser | TGroup | TPage | TPost>> => {
-  const { type, reportedItemId, userId } = reportInfo;
-  const user = await User.findById(userId);
-  if (!user) {
-    const error = new AppError("Invalid user id", 400, httpStatusText.ERROR);
-    return { error, type: "error" };
-  }
+// const removeReportService = async (reportInfo: {
+//   type: "user" | "group" | "page" | "post";
+//   reportedItemId: string;
+//   userId: string;
+// }): Promise<TServiceResult<IUser | TGroup | TPage | TPost>> => {
+//   const { type, reportedItemId, userId } = reportInfo;
+//   const user = await User.findById(userId);
+//   if (!user) {
+//     const error = new AppError("Invalid user id", 400, httpStatusText.ERROR);
+//     return { error, type: "error" };
+//   }
 
-  switch (type) {
-    case "user":
-      const reportedUser = await User.findById(reportedItemId);
-      if (!reportedUser) {
-        const error = new AppError(
-          "Invalid reported user id",
-          400,
-          httpStatusText.ERROR
-        );
-        return { error, type: "error" };
-      }
+//   switch (type) {
+//     case "user":
+//       const reportedUser = await User.findById(reportedItemId);
+//       if (!reportedUser) {
+//         const error = new AppError(
+//           "Invalid reported user id",
+//           400,
+//           httpStatusText.ERROR
+//         );
+//         return { error, type: "error" };
+//       }
 
-      if (!isUserTheReportOwner(reportedUser.reports, userId)) {
-        const error = new AppError(
-          "You can't remove this report, only the report owner can delete it",
-          400,
-          httpStatusText.ERROR
-        );
-        return { error, type: "error" };
-      }
+//       if (!isUserTheReportOwner(reportedUser.reports, userId)) {
+//         const error = new AppError(
+//           "You can't remove this report, only the report owner can delete it",
+//           400,
+//           httpStatusText.ERROR
+//         );
+//         return { error, type: "error" };
+//       }
 
-      reportedUser.reports = reportedUser.reports.filter(
-        (report) => report.reportedBy.toString() !== userId
-      );
-      user.madeReports = user.madeReports.filter(
-        (report) => report.reportedItemId.toString() !== reportedItemId
-      );
+//       reportedUser.reports = reportedUser.reports.filter(
+//         (report) => report.reportedBy.toString() !== userId
+//       );
+//       user.madeReports = user.madeReports.filter(
+//         (report) => report.reportedItemId.toString() !== reportedItemId
+//       );
 
-      await reportedUser.save();
-      await user.save();
-      break;
-    case "group":
-      const reportedGroup = await Group.findById(reportedItemId);
-      if (!reportedGroup) {
-        const error = new AppError(
-          "Invalid reported group id",
-          400,
-          httpStatusText.ERROR
-        );
-        return { error, type: "error" };
-      }
+//       await reportedUser.save();
+//       await user.save();
+//       break;
+//     case "group":
+//       const reportedGroup = await Group.findById(reportedItemId);
+//       if (!reportedGroup) {
+//         const error = new AppError(
+//           "Invalid reported group id",
+//           400,
+//           httpStatusText.ERROR
+//         );
+//         return { error, type: "error" };
+//       }
 
-      if (!isUserTheReportOwner(reportedGroup.reports, userId)) {
-        const error = new AppError(
-          "You can't remove this report, only the report owner can delete it",
-          400,
-          httpStatusText.ERROR
-        );
-        return { error, type: "error" };
-      }
+//       if (!isUserTheReportOwner(reportedGroup.reports, userId)) {
+//         const error = new AppError(
+//           "You can't remove this report, only the report owner can delete it",
+//           400,
+//           httpStatusText.ERROR
+//         );
+//         return { error, type: "error" };
+//       }
 
-      reportedGroup.reports = reportedGroup.reports.filter(
-        (report) => report.reportedBy.toString() !== userId
-      );
-      user.madeReports = user.madeReports.filter(
-        (report) => report.reportedItemId.toString() !== reportedItemId
-      );
+//       reportedGroup.reports = reportedGroup.reports.filter(
+//         (report) => report.reportedBy.toString() !== userId
+//       );
+//       user.madeReports = user.madeReports.filter(
+//         (report) => report.reportedItemId.toString() !== reportedItemId
+//       );
 
-      await reportedGroup.save();
-      await user.save();
-      break;
-    case "page":
-      const reportedPage = await Page.findById(reportedItemId);
-      if (!reportedPage) {
-        const error = new AppError(
-          "Invalid reported page id",
-          400,
-          httpStatusText.ERROR
-        );
-        return { error, type: "error" };
-      }
+//       await reportedGroup.save();
+//       await user.save();
+//       break;
+//     case "page":
+//       const reportedPage = await Page.findById(reportedItemId);
+//       if (!reportedPage) {
+//         const error = new AppError(
+//           "Invalid reported page id",
+//           400,
+//           httpStatusText.ERROR
+//         );
+//         return { error, type: "error" };
+//       }
 
-      if (!isUserTheReportOwner(reportedPage.reports, userId)) {
-        const error = new AppError(
-          "You can't remove this report, only the report owner can delete it",
-          400,
-          httpStatusText.ERROR
-        );
-        return { error, type: "error" };
-      }
+//       if (!isUserTheReportOwner(reportedPage.reports, userId)) {
+//         const error = new AppError(
+//           "You can't remove this report, only the report owner can delete it",
+//           400,
+//           httpStatusText.ERROR
+//         );
+//         return { error, type: "error" };
+//       }
 
-      reportedPage.reports = reportedPage.reports.filter(
-        (report) => report.reportedBy.toString() !== userId
-      );
-      user.madeReports = user.madeReports.filter(
-        (report) => report.reportedItemId.toString() !== reportedItemId
-      );
+//       reportedPage.reports = reportedPage.reports.filter(
+//         (report) => report.reportedBy.toString() !== userId
+//       );
+//       user.madeReports = user.madeReports.filter(
+//         (report) => report.reportedItemId.toString() !== reportedItemId
+//       );
 
-      await reportedPage.save();
-      await user.save();
-      break;
-    case "post":
-      const reportedPost = await Post.findById(reportedItemId);
-      if (!reportedPost) {
-        const error = new AppError(
-          "Invalid reported post id",
-          400,
-          httpStatusText.ERROR
-        );
-        return { error, type: "error" };
-      }
+//       await reportedPage.save();
+//       await user.save();
+//       break;
+//     case "post":
+//       const reportedPost = await Post.findById(reportedItemId);
+//       if (!reportedPost) {
+//         const error = new AppError(
+//           "Invalid reported post id",
+//           400,
+//           httpStatusText.ERROR
+//         );
+//         return { error, type: "error" };
+//       }
 
-      if (!isUserTheReportOwner(reportedPost.reports, userId)) {
-        const error = new AppError(
-          "You can't remove this report, only the report owner can delete it",
-          400,
-          httpStatusText.ERROR
-        );
-        return { error, type: "error" };
-      }
+//       if (!isUserTheReportOwner(reportedPost.reports, userId)) {
+//         const error = new AppError(
+//           "You can't remove this report, only the report owner can delete it",
+//           400,
+//           httpStatusText.ERROR
+//         );
+//         return { error, type: "error" };
+//       }
 
-      reportedPost.reports = reportedPost.reports.filter(
-        (report) => report.reportedBy.toString() !== userId
-      );
-      user.madeReports = user.madeReports.filter(
-        (report) => report.reportedItemId.toString() !== reportedItemId
-      );
+//       reportedPost.reports = reportedPost.reports.filter(
+//         (report) => report.reportedBy.toString() !== userId
+//       );
+//       user.madeReports = user.madeReports.filter(
+//         (report) => report.reportedItemId.toString() !== reportedItemId
+//       );
 
-      await reportedPost.save();
-      await user.save();
-      break;
-  }
+//       await reportedPost.save();
+//       await user.save();
+//       break;
+//   }
 
-  return { type: "success" };
-};
+//   return { type: "success" };
+// };
 
-export default {
-  addReportService,
-  removeReportService,
-};
+// export default {
+//   addReportService,
+//   removeReportService,
+// };
