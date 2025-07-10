@@ -4,6 +4,7 @@ import AppError from "../utils/AppError";
 import assertUserIsAllowed from "../utils/assertUserIsAllowed";
 import doesResourceExists from "../utils/doesResourceExists";
 import httpStatusText from "../utils/httpStatusText";
+import chatsServices from "./chatsServices";
 
 const preventSelfFriendRequest = (senderId: string, recipientId: string) => {
   if (senderId === recipientId) {
@@ -176,7 +177,7 @@ const sendFriendRequestService = async (
   await friendRequest.save();
 };
 
-// TODO create chat after acceptance
+// TODO create chat after acceptance // DONE
 const updateFriendRequestStatusService = async (
   userId: string,
   friendRequestUpdate: { friendRequestId: string; status: TStatus }
@@ -208,6 +209,10 @@ const updateFriendRequestStatusService = async (
   switch (status) {
     case "accepted":
       await createFriendshipService(userId, friendRequest.sender.toString());
+      await chatsServices.createChatService(
+        userId,
+        friendRequest.sender.toString()
+      );
       break;
     case "declined":
       break;

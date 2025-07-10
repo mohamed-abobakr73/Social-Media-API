@@ -28,22 +28,13 @@ const getAllChatsService = async (
   return { chats, paginationInfo };
 };
 
-const createOrGetChatService = async (
-  firstUserId: mongoose.Types.ObjectId,
-  secondUserId: mongoose.Types.ObjectId
-) => {
-  // Ensure participants exist and aren't blocked
-  const users = await User.find({ _id: { $in: [firstUserId, secondUserId] } });
-
-  // Create a new chat
-  const newChat = new Chat({
+const createChatService = async (firstUserId: string, secondUserId: string) => {
+  const chat = new Chat({
     participants: [firstUserId, secondUserId],
-    messages: [],
   });
 
-  await newChat.save();
-
-  // return { data: newChat, type: "success" };
+  await chat.save();
+  return chat;
 };
 
 const sendMessageService = async (
@@ -144,7 +135,7 @@ const updateOrDeleteMessageService = async (
 };
 
 export default {
-  createOrGetChatService,
+  createChatService,
   getAllChatsService,
   sendMessageService,
   updateOrDeleteMessageService,

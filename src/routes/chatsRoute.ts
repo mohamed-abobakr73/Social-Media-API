@@ -1,6 +1,5 @@
 import { Router } from "express";
 import {
-  createOrGetChat,
   getAllChats,
   sendMessage,
   updateOrDeleteMessage,
@@ -17,11 +16,6 @@ const chatsRouter = Router();
 
 // Get all chats by user id
 chatsRouter.route("/").get(verifyToken, getAllChats);
-
-// Create or get chat if it already exists
-chatsRouter
-  .route("/")
-  .post(createChatValidation(), validateRequestBody, createOrGetChat);
 
 // Send message
 chatsRouter

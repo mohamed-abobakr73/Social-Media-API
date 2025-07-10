@@ -2,8 +2,6 @@ import { Request, Response, NextFunction } from "express";
 import asyncWrapper from "../middlewares/asyncWrapper";
 import chatsServices from "../services/chatsServices";
 import httpStatusText from "../utils/httpStatusText";
-import { validationResult } from "express-validator";
-import AppError from "../utils/AppError";
 import paginationQuery from "../utils/paginationQuery";
 
 const getAllChats = asyncWrapper(
@@ -22,30 +20,6 @@ const getAllChats = asyncWrapper(
       status: httpStatusText.SUCCESS,
       data: chats,
     });
-  }
-);
-
-const createOrGetChat = asyncWrapper(
-  async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<Response | void> => {
-    const { firstUserId, secondUserId } = req.body;
-
-    const createChatResult = await chatsServices.createOrGetChatService(
-      firstUserId,
-      secondUserId
-    );
-
-    // if (createChatResult.type === "error") {
-    //   return next(createChatResult.error);
-    // } else {
-    //   return res.status(201).json({
-    //     status: httpStatusText.SUCCESS,
-    //     data: { chat: createChatResult.data },
-    //   });
-    // }
   }
 );
 
@@ -101,4 +75,4 @@ const updateOrDeleteMessage = asyncWrapper(
   }
 );
 
-export { getAllChats, createOrGetChat, sendMessage, updateOrDeleteMessage };
+export { getAllChats, sendMessage, updateOrDeleteMessage };
