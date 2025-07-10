@@ -5,6 +5,22 @@ import httpStatusText from "../utils/httpStatusText";
 import { TServiceResult } from "../types/serviceResult";
 import { TChat, TPaginationData } from "../types";
 import paginationResult from "../utils/paginationResult";
+import doesResourceExists from "../utils/doesResourceExists";
+import assertUserIsAllowed from "../utils/assertUserIsAllowed";
+
+const checkIfUserIsPartOfChat = (
+  userId: mongoose.Types.ObjectId,
+  chat: TChat
+) => {
+  if (!chat.participants.includes(userId)) {
+    const error = new AppError(
+      "User is not a participant in this chat",
+      400,
+      httpStatusText.ERROR
+    );
+    throw error;
+  }
+};
 
 const getAllChatsService = async (
   userId: string,
@@ -34,6 +50,18 @@ const createChatService = async (firstUserId: string, secondUserId: string) => {
   });
 
   await chat.save();
+  return chat;
+};
+
+const getChatByIdService = async (chatId: string, userId: string) => {
+  const user = await User.findById(userId, { _id: 1 });
+  const chat = await Chat.findById(chatId);
+
+  doesResourceExists(user, "You are not authorized to do this action");
+  doesResourceExists(chat, "Chat");
+
+  checkIfUserIsPartOfChat(user._id, chat);
+
   return chat;
 };
 
@@ -136,6 +164,7 @@ const updateOrDeleteMessageService = async (
 
 export default {
   createChatService,
+  getChatByIdService,
   getAllChatsService,
   sendMessageService,
   updateOrDeleteMessageService,

@@ -23,6 +23,18 @@ const getAllChats = asyncWrapper(
   }
 );
 
+const getChatById = asyncWrapper(async (req: Request, res: Response) => {
+  const { userId } = req.currentUser!;
+  const { chatId } = req.params;
+
+  const chat = await chatsServices.getChatByIdService(chatId, userId);
+
+  return res.status(200).json({
+    status: httpStatusText.SUCCESS,
+    data: chat,
+  });
+});
+
 const sendMessage = asyncWrapper(
   async (
     req: Request,
@@ -75,4 +87,4 @@ const updateOrDeleteMessage = asyncWrapper(
   }
 );
 
-export { getAllChats, sendMessage, updateOrDeleteMessage };
+export { getAllChats, getChatById, sendMessage, updateOrDeleteMessage };

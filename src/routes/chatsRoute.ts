@@ -1,6 +1,7 @@
 import { Router } from "express";
 import {
   getAllChats,
+  getChatById,
   sendMessage,
   updateOrDeleteMessage,
 } from "../controllers/chatsController";
@@ -17,10 +18,12 @@ const chatsRouter = Router();
 // Get all chats by user id
 chatsRouter.route("/").get(verifyToken, getAllChats);
 
+chatsRouter.route("/:chatId").get(verifyToken, getChatById);
+
 // Send message
-chatsRouter
-  .route("/:chatId")
-  .post(sendMessageValidation(), validateRequestBody, sendMessage);
+// chatsRouter
+//   .route("/:chatId")
+//   .post(sendMessageValidation(), validateRequestBody, sendMessage);
 
 // Update or delete message
 chatsRouter
