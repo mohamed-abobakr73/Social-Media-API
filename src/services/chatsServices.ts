@@ -3,21 +3,29 @@ import { Chat, User } from "../models/";
 import AppError from "../utils/AppError";
 import httpStatusText from "../utils/httpStatusText";
 import { TServiceResult } from "../types/serviceResult";
-import { TChat, TMessage } from "../types";
+import { TChat, TPaginationData } from "../types";
+import paginationResult from "../utils/paginationResult";
 
 const getAllChatsService = async (
-  userId: string
-): Promise<TServiceResult<TChat[]>> => {
+  userId: string,
+  pagination: TPaginationData
+) => {
+  const { limit, skip } = pagination;
+
   const chats = await Chat.find(
     { participants: { $all: [userId] } },
     { __v: 0 }
-  );
-  if (!chats) {
-    const error = new AppError("Invalid user id", 400, httpStatusText.ERROR);
-    return { error, type: "error" };
-  }
+  )
+    .limit(limit)
+    .skip(skip);
 
-  return { data: chats, type: "success" };
+  const totalCount = await Chat.countDocuments({
+    participants: { $all: [userId] },
+  });
+
+  const paginationInfo = paginationResult(totalCount, skip, limit);
+
+  return { chats, paginationInfo };
 };
 
 const createOrGetChatService = async (

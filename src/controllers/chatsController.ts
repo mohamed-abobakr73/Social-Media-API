@@ -4,6 +4,7 @@ import chatsServices from "../services/chatsServices";
 import httpStatusText from "../utils/httpStatusText";
 import { validationResult } from "express-validator";
 import AppError from "../utils/AppError";
+import paginationQuery from "../utils/paginationQuery";
 
 const getAllChats = asyncWrapper(
   async (
@@ -11,20 +12,16 @@ const getAllChats = asyncWrapper(
     res: Response,
     next: NextFunction
   ): Promise<Response | void> => {
-    // const { userId } = req.query;
+    const { userId } = req.currentUser!;
 
-    const getChatsResult = await chatsServices.getAllChatsService(
-      req.query.userId as string
-    );
+    const pagination = paginationQuery(req.query);
 
-    if (getChatsResult.type === "error") {
-      return next(getChatsResult.error);
-    } else {
-      return res.status(200).json({
-        status: httpStatusText.SUCCESS,
-        data: { chats: getChatsResult.data },
-      });
-    }
+    const chats = await chatsServices.getAllChatsService(userId, pagination);
+
+    return res.status(200).json({
+      status: httpStatusText.SUCCESS,
+      data: chats,
+    });
   }
 );
 

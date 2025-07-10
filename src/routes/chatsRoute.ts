@@ -10,12 +10,13 @@ import {
   sendMessageValidation,
   updateOrDeleteMessageValidation,
   validateRequestBody,
+  verifyToken,
 } from "../middlewares/";
 
 const chatsRouter = Router();
 
 // Get all chats by user id
-chatsRouter.route("/").get(getAllChats);
+chatsRouter.route("/").get(verifyToken, getAllChats);
 
 // Create or get chat if it already exists
 chatsRouter
